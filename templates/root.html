@@ -1,0 +1,43 @@
+<!doctype html>
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{{ _('Fabweb') }}{% block title %}{% end %}</title>
+    <meta name="description" content="{% block description %} 基于Fabric的线上部署及发布工具 {% end %}"/>
+    <meta name="keywords" content="{% block keywords %} 基于Fabric的部署及发布工具 {% end %}"/>
+    <meta name="author" content="{{ _('王文沛') }}"/>
+    <meta name="copyright" content="Baixing, inc. Copyright (c) 2014"/>
+
+    {% block css %}
+    <link href="/static/foundation/css/foundation.min.css" media="screen" rel="stylesheet" type="text/css" />
+    {% end %}
+
+    {% block js %}
+    <script src="/static/foundation/js/vendor/modernizr.js"></script>
+    <!--用于测试-->
+    <script src="/static/foundation/js/vendor/jquery.js"></script>
+    <script src="/static/foundation/js/foundation.min.js"></script>
+
+    {% end %}
+
+    {% block extra-head %}
+
+    {% end %}
+
+</head>
+
+<body>
+{% block body %}
+
+
+
+
+
+{% end %}
+</body>
+
+
+
+</html>

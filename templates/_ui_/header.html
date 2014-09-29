@@ -1,0 +1,38 @@
+<header>
+    <div class="wrapper-full">
+        <a class="logo" href="{{ urls['dashboard'] }}">{{ _('NextOA') }}</a>
+        <a id="hiring" href="/company/careers/">We're Hiring!</a>
+        <nav id="button-nav">
+
+            <ul>
+                {% if current_user %}
+                <a href="#">{{ current_user[1] }}</a>
+                <li><a href="{{ urls['logout'] }}">{{ _('Logout') }}</a></li>
+                {% else %}
+                <li><a href="{{ urls['login'] }}">{{ _('Log In') }}</a></li>
+                <li class="button-outline"><a href="{{ urls['join'] }}">{{ _('Sign Up') }}</a></li>
+                {% end %}
+
+                <div style="display:none">
+                    <li class="has-dropdown">
+                        <a href="#">{{ locale.name }}</a>
+                        <ul class="dropdown">
+                            <li><a href="/locale/zh_CN">简体中文</a></li>
+                            <li><a href="/locale/en_US">English</a></li>
+                            <li><a href="/locale/zh_TW">繁体中文</a></li>
+                        </ul>
+                    </li>
+                </div>
+            </ul>
+        </nav>
+        <nav>
+            <ul>
+                <li><a class="" href="/pricing/">Pricing</a></li>
+                <li><a class="" href="/features/">Features</a></li>
+                <li><a class="" href="/community/">Community</a></li>
+                <li><a class="" href="/help/">Help</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+

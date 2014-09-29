@@ -5,12 +5,17 @@ from setuptools import setup, find_packages
 
 setup(
     name='fabez',
-    version='0.1.0',
+    version='0.2.0',
     packages=['fabez'],
-    url='https://github.com/kbonez/fabez',
-    download_url='https://github.com/kbonez/fabez/tarball/master',
+    url='https://github.com/nextoa/fabez',
+    download_url='https://github.com/nextoa/fabez/tarball/master',
     license='http://opensource.org/licenses/MIT',
-    install_requires=['fabric'],
+    install_requires=[
+        'fabric',
+        'tornadoez',
+        'requests',
+        'github3.py',
+    ],
     author='Breeze.Kay',
     author_email='wangwenpei@kbonez.com',
     description='fabric helper tools',

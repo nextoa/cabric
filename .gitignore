@@ -44,3 +44,13 @@ bower_components
 
 *.egg-info
 *.pyc
+*.pyo
+
+dist/
+build/
+
+
+# for fabez user config
+projects/
+
+

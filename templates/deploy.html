@@ -1,0 +1,82 @@
+{% extends 'root.html' %}
+
+
+{% block body%}
+<table class="table row">
+    <thead>
+    <tr>
+        <td>项目名称</td>
+        <td>指定的集群</td>
+        <td>发布版本</td>
+        <td>操作</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>pylib</td>
+        <td>
+            <select>
+                <option>DEV</option>
+                <option>Test</option>
+                <option>Online</option>
+            </select>
+        </td>
+        <td>
+            <select>
+                <option>不指定</option>
+                <option>1.0</option>
+                <option>1.1</option>
+                <option>1.2</option>
+                <option>2.0</option>
+            </select>
+        </td>
+        <td>发布</td>
+    </tr>
+    <tr>
+        <td>banjia.baixing.com</td>
+        <td>
+            <select>
+                <option>不指定</option>
+                <option>1.0</option>
+                <option>1.1</option>
+                <option>1.2</option>
+                <option>2.0</option>
+            </select>
+        </td>
+        <td>发布</td>
+    </tr>
+    <tr>
+        <td>api.baixing.com.cn</td>
+        <td>
+            <select>
+                <option>不指定</option>
+                <option>1.0</option>
+                <option>1.1</option>
+                <option>1.2</option>
+                <option>2.0</option>
+            </select>
+        </td>
+        <td>发布</td>
+    </tr>
+    </tbody>
+
+</table>
+
+
+<p>
+<pre class="code-container">
+
+    说明：
+
+    界面只配置项目，不配置机器。项目在子模块中配置
+    比如：
+    routes = {
+        'dev': os.path.dirname(__file__) + '/config/fabez/dev.conf',
+        'test': os.path.dirname(__file__) + '/config/fabez/test.conf',
+        'ol': os.path.dirname(__file__) + '/config/fabez/online.conf',
+    }
+
+</pre>
+</p>
+
+{% end %}

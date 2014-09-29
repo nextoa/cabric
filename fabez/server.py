@@ -4,7 +4,7 @@ from fabric.api import *
 from fabez.cmd import (cmd_git, cmd_ip)
 
 
-def server_nginx(user=None, worker_processes=16, worker_connections=512, old_user='nginx'):
+def server_nginx(user=None, worker_processes=16, worker_connections=512, old_user='nginx',error_log='/logs/nginx/error.log',access_log='/logs/nginx/access.log'):
     """
     Install Nginx
     :param user: user,default is nobody
@@ -21,7 +21,12 @@ def server_nginx(user=None, worker_processes=16, worker_connections=512, old_use
     if user:
         run('sed -i -e "s/\(user\s*\)%s/\\1%s/g" /etc/nginx/nginx.conf' % (old_user, user))
     run('sed -i -e "s/\(worker_processes\s*\)[0-9]*/\\1%d/g" /etc/nginx/nginx.conf' % worker_processes)
-    run('sed -i -e "s/\(worker_connections\s*\)[0-9]*/\\1%d/g" /etc/nginx/nginx.conf' % worker_connections)
+    run('sed -i -e "s/\(worker_connections\s*\)[a-zA-Z\/._0-9]*/\\1%d/g" /etc/nginx/nginx.conf' % worker_connections)
+    run('sed -i -e "s/\(error_log\s*\)[a-zA-Z\/._0-9]*/\\1%s/g" /etc/nginx/nginx.conf' % error_log.replace('/','\/'))
+    run('sed -i -e "s/\(access_log\s*\)[a-zA-Z/._0-9]*/\\1%s/g" /etc/nginx/nginx.conf' % access_log.replace('/','\/'))
+
+
+
 
 
 def rm_server_nginx():
@@ -79,10 +84,11 @@ def rm_server_redis(clean=False):
 
 def server_mongo():
     '''
-    @TODO. install mongo server
+    @TODO. currently, this is for develop env
     :return:
     '''
-    # run('mkdir -p /storage/mongodb')
+    run('yum install mongodb-server -y')
+    run('chkconfig --level 35 mongod on')
     pass
 
 

@@ -17,7 +17,7 @@ setup(
     keywords='fabric,fabez,ez',
     include_package_data=True,
     package_data={
-        'fabez': ['tpl/*.py']
+        'fabez': ['tpl/*.*']
     },
     entry_points={
         'console_scripts': [

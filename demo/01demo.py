@@ -15,7 +15,7 @@ import os
 def ez(curr):
     routes = {
         'dev':os.path.dirname(__file__)+'/config/dev.conf',
-        'pro':os.path.dirname(__file__)+'/config/production.conf',
+        'ol':os.path.dirname(__file__)+'/config/production.conf',
     }
 
     bind_hosts(curr,routes)
@@ -38,6 +38,12 @@ def start():
     pass
 
 
+def hello():
+    cmd_su('rm /tmp/a','webuser')
+    run('rm /tmp/a')
+    pass
+
+
 def fastfs():
     io_airlog()
     pass
@@ -50,7 +56,7 @@ def drop_fastfs():
 
 def upgrade():
 
-    if ez_env.group == 'pro':
+    if ez_env.group == 'ol':
         cmd_git('/tmp/web-master','https://github.com/kbonez/fabezweb.git',user='webuser')
         pass
     else:

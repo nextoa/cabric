@@ -10,7 +10,6 @@ from fabez.cmd import (cmd_git)
 
 def py_setuptools():
 
-
     pass
 
 
@@ -39,15 +38,26 @@ def rm_py_setup_py(code_dir=None,python='python'):
 
 
 
+def py_pip(python='/usr/local/bin/python'):
+    """
+    install pip package
+    :return:
+    """
+    run('curl -sS https://bootstrap.pypa.io/get-pip.py | %s ' % python)
+    pass
+
+
+# selenium
+# 安装chrome driver
+# download http://chromedriver.storage.googleapis.com/2.10/chromedriver_mac32.zip
+# offical site:  https://sites.google.com/a/chromium.org/chromedriver/downloads
 
 
 
 
-
-
-def uninstall_python():
+def rm_python():
     with settings(warn_only=True):
-        uninstall_pip('setuptools')
+        rm_pip('setuptools')
         run('rm -rf /usr/local/bin/pip*')
         run('rm -rf /usr/local/bin/python*')
         run('rm -rf /usr/local/*/python*')
@@ -71,7 +81,7 @@ def pip(package=None, upgrade=None):
             run('pip install %s --upgrade' % package)
 
 
-def uninstall_pip(package):
+def rm_pip(package):
     '''
     uninstall package from pip
     :param package:
@@ -94,12 +104,3 @@ def tornado(ez=None):
         pip('tornado', True)
 
 
-def putc_supervisor(path):
-    '''
-    put supervisor config file
-    :param path: local path
-    '''
-    remote_path = '/usr/local/etc/supervisor.d/'
-    put(path, remote_path)
-
-    pass

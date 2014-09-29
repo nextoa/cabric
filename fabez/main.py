@@ -5,7 +5,11 @@
 
 from cliez.loader import ArgLoader
 import os, sys, pickle
-# import pkg_resources
+
+try:
+    import pkg_resources
+except:
+    pass
 
 
 def init_fabric(hosts, dir, fabfile_name):
@@ -38,10 +42,13 @@ def init_fabric(hosts, dir, fabfile_name):
                     for item in hosts:
                         print>> fh, item
 
-            if k == 'fabfile':
+            elif k == 'fabfile':
 
-                template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'fabfile.py')).read()
-                # template = pkg_resources.resource_string('fabez', 'tpl\fabfile.py')
+                try:
+                    template = pkg_resources.resource_string('fabez', 'tpl/fabfile.py')
+                except:
+                    template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'fabfile.py')).read()
+                    pass
 
                 with open(f, 'w') as fh:
                     print>> fh, template.replace('{0}', dir.replace(os.getcwd(), ''))
@@ -86,7 +93,7 @@ def main():
         pass
 
     config_name = a.options.get('--dir-name') or 'config'
-    fabfile_name = a.option.get('--fabfile') or 'fabfile'
+    fabfile_name = a.options.get('--fabfile') or 'fabfile'
 
     config_path = os.path.join(os.getcwd(), config_name, 'fabez')
 

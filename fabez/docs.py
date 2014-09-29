@@ -15,7 +15,7 @@ def docs_server():
 
 def docs_bootstrap(server=False, init=False):
 
-    with  lcd('~/Manuals/framework.ez.co/bootstrap'):
+    with  lcd('~/GDrive/Manuals/framework.ez.co/bootstrap'):
         if init:
             local('git remote add upstream https://github.com/twbs/bootstrap.git')
             pass

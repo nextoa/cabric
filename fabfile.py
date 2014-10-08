@@ -24,18 +24,30 @@ def fabez_debug():
 
 
 
-def upgrade(tag=None,clean=False):
+def upload_server_key():
+    """
+    上传私钥key
+    :return:
+    """
+    put_private_key('~/.ssh/baixing/id_weekweekup','webuser')
+    pass
+
+
+
+def upgrade(tag=None,clean=False,depend=False):
     """
     执行升级
     :return:
     """
 
-    root = '/webdata/fabez.baixing.com'
-    repo = 'gitolite3@fabez.nextoa.com:fabez.git'
+    root = '/webdata/fabez.ez.co'
+    repo = 'gitolite3@fabez.kbonez.com:fabez.git'
 
     if clean:
         run('rm -rf %s' % root)
         pass
+
+
 
     if ez_env.group == 'ol':
         cmd_git(root, repo, branch='master', user='webuser',tag=tag)
@@ -49,6 +61,11 @@ def upgrade(tag=None,clean=False):
     else:
         print "找不到指定的配置环境,SKIP"
         pass
+
+    if depend:
+        run('cd /webdata/fabez.ez.co && python setup.py install')
+        run('chown -Rf webuser.webuser /webdata/fabez.ez.co')
+
 
     pass
 

@@ -1,0 +1,10 @@
+#msg {
+    border:0;
+    width:100%;
+    height:auto;
+}
+
+#msg body {
+    background-color:black;
+    color:white;
+}

@@ -1,38 +1,24 @@
 <header>
-    <div class="wrapper-full">
-        <a class="logo" href="{{ urls['dashboard'] }}">{{ _('NextOA') }}</a>
-        <a id="hiring" href="/company/careers/">We're Hiring!</a>
-        <nav id="button-nav">
+    <nav class="top-bar" data-topbar role="navigation">
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="/">Fabez</a></h1>
+            </li>
+            <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+            <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+        </ul>
 
-            <ul>
+        <section class="top-bar-section">
+            <!-- Right Nav Section -->
+            <ul class="right">
                 {% if current_user %}
-                <a href="#">{{ current_user[1] }}</a>
-                <li><a href="{{ urls['logout'] }}">{{ _('Logout') }}</a></li>
+                <li><a href="https://www.github.com/{{ current_user }}">{{ current_user }}</a></li>
+                <li><a href="/logout">Logout</a></li>
                 {% else %}
-                <li><a href="{{ urls['login'] }}">{{ _('Log In') }}</a></li>
-                <li class="button-outline"><a href="{{ urls['join'] }}">{{ _('Sign Up') }}</a></li>
+                <li><a href="/login">Login</a></li>
                 {% end %}
-
-                <div style="display:none">
-                    <li class="has-dropdown">
-                        <a href="#">{{ locale.name }}</a>
-                        <ul class="dropdown">
-                            <li><a href="/locale/zh_CN">简体中文</a></li>
-                            <li><a href="/locale/en_US">English</a></li>
-                            <li><a href="/locale/zh_TW">繁体中文</a></li>
-                        </ul>
-                    </li>
-                </div>
             </ul>
-        </nav>
-        <nav>
-            <ul>
-                <li><a class="" href="/pricing/">Pricing</a></li>
-                <li><a class="" href="/features/">Features</a></li>
-                <li><a class="" href="/community/">Community</a></li>
-                <li><a class="" href="/help/">Help</a></li>
-            </ul>
-        </nav>
-    </div>
+        </section>
+    </nav>
 </header>
 

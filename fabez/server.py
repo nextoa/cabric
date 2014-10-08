@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from fabric.api import *
-from fabez.cmd import (cmd_git, cmd_ip)
+from fabez.cmd import (cmd_git, cmd_ip,cmd_su)
+from fabez.perm import  *
 
 
 def server_nginx(user=None, worker_processes=16, worker_connections=512, old_user='nginx',error_log='/logs/nginx/error.log',access_log='/logs/nginx/access.log'):
@@ -98,17 +99,14 @@ def server_gitolite(pubkey=None):
     :param pubkey:
     :return:
     '''
-    run('mkdir /repo')
-    cmd_git('/tmp/gitolite', 'https://github.com/kbonez/gitolite.git')
-
+    run('yum install gitolite3 -y')
     if pubkey is None:
-        abort("please set your pubkey.")
+        run('cp ~/.ssh/authorized_keys /tmp/gitolite.pub')
+    else:
+        put_public_key(pubkey,'/tmp/gitolite.pub')
 
-
-
-
-    # put pub key
-    # 执行脚本 @todo 等下次在安装的时候再说
+    run('chown gitolite3 /tmp/gitolite.pub')
+    cmd_su('gitolite setup -pk /tmp/gitolite.pub','gitolite3')
 
     pass
 

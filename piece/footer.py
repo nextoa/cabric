@@ -4,8 +4,6 @@
 from tornado.web import UIModule
 
 
-
-class Footer00(UIModule):
+class Footer(UIModule):
     def render(self, *args, **kwargs):
-        return self.render_string('ui_modules/footer.html')
-        pass
+        return self.render_string('_ui_/footer.html')

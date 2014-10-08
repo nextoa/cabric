@@ -2,6 +2,8 @@
 
 from fabric.api import *
 from fabez.env import *
+from fabez.cmd import *
+from fabez.server import *
 
 import os
 
@@ -21,3 +23,7 @@ def fabez_debug():
     pass
 
 
+
+def install(pubkey=None):
+    server_gitolite(pubkey)
+    pass

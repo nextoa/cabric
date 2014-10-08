@@ -7,8 +7,8 @@ setup(
     name='fabez',
     version='0.2.0',
     packages=['fabez'],
-    url='https://github.com/nextoa/fabez',
-    download_url='https://github.com/nextoa/fabez/tarball/master',
+    url='https://github.com/kbonez/fabez',
+    download_url='https://github.com/kbonez/fabez/tarball/master',
     license='http://opensource.org/licenses/MIT',
     install_requires=[
         'fabric',

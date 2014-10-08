@@ -2,81 +2,52 @@
 
 
 {% block body%}
-<table class="table row">
-    <thead>
-    <tr>
-        <td>项目名称</td>
-        <td>指定的集群</td>
-        <td>发布版本</td>
-        <td>操作</td>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>pylib</td>
-        <td>
-            <select>
-                <option>DEV</option>
-                <option>Test</option>
-                <option>Online</option>
-            </select>
-        </td>
-        <td>
-            <select>
-                <option>不指定</option>
-                <option>1.0</option>
-                <option>1.1</option>
-                <option>1.2</option>
-                <option>2.0</option>
-            </select>
-        </td>
-        <td>发布</td>
-    </tr>
-    <tr>
-        <td>banjia.baixing.com</td>
-        <td>
-            <select>
-                <option>不指定</option>
-                <option>1.0</option>
-                <option>1.1</option>
-                <option>1.2</option>
-                <option>2.0</option>
-            </select>
-        </td>
-        <td>发布</td>
-    </tr>
-    <tr>
-        <td>api.baixing.com.cn</td>
-        <td>
-            <select>
-                <option>不指定</option>
-                <option>1.0</option>
-                <option>1.1</option>
-                <option>1.2</option>
-                <option>2.0</option>
-            </select>
-        </td>
-        <td>发布</td>
-    </tr>
-    </tbody>
 
-</table>
+<div class="row">
+    <form class="small-12 large-6 columns center" method="post" id="form">
+        <fieldset>
+            <legend>{{ project.name }}</legend>
+
+            <label>发布至集群:
+                <select name="env">
+                    {% for env in project.environment %}
+                    <option value="{{ env }}">{{ env }}</option>
+                    {% end %}
+                </select>
+            </label>
+
+            <label>版本号:
+                <select name="version" id="tags" aria-describedby="tagsHelpText">
+                    <option value="0">默认</option>
+                </select>
+
+                <p id="tagsHelpText"><a id="refresh-tags" href="#" project="{{ project.code }}">[刷新]</a>版本列表</p>
+
+            </label>
 
 
-<p>
-<pre class="code-container">
+            <input type="hidden" name="project" value="{{ project.code }}"/>
+            <label>
+                <button type="submit" class="btn">发布</button>
+            </label>
+        </fieldset>
 
-    说明：
+    </form>
+</div>
 
-    界面只配置项目，不配置机器。项目在子模块中配置
-    比如：
-    routes = {
-        'dev': os.path.dirname(__file__) + '/config/fabez/dev.conf',
-        'test': os.path.dirname(__file__) + '/config/fabez/test.conf',
-        'ol': os.path.dirname(__file__) + '/config/fabez/online.conf',
-    }
+<div id="msg" class="row">
+    <iframe src="/process/?prepare=1" class="small-12 large-10 columns center" style="min-height:300px;" frameborder="0"></iframe>
+</div>
 
-</pre>
-</p>
 
+{% end %}
+
+
+{% block css %}
+<link href="/static/css/deploy.css" media="screen" rel="stylesheet" type="text/css"/>
+{% end %}
+
+
+{% block js %}
+<script src="/static/js/deploy.js"></script>
 {% end %}

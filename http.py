@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import os
+
+from piece import *
+
 import web.deploy as Deploy
 
-from bx.helloworld import HelloWorld
+import web.acct as Acct
+
+
 
 
 def _handlers():
@@ -15,14 +20,20 @@ def _handlers():
         # (r"/", Dashboard.Dashboard),
 
         # locale 语言切换,应该是ajax方式,请求之后,然后js控制刷新页面
-        (r"/deploy/?", Deploy.Deploy),
+        (r"/", Deploy.Dashboard),
+        (r"/deploy/(.+)", Deploy.Deploy),
+        (r"/process/?", Deploy.Process),
+        (r"/tags/(.+)", Deploy.Tags),
+
+        (r"/login/?", Acct.Login),
+        (r"/logout/?", Acct.Logout),
+
 
     ]
     pass
 
 
-
-def production(**ez_settings):
+def dev(**ez_settings):
     '''
     开发机
     :param ez_settings:
@@ -32,15 +43,15 @@ def production(**ez_settings):
 
     config.update({
         'cookie_secret': '8888',
-        'debug': False,
+        'debug': True,
         'static_path': os.path.join(os.path.dirname(__file__), 'wwwroot', 'static'),
         'locale_callback': None,
-        'auth_callback': None,
+        'auth_callback': Acct.verify_acct,
+        'ui_modules': [header, footer],
+        'resource_path':os.path.join(os.path.dirname(__file__),'resources')
     })
 
     return config, _handlers()
-
-
 
 
 # for quick test
@@ -50,8 +61,8 @@ if __name__ == '__main__':
     from pkg_resources import load_entry_point
 
     sys.argv.append(os.path.dirname(__file__))
-    # sys.argv.append('--debug')
-    sys.argv.append('production')
+    sys.argv.append('.')
+    sys.argv.append('dev')
     sys.argv.append("--port")
     sys.argv.append("9801")
 

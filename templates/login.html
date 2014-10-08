@@ -1,0 +1,31 @@
+{% extends 'root.html' %}
+
+
+{% block body%}
+
+<div class="row">
+    <form class="small-12 large-6 columns center" method="post" id="form">
+        <fieldset>
+            <legend>使用github账户登录</legend>
+
+            <label>
+                <input type="text" placeholder="github账户" name="u">
+            </label>
+            <label>
+                <input type="password" placeholder="github密码" name="p">
+            </label>
+            <label>
+                <button type="submit" class="btn">登录</button>
+            </label>
+        </fieldset>
+    </form>
+</div>
+
+{% end %}
+
+
+{% block css %}
+<link href="/static/css/deploy.css" media="screen" rel="stylesheet" type="text/css"/>
+{% end %}
+
+

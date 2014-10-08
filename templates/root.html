@@ -4,24 +4,18 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>{{ _('Fabweb') }}{% block title %}{% end %}</title>
-    <meta name="description" content="{% block description %} 基于Fabric的线上部署及发布工具 {% end %}"/>
+    <title>{{ _('Fabez') }}{% block title %}{% end %}</title>
+    <meta name="description" content="{% block description %} 基于Fabric的线上部署工具 {% end %}"/>
     <meta name="keywords" content="{% block keywords %} 基于Fabric的部署及发布工具 {% end %}"/>
-    <meta name="author" content="{{ _('王文沛') }}"/>
+    <meta name="author" content="{{ _('王文沛 | 风爻') }}"/>
     <meta name="copyright" content="Baixing, inc. Copyright (c) 2014"/>
 
+    <link href="/static/foundation/css/foundation.min.css" media="screen" rel="stylesheet" type="text/css"/>
     {% block css %}
-    <link href="/static/foundation/css/foundation.min.css" media="screen" rel="stylesheet" type="text/css" />
+
     {% end %}
 
-    {% block js %}
     <script src="/static/foundation/js/vendor/modernizr.js"></script>
-    <!--用于测试-->
-    <script src="/static/foundation/js/vendor/jquery.js"></script>
-    <script src="/static/foundation/js/foundation.min.js"></script>
-
-    {% end %}
-
     {% block extra-head %}
 
     {% end %}
@@ -29,15 +23,41 @@
 </head>
 
 <body>
+
+
+
+{% block header %}
+{% module Header() %}
+{% end %}
+
 {% block body %}
 
+
+{% end %}
+
+
+{% block footer %}
+{% module Footer() %}
+{% end %}
+
+
+<script src="/static/foundation/js/vendor/jquery.js"></script>
+<script src="/static/foundation/js/foundation.min.js"></script>
+<script>
+      $(document).foundation();
+</script>
+
+{% block js %}
 
 
 
 
 {% end %}
-</body>
 
+
+
+
+</body>
 
 
 </html>

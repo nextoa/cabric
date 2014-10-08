@@ -13,14 +13,22 @@
     position: absolute;
     bottom: 0;
     left: 0;
+
+    text-indent: 4pt;
+
 }
 
+/**
+#th li div img {
+width:520px;
+height:470px;
+}
+*/
 
 #th {
     margin-top:10px;
 }
 
-footer {
-    position: absolute;
-    bottom:0;
-}
+
+
+

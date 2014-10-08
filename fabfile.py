@@ -24,6 +24,31 @@ def fabez_debug():
 
 
 
-def install(pubkey=None):
-    server_gitolite(pubkey)
+def upgrade(tag=None,clean=False):
+    """
+    执行升级
+    :return:
+    """
+
+    root = '/webdata/fabez.baixing.com'
+    repo = 'gitolite3@fabez.nextoa.com:fabez.git'
+
+    if clean:
+        run('rm -rf %s' % root)
+        pass
+
+    if ez_env.group == 'ol':
+        cmd_git(root, repo, branch='master', user='webuser',tag=tag)
+        pass
+    elif ez_env.group == 'test':
+        cmd_git(root, repo, branch='beta', user='webuser',tag=tag)
+        pass
+    elif ez_env.group == 'dev':
+        cmd_git(root, repo, branch='dev', user='webuser',tag=tag)
+        pass
+    else:
+        print "找不到指定的配置环境,SKIP"
+        pass
+
     pass
+

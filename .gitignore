@@ -52,5 +52,5 @@ build/
 
 # for fabez user config
 projects
-./resources
+resources
 wwwroot/static/icons

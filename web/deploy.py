@@ -97,7 +97,8 @@ class Process(RequestHandler):
 
         workspace = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'projects', os.path.basename(project))
 
-        os.chdir(workspace)
+        # 项目如果异常,会导致整个app崩溃
+        # os.chdir(workspace)
 
         # 兼容命令行的语法
         if config_file == "online.conf":
@@ -107,7 +108,7 @@ class Process(RequestHandler):
             pos = config_file.find(".")
             env = config_file[0:pos]
 
-        cmd = "fab ez:{} upgrade".format(env)
+        cmd = "cd {} && fab ez:{} upgrade".format(workspace,env)
 
         if tag != "0":
             cmd += ":tag=" + tag

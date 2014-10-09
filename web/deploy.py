@@ -67,7 +67,9 @@ class Tags(RequestHandler):
         """
 
         project_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'projects', os.path.basename(project))
+
         project = Project(project_path, init_tags=True, init_env=False, init_name=False)
+
         self.api_write(200, tags=project.tags)
 
         pass

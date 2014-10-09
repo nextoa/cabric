@@ -11,6 +11,9 @@ import json
 from github3 import login,GitHub
 
 
+from ConfigParser import SafeConfigParser
+
+
 
 class Projects(object):
     """
@@ -87,11 +90,15 @@ class Project(object):
         :return:
         """
 
-        sys.path.insert(0,path)
 
         self.root = path
-        self.fabfile = importlib.import_module("fabfile")
-        self.github = GitHub(token=self.fabfile._token())
+
+        config_path  = os.path.join(path,"config","github.cfg")
+
+        self.config = SafeConfigParser()
+        self.config.read(config_path)
+
+        self.github = GitHub(token=self.config.get('api','token'))
 
         self.code = os.path.basename(path)
 
@@ -117,7 +124,7 @@ class Project(object):
         获取最新的tags
         :return:
         """
-        h = self.github._get(self.fabfile._github()+"/tags")
+        h = self.github._get(self.config.get('api','addr')+"/tags")
 
         buffer = h.content
         json_code = json.loads(buffer)

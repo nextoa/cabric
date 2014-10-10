@@ -22,7 +22,7 @@ def verify_acct(handle):
     :return:
     """
 
-    uid = handle.get_cookie('uid')
+    uid = handle.get_cookie('fabez_uid')
     origin = uid
 
     try:
@@ -36,7 +36,7 @@ def verify_acct(handle):
 
         sign=sha1(origin).hexdigest()
 
-        if sign == handle.get_cookie('sign'):
+        if sign == handle.get_cookie('fabez_sign'):
             return uid
 
     except Exception as e:
@@ -75,9 +75,9 @@ class Login(RequestHandler):
                 with open(user_path, 'r') as f:
                     origin += f.readline()
 
-                self.set_cookie('uid', u.login, expires_days=365)
-                self.set_cookie('user', u.name, expires_days=365)
-                self.set_cookie('sign', sha1(origin).hexdigest(), expires_days=365)
+                self.set_cookie('fabez_uid', u.login, expires_days=365)
+                self.set_cookie('fabez_user', u.name, expires_days=365)
+                self.set_cookie('fabez_sign', sha1(origin).hexdigest(), expires_days=365)
 
                 self.redirect("/")
 
@@ -102,8 +102,8 @@ class Logout(RequestHandler):
 
     def get(self):
         # 清理cookie,只清理登录状态，这样还可以继续使用用户的身份信息
-        self.clear_cookie('uid')
-        self.clear_cookie('user')
-        self.clear_cookie('sign')
+        self.clear_cookie('fabez_uid')
+        self.clear_cookie('fabez_user')
+        self.clear_cookie('fabez_sign')
         return self.redirect('/')
 

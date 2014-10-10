@@ -11,6 +11,7 @@ import subprocess
 from tornado.web import authenticated
 
 
+
 class Dashboard(RequestHandler):
     @authenticated
     def get(self, *args, **kwargs):
@@ -116,6 +117,9 @@ class Process(RequestHandler):
         out_stream = subprocess.PIPE
         err_stream = subprocess.PIPE
 
+
+
+        # 可以开始异步的地方,建议直接使用feature来完成
         p = subprocess.Popen(cmd, shell=True, stdout=out_stream, stderr=err_stream)
 
         self.write("<html>"

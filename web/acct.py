@@ -80,7 +80,7 @@ class Login(RequestHandler):
                     origin += f.readline()
 
                 self.set_cookie('uid', u.login, expires_days=365)
-                self.set_cookie('user', urllib.quote_plus(u.name), expires_days=365)
+                self.set_cookie('user', urllib.quote_plus(u.name.encode('utf-8')), expires_days=365)
                 self.set_cookie('sign', sha1(origin).hexdigest(), expires_days=365)
 
                 self.redirect("/")

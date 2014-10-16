@@ -27,7 +27,7 @@ def verify_acct(handle):
     """
 
     uid = handle.get_cookie('uid')
-    origin = uid
+    origin = uid.lower()
 
     try:
         user_path = os.path.join(handle.application.settings['resource_path'], origin + '.user')
@@ -72,9 +72,9 @@ class Login(RequestHandler):
 
         try:
             u = github.user()
-            user_path = os.path.join(self.application.settings['resource_path'], u.login + '.user')
+            user_path = os.path.join(self.application.settings['resource_path'], u.login.lower() + '.user')
 
-            origin = u.login
+            origin = u.login.lower()
             if os.path.isfile(user_path):
                 with open(user_path, 'r') as f:
                     origin += f.readline()

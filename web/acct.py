@@ -26,10 +26,12 @@ def verify_acct(handle):
     :return:
     """
 
-    uid = handle.get_cookie('uid')
-    origin = uid.lower()
+
 
     try:
+        uid = handle.get_cookie('uid')
+        origin = uid.lower()
+
         user_path = os.path.join(handle.application.settings['resource_path'], origin + '.user')
 
         if os.path.isfile(user_path):

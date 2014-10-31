@@ -54,3 +54,4 @@ build/
 projects
 resources
 wwwroot/static/icons
+__pycache__

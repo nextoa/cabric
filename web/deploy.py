@@ -109,6 +109,21 @@ class Process(RequestHandler):
             pos = config_file.find(".")
             env = config_file[0:pos]
 
+
+
+        # @note 关于fabez的挂起问题.
+        # 首先,问题的原因:
+        # 因为tornado使用了单队列,不用异步就会导致整个tornado堵塞.
+        #
+        # 第一种
+        # 如果我们能保证client中途不会出现交互式,那么整个流程是没问题,这个锁也会给我们带来好处,
+        # 所以我们只要能保证client是正常的,那就可以了
+        # 第二种
+        # 干掉当前用户的fabez进程,因为tornado是单队列堵塞机制,所以我们需要先干掉锁死掉的进程,这个对于小团队来说不会是太大的问题
+        # 第三种
+        # 做异步,异步带来的问题是,进程可以无限开启,所以会导致垃圾进程.
+
+        # 目前我们坚持第一种
         cmd = "cd {} && fab ez:{} upgrade".format(workspace,env)
 
         if tag != "0":

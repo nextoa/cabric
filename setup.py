@@ -2,10 +2,11 @@
 
 from setuptools import setup, find_packages
 
+import fabez
 
 setup(
     name='fabez',
-    version='0.2.0',
+    version=fabez.version,
     packages=['fabez'],
     url='https://github.com/kbonez/fabez',
     download_url='https://github.com/kbonez/fabez/tarball/master',

@@ -223,8 +223,9 @@ def cmd_git(path=None, url=None, branch='master', tag=None, user=None):
                     cmd_su("cd %s && git checkout -- ." % path, user)
                     cmd_su("cd %s && git checkout %s" % (path,branch), user)
 
-        # git pull no --tags options
+
         cmd_su("cd %s && git pull origin %s" % (path,branch), user)
+        cmd_su("cd %s && git pull origin %s --tags" % (path,branch), user)
         if tag:
             cmd_su("cd %s && git checkout %s" % (path,tag), user)
 

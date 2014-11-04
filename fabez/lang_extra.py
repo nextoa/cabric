@@ -12,9 +12,12 @@ try:
 except:
     pass
 
+# @deprecated
+
 
 def lang_extra_pecl_install(php_package):
     """
+    @deprecated drop PHP
     php pecl tools
     :param php_pkg:
     :return:
@@ -26,6 +29,8 @@ def lang_extra_pecl_install(php_package):
 
 def lang_extra_pecl_manual(php_package,repo,tag=None):
     """
+    @deprecated drop PHP
+
     php pecl manual install tools
     :param php_pkg:
     :return:
@@ -51,6 +56,8 @@ def lang_extra_pecl_manual(php_package,repo,tag=None):
 
 def lang_extra_php_yaf(server_name, environ='product', root=None, more_domain='', log_dir='/logs/nginx'):
     """
+    @deprecated  drop PHP
+
     install yaf config for nginx
     :return:
     """

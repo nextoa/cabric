@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from fabric.api import *
-from fabez.cmd import (cmd_git, cmd_ip,cmd_su)
-from fabez.perm import  *
+from fabez.cmd import (cmd_git, cmd_ip, cmd_su)
+from fabez.api import *
+
+import tempfile
 
 
-def server_nginx(user=None, worker_processes=16, worker_connections=512, old_user='nginx',error_log='/logs/nginx/error.log',access_log='/logs/nginx/access.log'):
+try:
+    import pkg_resources  # in package
+except:
+    pass
+
+
+def server_nginx(user=None, worker_processes=16, worker_connections=512, old_user='nginx', error_log='/logs/nginx/error.log', access_log='/logs/nginx/access.log'):
     """
     Install Nginx
     :param user: user,default is nobody
@@ -23,11 +31,8 @@ def server_nginx(user=None, worker_processes=16, worker_connections=512, old_use
         run('sed -i -e "s/\(user\s*\)%s/\\1%s/g" /etc/nginx/nginx.conf' % (old_user, user))
     run('sed -i -e "s/\(worker_processes\s*\)[0-9]*/\\1%d/g" /etc/nginx/nginx.conf' % worker_processes)
     run('sed -i -e "s/\(worker_connections\s*\)[a-zA-Z\/._0-9]*/\\1%d/g" /etc/nginx/nginx.conf' % worker_connections)
-    run('sed -i -e "s/\(error_log\s*\)[a-zA-Z\/._0-9]*/\\1%s/g" /etc/nginx/nginx.conf' % error_log.replace('/','\/'))
-    run('sed -i -e "s/\(access_log\s*\)[a-zA-Z/._0-9]*/\\1%s/g" /etc/nginx/nginx.conf' % access_log.replace('/','\/'))
-
-
-
+    run('sed -i -e "s/\(error_log\s*\)[a-zA-Z\/._0-9]*/\\1%s/g" /etc/nginx/nginx.conf' % error_log.replace('/', '\/'))
+    run('sed -i -e "s/\(access_log\s*\)[a-zA-Z/._0-9]*/\\1%s/g" /etc/nginx/nginx.conf' % access_log.replace('/', '\/'))
 
 
 def rm_server_nginx():
@@ -84,11 +89,25 @@ def rm_server_redis(clean=False):
 
 
 def server_mongo():
-    '''
-    @TODO. currently, this is for develop env
+    """
+    @note, by default, mongodb bind 0.0.0.0 and we don't plan change it
+    only support 64-bit system
     :return:
-    '''
-    run('yum install mongodb-server -y')
+    """
+
+    try:
+        buf = pkg_resources.resource_string('fabez', 'tpl/mongodb.repo')
+    except:
+        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mongodb.repo')).read()
+        pass
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buf
+
+    put(fh.name, '/etc/yum.repos.d/mongodb.repo')
+    os.remove(fh.name)
+
+    run('yum install mongodb-org -y')
     run('chkconfig --level 35 mongod on')
     pass
 
@@ -103,51 +122,71 @@ def server_gitolite(pubkey=None):
     if pubkey is None:
         run('cp ~/.ssh/authorized_keys /tmp/gitolite.pub')
     else:
-        put_public_key(pubkey,'/tmp/gitolite.pub')
+        put_public_key(pubkey, '/tmp/gitolite.pub')
 
     run('chown gitolite3 /tmp/gitolite.pub')
-    cmd_su('gitolite setup -pk /tmp/gitolite.pub','gitolite3')
+    cmd_su('gitolite setup -pk /tmp/gitolite.pub', 'gitolite3')
 
     pass
 
 
-def server_supervisor(user):
-    '''
+def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', log_level='info'):
+    """
     Install supervisor
-    '''
-    # with settings(warn_only=True):
-    # run('pip install supervisor')
-    #     if run('test -d /usr/local/etc/supervisor.d').failed:
-    #         run('mkdir /usr/local/etc/supervisor.d')
-    #     run(
-    #         "grep '\[supervisord\]' /usr/local/etc/supervisord.conf || echo \"[supervisord]\nuser=%s\nlogfile=/tmp/supervisord.log\nlogfile_maxbytes=50MB\nlogfile_backups=10\nloglevel=info\" >>  /usr/local/etc/supervisord.conf" % user)
-    #
-    #     run(
-    #         "grep '\[unix_http_server\]' /usr/local/etc/supervisord.conf || echo '[unix_http_server]\nfile = /usr/local/var/run/supervisor.sock' >> /usr/local/etc/supervisord.conf")
-    #
-    #     run(
-    #         "grep '\[rpcinterface:supervisor\]' /usr/local/etc/supervisord.conf || echo '[rpcinterface:supervisor]\nsupervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface' >> /usr/local/etc/supervisord.conf")
-    #
-    #     run(
-    #         "grep '\[supervisorctl\]' /usr/local/etc/supervisord.conf || echo \"[supervisorctl]\nserverurl=unix:///usr/local/var/run/supervisor.sock\" >>  /usr/local/etc/supervisord.conf")
-    #
-    #     run(
-    #         "grep '\[include\]' /usr/local/etc/supervisord.conf || echo '[include]\nfiles = supervisor.d/*.ini' >> /usr/local/etc/supervisord.conf")
-    #
-    #     run(
-    #         "grep 'supervisord' /etc/rc.local || echo '/usr/local/bin/supervisord -c /usr/local/etc/supervisord.conf  --pidfile=/usr/local/var/run/supervisord.pid' >> /etc/rc.local")
-
+    """
 
     run('yum install supervisor -y')
-    run('chkconfig --level 35 supervisor on')
+    run('chkconfig --level 35 supervisord on')
 
-    pass
-
-
-def rm_server_supervisor():
     with settings(warn_only=True):
-        run('pip uninstall supervisor -y')
-        run('rm -rf /usr/local/etc/supervisor*')
+        run('test -d /etc/supervisor.d || mkdir /etc/supervisor.d')
+
+    try:
+        template = pkg_resources.resource_string('fabez', 'tpl/supervisord.conf')
+    except:
+        template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'supervisord.conf')).read()
+        pass
+
+    buf = template.replace('{$username}', user) \
+        .replace('{$tmp}', tmp) \
+        .replace('{$logs}', log_dir) \
+        .replace('{$log_level}', log_level)
+
+
+    # only support python2.x
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buf
+
+    put(fh.name, '/etc/supervisord.conf')
+    os.remove(fh.name)
+
     pass
 
 
+def server_websuite(user='webuser',python_version='3.4.2'):
+
+    cmd_useradd(user)
+    cmd_ulimit()
+    utils_epel()
+
+    utils_git()
+
+    io_webdata(uid=user,gid=user)
+
+    io_slowlog('nginx', user)
+    server_nginx(user)
+
+    io_slowlog('supervisor', user)
+    server_supervisor()
+
+    py_python(python_version)
+
+    pip('tornadoez')
+    pip('pyjwt')
+    pip('pillow')
+    pip('pymongo')
+    pip('redis')
+    pip('pymysql')
+
+
+    pass

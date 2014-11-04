@@ -11,28 +11,41 @@ from fabez.pythonic import *
 
 
 
-def lang_python(tag=None):
-    '''
-    install python. include python,setuptools,pip and supervisord
-    :param pip_index_url:proxy url
-    '''
-
-    utils_baselib()
-    cmd_git('/tmp/python', 'https://github.com/kbonez/python.git', tag=None)
 
 
-    with cd('/tmp/python'):
-        run('./configure')
-        run('make && make install')
-        py_pip()
-        pip('Sphinx')
+
+def rm_py_setup_py(code_dir=None, python='python'):
+    """
+    @deprecated
+        move from pythonic, python setup tools packaged in python
+
+    :param code_dir:user dir
+    :param python:python
+    """
+    # with cd(code_dir):
+    # run('%s setup.py uninstall' % python)
+    abort("please use uninstall_pip to remove package")
     pass
+
+
+
+def py_setuptools():
+    """
+    @deprecated
+    :return:
+    """
+
+    pass
+
 
 
 
 def lang_php(branch='master', user='webuser', repo='https://github.com/kbonez/php-src.git', tag=None,
              logs='/logs/php-fpm'):
     """
+    @deprecate
+        we drop PHP,sorry
+
     for php, will bind php-fpm
     :param branch:
     :param user:

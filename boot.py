@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-
-from piece import *
-
 import web.deploy as Deploy
-
 import web.acct as Acct
 
+from piece import *
 
 
 

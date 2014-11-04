@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
 
 
-
 from fabric.api import *
 
-
-def putc_nginx(path):
+def config_nginx(deploy_root):
     '''
-    put nginx config file
+    directory must be project_root/config/nginx/*.conf
     :param path: local path
     '''
-    remote_path = '/etc/nginx/conf.d/'
-    put(path, remote_path)
+    run('cp -rf {}/config/nginx/*.conf /etc/nginx/conf.d/'.format(deploy_root))
+
+def config_supervisor(deploy_root):
+    '''
+    directory must be project_root/config/supervisor.d/*.ini
+    :param path: local path
+    '''
+    run('cp -rf {}/config/supervisor.d/*.ini /etc/supervisor.d/'.format(deploy_root))
+
+
 
 
 

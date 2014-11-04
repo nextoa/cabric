@@ -2,5 +2,5 @@
 
 
 
-version='0.3.0'
-version_info=(0,2,2)
+version = '0.5.0'
+version_info = (0, 5, 0)

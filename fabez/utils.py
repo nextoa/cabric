@@ -55,3 +55,14 @@ def utils_epel():
     pass
 
 
+
+def utils_hg(proxy=None):
+    '''
+    Install Mercurial
+    :param proxy:proxy server
+    :return:
+    '''
+    run('yum install mercurial -y')
+
+    pass
+

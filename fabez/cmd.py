@@ -2,6 +2,8 @@
 
 from fabric.api import *
 import os
+import pkg_resources
+import tempfile
 
 
 def cmd_userexist(user):
@@ -67,36 +69,25 @@ def cmd_userdel(user, clean=True, extra=[]):
 
 def cmd_ulimit(limit=65535):
     """
-    @issue can't match
-    add ulimit for heavy load system.
-    use * instead user
+    set all ulimit to number
     :return:
     """
-    with settings(warn_only=True):
-            # grep nproc
-        if run('cat /etc/security/limits.d/90-nproc.conf | grep %s' % "'*          soft    nproc'").failed:
-            print '%s%d >> /etc/security/limits.d/90-nproc.conf' % ("'*          soft    nproc     '", limit)
-        else:
-            run(
-                'sed -i -e "s/\(\*          soft    nproc     \)[0-9]*/\\1%d/g" /etc/security/limits.d/90-nproc.conf' % limit)
+
+    try:
+        buf = pkg_resources.resource_string('fabez', 'tpl/90-nproc.conf')
+    except:
+        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', '90-nproc.conf')).read()
         pass
 
-    with settings(warn_only=True):
-        if run('cat /etc/security/limits.d/90-nproc.conf | grep %s' % "'*          soft    nofile'").failed:
-            print '%s%d >> /etc/security/limits.d/90-nproc.conf' % ("'*          soft    nofile     '", limit)
-        else:
-            run(
-                'sed -i -e "s/\(\*          soft    nofile     \)[0-9]*/\\1%d/g" /etc/security/limits.d/90-nproc.conf' % limit)
 
-            pass
+    # only support python2.x
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buf
 
-        pass
+    put(fh.name, '/etc/security/limits.d/90-nproc.conf')
+    os.remove(fh.name)
 
-        # if run('grep %s /etc/security/limits.d/90-nproc.conf' % "'*          soft    nofile'").failed:
-        #     print '%s%d >> /etc/security/limits.d/90-nproc.conf' % ("'*          soft    nofile     '", limit)
-        # else:
-        #     run('sed -i -e "s/\(\*          soft    nofile     \)[0-9]*/\\1%d/g" /etc/security/limits.d/90-nproc.conf' % limit)
-        # pass
+
 
 
 def cmd_expanduser(user=None):
@@ -245,14 +236,4 @@ def cmd_ip(card='eth0'):
 
 
 
-
-def cmd_write_str(file,data):
-
-    with settings(warn_only=True):
-
-
-        pass
-
-
-    pass
 

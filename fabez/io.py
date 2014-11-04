@@ -88,7 +88,7 @@ def rm_io_airlog():
 
 
 
-def io_webdata(uid='webuser',gid='webuser',tmpfs=True):
+def io_webdata(uid='webuser',gid='webuser',tmpfs=False):
     if tmpfs:
         return io_tmpfs('/webdata',uid=uid,gid=gid,mode=700)
     else:
@@ -96,7 +96,7 @@ def io_webdata(uid='webuser',gid='webuser',tmpfs=True):
 
 
 
-def rm_io_webdata(uid='webuser',gid='webuser',tmpfs=True):
+def rm_io_webdata(uid='webuser',gid='webuser',tmpfs=False):
     if tmpfs:
         return rm_io_tmpfs('/webdata',uid=uid,gid=gid)
     else:

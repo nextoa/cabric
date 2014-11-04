@@ -10,7 +10,7 @@ from fabez.cmd import (cmd_git)
 
 # @note if name start py, this is install tools
 
-def py_python(tag=None):
+def py_python(tag=None, force=True):
     '''
     install python. include python,setuptools,pip and supervisord
     :param pip_index_url:proxy url
@@ -20,12 +20,12 @@ def py_python(tag=None):
 
     run('yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel -y')
 
-    if not tag:
-        tag_str = 'general'
+    if tag is None:
+        tag_str = '2.7.8'
     else:
         tag_str = tag
 
-    if tag is None or tag.find('2.7.8') == 0:
+    if tag.find('2.7.8') == 0:
         cmd_git('/tmp/python', 'https://github.com/kbonez/python.git', tag=tag)
         cd_path = '/tmp/python'
     else:
@@ -39,15 +39,20 @@ def py_python(tag=None):
 
     if tag_str.find('3') == 0:
         py_pip('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag_str))
-        python_fix('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag_str), force=True)
-        pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag_str), force=True)
+        python_fix('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag_str), force=force)
+        pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag_str), force=force)
+        py_python(tag='2.7.8', force=False)
     else:
         py_pip('/usr/local/lib/python/Versions/{}/bin/python'.format(tag_str))
-        python_fix('/usr/local/lib/python/Versions/{}/bin/python'.format(tag_str), force=True)
-        pip_fix('/usr/local/lib/python/Versions/{}/bin/pip'.format(tag_str), force=True)
+        python_fix('/usr/local/lib/python/Versions/{}/bin/python'.format(tag_str), force=force)
+        pip_fix('/usr/local/lib/python/Versions/{}/bin/pip'.format(tag_str), force=force)
+        pip('supervisor', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag_str))
+        supervisor_fix('/usr/local/lib/python/Versions/{}/bin'.format(tag_str))
 
     pip('Sphinx')
-    python_bin_path('/usr/local/lib/python/Versions/{}/bin'.format(tag_str))
+
+    if force:
+        python_bin_path('/usr/local/lib/python/Versions/{}/bin'.format(tag_str))
 
     pass
 
@@ -177,6 +182,17 @@ def python_fix(file_path, force=False):
     pass
 
 
+def supervisor_fix(file_path, force=False):
+    if force:
+        run('ln -snf {}/supervisord /usr/local/bin/supervisord'.format(file_path))
+        run('ln -snf {}/supervisorctl /usr/local/bin/supervisorctl'.format(file_path))
+    else:
+        run('test -f /usr/local/bin/supervisord || ln -s {}/supervisord /usr/local/bin/supervisord'.format(file_path))
+        run('test -f /usr/local/bin/supervisorctl || ln -s {}/supervisorctl /usr/local/bin/supervisorctl'.format(file_path))
+
+    pass
+
+
 def python_path(path, user=''):
     """
     set private package path
@@ -192,7 +208,6 @@ def python_path(path, user=''):
 
         if user:
             run('chown -Rf {}.{} ~{}/.bash_profile'.format(user, user, user))
-
 
 
 def python_bin_path(path, user=''):

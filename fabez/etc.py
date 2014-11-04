@@ -15,7 +15,7 @@ def config_supervisor(deploy_root):
     directory must be project_root/config/supervisor.d/*.ini
     :param path: local path
     '''
-    run('cp -rf {}/config/supervisor.d/*.ini /etc/supervisor.d/'.format(deploy_root))
+    run('cp -rf {}/config/supervisord/*.ini /etc/supervisor.d/'.format(deploy_root))
 
 
 

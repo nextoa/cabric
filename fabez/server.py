@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from fabric.api import *
-from fabez.cmd import (cmd_git, cmd_ip, cmd_su)
-from fabez.api import *
-
 import tempfile
+
+from fabric.api import *
+
+from fabez.cmd import *
+from server import *
+from io import *
+from perm import *
+from utils import *
+from pythonic import *
+from etc import *
 
 
 try:
@@ -88,10 +94,9 @@ def rm_server_redis(clean=False):
     pass
 
 
-def server_mongo():
+def server_mongo(card='lo'):
     """
-    @note, by default, mongodb bind 0.0.0.0 and we don't plan change it
-    only support 64-bit system
+    @note this mongo only support 64-bit system
     :return:
     """
 
@@ -108,6 +113,11 @@ def server_mongo():
     os.remove(fh.name)
 
     run('yum install mongodb-org -y')
+
+    if card:
+        ip = cmd_ip(card)
+        run('sed -i -e "s/\(bind_ip\s*=\s*\)[0-9\.]*/\\1%s/g" /etc/mongod.conf' % ip)
+
     run('chkconfig --level 35 mongod on')
     pass
 
@@ -135,8 +145,27 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
     Install supervisor
     """
 
-    run('yum install supervisor -y')
-    run('chkconfig --level 35 supervisord on')
+    # yum supervisor id tooooooooooooooooo old
+    # run('yum install supervisor -y')
+
+    # try:
+    #     buf = pkg_resources.resource_string('fabez', 'tpl/supervisord.boot')
+    # except:
+    #     buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'supervisord.boot')).read()
+    #     pass
+    #
+    # with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+    #     print>> fh, buf
+    #
+    # put(fh.name, '/etc/init.d/supervisord')
+    # os.remove(fh.name)
+
+    # run('chkconfig --level 35 supervisord on')
+
+
+    with settings(warn_only=True):
+        if run('cat /etc/rc.local | grep "/usr/local/bin/supervisord"').failed:
+            run('echo "/usr/local/bin/supervisord" >> /etc/rc.local')
 
     with settings(warn_only=True):
         run('test -d /etc/supervisor.d || mkdir /etc/supervisor.d')
@@ -163,7 +192,8 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
     pass
 
 
-def server_websuite(user='webuser',python_version='3.4.2'):
+def server_websuite(user='webuser', python_version='3.4.2'):
+    run('yum install wget -y')
 
     cmd_useradd(user)
     cmd_ulimit()
@@ -171,7 +201,7 @@ def server_websuite(user='webuser',python_version='3.4.2'):
 
     utils_git()
 
-    io_webdata(uid=user,gid=user)
+    io_webdata(uid=user, gid=user)
 
     io_slowlog('nginx', user)
     server_nginx(user)
@@ -188,5 +218,15 @@ def server_websuite(user='webuser',python_version='3.4.2'):
     pip('redis')
     pip('pymysql')
 
-
     pass
+
+
+def server_mysql():
+    with settings(warn_only=True):
+        run('rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm')
+
+    run('yum install mysql-community-server -y')
+    run('chkconfig --level 35 mysqld on')
+    pass
+
+

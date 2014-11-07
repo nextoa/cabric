@@ -76,9 +76,20 @@ def rm_python():
     pass
 
 
-def py_pypy(version='2.4.0'):
+
+def py_pypy(version='2.4'):
+
+    run('wget https://bitbucket.org/squeaky/portable-pypy/downloads/pypy-{}-linux_x86_64-portable.tar.bz2'.format(tag))
+    run('cd /tmp && tar -xvzpf pypy-{}-linux_x86_64-portable.tar.bz2'.format(tag))
+    cd_path = '/tmp/pypy-{}-linux_x86_64-portable.tar.bz2'.format(tag)
+
+    pass
+
+
+def py_pypy_disable(version='2.4.0'):
     """
     install pypy and pypy tools
+    only use to refer
     @note  this depends epel resources
     :return:
     """

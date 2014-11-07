@@ -3,21 +3,27 @@
 
 from fabric.api import *
 
-def config_nginx(deploy_root):
-    '''
-    directory must be project_root/config/nginx/*.conf
-    :param path: local path
-    '''
-    run('cp -rf {}/config/nginx/*.conf /etc/nginx/conf.d/'.format(deploy_root))
 
-def config_supervisor(deploy_root):
-    '''
-    directory must be project_root/config/supervisor.d/*.ini
-    :param path: local path
-    '''
-    run('cp -rf {}/config/supervisord/*.ini /etc/supervisor.d/'.format(deploy_root))
+def config_nginx(local_name, remote_name=None):
+    """
+    directory must be ./config/nginx/*.conf
+    """
+
+    if remote_name is None:
+        remote_name = local_name
+
+    put('./config/nginx/{}.conf /etc/nginx/conf.d/{}.conf'.format(local_name, remote_name))
 
 
+def config_supervisor(local_name, remote_name=None):
+    """
+    directory must be ./config/supervisor.d/*.ini
+    """
+
+    if remote_name is None:
+        remote_name = local_name
+
+    put('./config/supervisord/{}.ini /etc/supervisor.d/{}.ini'.format(local_name, remote_name))
 
 
 

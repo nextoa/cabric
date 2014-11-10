@@ -149,7 +149,7 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
     # run('yum install supervisor -y')
 
     # try:
-    #     buf = pkg_resources.resource_string('fabez', 'tpl/supervisord.boot')
+    # buf = pkg_resources.resource_string('fabez', 'tpl/supervisord.boot')
     # except:
     #     buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'supervisord.boot')).read()
     #     pass
@@ -192,7 +192,7 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
     pass
 
 
-def server_websuite(user='webuser', python_version='3.4.2'):
+def server_websuite(user='webuser', python_version='3.4.2', pypy=True, pypy_version='2.4', compatible=False):
     run('yum install wget -y')
 
     cmd_useradd(user)
@@ -209,7 +209,10 @@ def server_websuite(user='webuser', python_version='3.4.2'):
     io_slowlog('supervisor', user)
     server_supervisor()
 
-    py_python(python_version)
+    if pypy:
+        py_pypy(pypy_version)
+    else:
+        py_python(python_version, compatible=False, pypy=pypy_version)
 
     pip('tornadoez')
     pip('pyjwt')

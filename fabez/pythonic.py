@@ -10,7 +10,7 @@ from fabez.cmd import (cmd_git)
 
 # @note if name start py, this is install tools
 
-def py_python(tag=None, force=True):
+def py_python(tag='3.4.2', force=True, compatible=True,pypy='2.4'):
     '''
     install python. include python,setuptools,pip and supervisord
     :param pip_index_url:proxy url
@@ -18,41 +18,35 @@ def py_python(tag=None, force=True):
 
     utils_baselib()
 
-    run('yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel -y')
-
-    if tag is None:
-        tag_str = '2.7.8'
-    else:
-        tag_str = tag
-
-    if tag.find('2.7.8') == 0:
-        cmd_git('/tmp/python', 'https://github.com/kbonez/python.git', tag=tag)
-        cd_path = '/tmp/python'
-    else:
-        run('wget https://www.python.org/ftp/python/{0}/Python-{0}.tgz -O /tmp/Python-{0}.tgz'.format(tag))
-        run('cd /tmp && tar -xvzpf Python-{0}.tgz'.format(tag))
-        cd_path = '/tmp/Python-{}'.format(tag)
+    run('wget https://www.python.org/ftp/python/{0}/Python-{0}.tgz -O /tmp/Python-{0}.tgz'.format(tag))
+    run('cd /tmp && tar -xvzpf Python-{0}.tgz'.format(tag))
+    cd_path = '/tmp/Python-{}'.format(tag)
 
     with cd(cd_path):
-        run('./configure --prefix /usr/local/lib/python/Versions/{}'.format(tag_str))
+        run('./configure --prefix /usr/local/lib/python/Versions/{}'.format(tag))
         run('make && make install')
 
-    if tag_str.find('3') == 0:
-        py_pip('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag_str))
-        python_fix('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag_str), force=force)
-        pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag_str), force=force)
-        py_python(tag='2.7.8', force=False)
-    else:
-        py_pip('/usr/local/lib/python/Versions/{}/bin/python'.format(tag_str))
-        python_fix('/usr/local/lib/python/Versions/{}/bin/python'.format(tag_str), force=force)
-        pip_fix('/usr/local/lib/python/Versions/{}/bin/pip'.format(tag_str), force=force)
-        pip('supervisor', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag_str))
-        supervisor_fix('/usr/local/lib/python/Versions/{}/bin'.format(tag_str))
+    if tag.find('3') == 0:
+        py_pip('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag))
+        python_fix('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag), force=force)
 
-    pip('Sphinx')
+        if compatible:
+            pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag), force=force, replace='pip3')
+            # use pypy instead python2
+            py_pypy(pypy)
+        else:
+            pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag), force=force)
+    else:
+        py_pip('/usr/local/lib/python/Versions/{}/bin/python'.format(tag))
+        python_fix('/usr/local/lib/python/Versions/{}/bin/python'.format(tag), force=force)
+        pip_fix('/usr/local/lib/python/Versions/{}/bin/pip'.format(tag), force=force)
+        pip('supervisor', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
+        supervisor_fix('/usr/local/lib/python/Versions/{}/bin'.format(tag))
+
+    pip('Sphinx', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
 
     if force:
-        python_bin_path('/usr/local/lib/python/Versions/{}/bin'.format(tag_str))
+        python_bin_path('/usr/local/lib/python/Versions/{}/bin'.format(tag))
 
     pass
 
@@ -76,17 +70,26 @@ def rm_python():
     pass
 
 
+def py_pypy(version='2.4', server='https://github.com/nextoa/portable-pypy-arch/blob/master'):
+    run('wget {1}/pypy-{0}-linux_x86_64-portable.tar.bz2?raw=true -O /tmp/pypy-{0}-linux_x86_64-portable.tar.bz2'.format(version,server))
 
-def py_pypy(version='2.4'):
+    run('cd /tmp && tar -xvjpf pypy-{}-linux_x86_64-portable.tar.bz2'.format(version))
+    run('rsync -r /tmp/pypy-{0}-linux_x86_64-portable/ /usr/local/pypy-{0}-linux_x86_64-portable'.format(version))
 
-    run('wget https://bitbucket.org/squeaky/portable-pypy/downloads/pypy-{}-linux_x86_64-portable.tar.bz2'.format(tag))
-    run('cd /tmp && tar -xvzpf pypy-{}-linux_x86_64-portable.tar.bz2'.format(tag))
-    cd_path = '/tmp/pypy-{}-linux_x86_64-portable.tar.bz2'.format(tag)
+    py_pip('/usr/local/pypy-{0}-linux_x86_64-portable/bin/pypy'.format(version))
+    python_fix('/usr/local/lib/python/Versions/{}/bin/pypy'.format(version), force=True, replace='pypy')
+    pip_fix('/usr/local/pypy-{0}-linux_x86_64-portable/bin/pip'.format(version), force=True)
+    pip('supervisor', pip_path='/usr/local/pypy-{0}-linux_x86_64-portable/bin/pip'.format(version))
+    supervisor_fix('/usr/local/pypy-{0}-linux_x86_64-portable/bin'.format(version), force=True)
+
+    run('ln -snf /usr/local/pypy-{0}-linux_x86_64-portable /usr/local/pypy'.format(version))
+
+    pip('Sphinx')
 
     pass
 
 
-def py_pypy_disable(version='2.4.0'):
+def py_pypy_deprecated(version='2.4.0'):
     """
     install pypy and pypy tools
     only use to refer
@@ -175,20 +178,20 @@ def pip_uninstall(package):
         run('pip uninstall %s -y' % package)
 
 
-def pip_fix(file_path, force=False):
+def pip_fix(file_path, force=False, replace='pip'):
     if force:
-        run('ln -snf {} /usr/local/bin/pip'.format(file_path))
+        run('ln -snf {} /usr/local/bin/{}'.format(file_path, replace))
     else:
-        run('test -f /usr/local/bin/pip || ln -s {} /usr/local/bin/pip'.format(file_path))
+        run('test -f /usr/local/bin/{1} || ln -s {0} /usr/local/bin/{1}'.format(file_path, replace))
 
     pass
 
 
-def python_fix(file_path, force=False):
+def python_fix(file_path, force=False, replace='python'):
     if force:
-        run('ln -snf {} /usr/local/bin/python'.format(file_path))
+        run('ln -snf {} /usr/local/bin/{}'.format(file_path, replace))
     else:
-        run('test -f /usr/local/bin/python || ln -s {} /usr/local/bin/python'.format(file_path))
+        run('test -f /usr/local/bin/{1} || ln -s {0} /usr/local/bin/{1}'.format(file_path, replace))
 
     pass
 

@@ -88,8 +88,6 @@ def cmd_ulimit(limit=65535):
     os.remove(fh.name)
 
 
-
-
 def cmd_expanduser(user=None):
     '''
     get userpath prefix ~ from remote server. for example: ~webuser
@@ -175,7 +173,7 @@ def cmd_su(cmd, user=None):
         return run(cmd)
 
 
-def cmd_git(path=None, url=None, branch='master', tag=None, user=None):
+def cmd_git(path=None, url=None, branch='master', tag=None, user=None, ignore_perm=True):
     '''
     deploy source code by git
     :param path:
@@ -206,19 +204,19 @@ def cmd_git(path=None, url=None, branch='master', tag=None, user=None):
         if run("test -d %s" % path).failed:
             with cd(parent):
                 cmd_su('git clone {} -b {} {}'.format(url, branch, path), user)
+                cmd_su("cd {} && git config core.fileMode false".format(path), user)
 
     with cd(path):
         with settings(warn_only=True):
-            if cmd_su("cd %s && git checkout %s" % (path,branch), user).failed:
+            if cmd_su("cd %s && git checkout %s" % (path, branch), user).failed:
                 if tag:
                     cmd_su("cd %s && git checkout -- ." % path, user)
-                    cmd_su("cd %s && git checkout %s" % (path,branch), user)
+                    cmd_su("cd %s && git checkout %s" % (path, branch), user)
 
-
-        cmd_su("cd %s && git pull origin %s" % (path,branch), user)
-        cmd_su("cd %s && git pull origin %s --tags" % (path,branch), user)
+        cmd_su("cd %s && git pull origin %s" % (path, branch), user)
+        cmd_su("cd %s && git pull origin %s --tags" % (path, branch), user)
         if tag:
-            cmd_su("cd %s && git checkout %s" % (path,tag), user)
+            cmd_su("cd %s && git checkout %s" % (path, tag), user)
 
     pass
 
@@ -235,5 +233,10 @@ def cmd_ip(card='eth0'):
     return ip
 
 
-
+def yum_install(package_name, newer=None):
+    if newer:
+        run('yum  --enablerepo={}  install {} -y'.format(newer, package_name))
+    else:
+        run('yum install {} -y'.format(package_name))
+    pass
 

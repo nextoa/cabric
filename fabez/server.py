@@ -19,7 +19,7 @@ except:
     pass
 
 
-def server_nginx(user=None, worker_processes=16, worker_connections=512, old_user='nginx', error_log='/logs/nginx/error.log', access_log='/logs/nginx/access.log'):
+def server_nginx(user=None, worker_processes=1, worker_connections=512, old_user='nginx', error_log='/logs/nginx/error.log', access_log='/logs/nginx/access.log'):
     """
     Install Nginx
     :param user: user,default is nobody
@@ -55,7 +55,7 @@ def rm_server_nginx():
     pass
 
 
-def server_redis(card='eth0', size=None):
+def server_redis(card='eth0', size=None, newer='remi'):
     """
     Install redis server
     @todo support set unixsocket
@@ -63,10 +63,12 @@ def server_redis(card='eth0', size=None):
     @todo support change database numbers
     :return:
     """
+
     with settings(warn_only=True):
         run('mkdir -p /storage/redis')
 
-    run('yum install redis -y')
+    yum_install('redis', newer='remi')
+
     run('chown redis.redis /storage/redis')
     run('chkconfig --level 35 redis on')
 
@@ -151,7 +153,7 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
     # try:
     # buf = pkg_resources.resource_string('fabez', 'tpl/supervisord.boot')
     # except:
-    #     buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'supervisord.boot')).read()
+    # buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'supervisord.boot')).read()
     #     pass
     #
     # with tempfile.NamedTemporaryFile('w', delete=False) as fh:
@@ -165,7 +167,7 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
 
     with settings(warn_only=True):
         if run('cat /etc/rc.local | grep "/usr/local/bin/supervisord"').failed:
-            run('echo "/usr/local/bin/supervisord" >> /etc/rc.local')
+            run('echo "/usr/local/bin/supervisord -c  /etc/supervisord.conf " >> /etc/rc.local')
 
     with settings(warn_only=True):
         run('test -d /etc/supervisor.d || mkdir /etc/supervisor.d')
@@ -192,7 +194,7 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
     pass
 
 
-def server_websuite(user='webuser', python_version='3.4.2', pypy=True, pypy_version='2.4', compatible=False):
+def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy_version='2.4', compatible=False):
     run('yum install wget -y')
 
     cmd_useradd(user)
@@ -209,14 +211,18 @@ def server_websuite(user='webuser', python_version='3.4.2', pypy=True, pypy_vers
     io_slowlog('supervisor', user)
     server_supervisor()
 
-    if pypy:
+    if only_pypy:
         py_pypy(pypy_version)
+
     else:
-        py_python(python_version, compatible=False, pypy=pypy_version)
+        py_python(python_version, compatible=compatible, pypy=pypy_version)
+
 
     pip('tornadoez')
     pip('pyjwt')
-    pip('pillow')
+
+    utils_imagelib()
+    pip_c('pillow')
     pip('pymongo')
     pip('redis')
     pip('pymysql')
@@ -232,4 +238,8 @@ def server_mysql():
     run('chkconfig --level 35 mysqld on')
     pass
 
+
+def supervisor_restart():
+    run('killall supervisord')
+    run('`grep supervisor /etc/rc.local`')
 

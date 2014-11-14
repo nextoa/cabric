@@ -13,9 +13,7 @@ setup(
     license='http://opensource.org/licenses/MIT',
     install_requires=[
         'fabric',
-        'tornadoez',
-        'requests',
-        'github3.py',
+        'cliez'
     ],
     author='Breeze.Kay',
     author_email='wangwenpei@kbonez.com',
@@ -23,7 +21,7 @@ setup(
     keywords='fabric,fabez,ez',
     include_package_data=True,
     package_data={
-        'fabez': ['tpl/*.*']
+        'fabez': ['tpl/*.conf','tpl/*.py','tpl/*.repo']
     },
     entry_points={
         'console_scripts': [

@@ -3,6 +3,8 @@
 
 from fabric.api import *
 
+from fabez.env import *
+
 
 def config_nginx(local_name, remote_name=None):
     """
@@ -12,7 +14,10 @@ def config_nginx(local_name, remote_name=None):
     if remote_name is None:
         remote_name = local_name
 
-    put('./config/nginx/{}.conf /etc/nginx/conf.d/{}.conf'.format(local_name, remote_name))
+    if ez_env.group != 'ol':
+        local_name += '_' + ez_env.group
+
+    put('./config/nginx/{}.conf'.format(local_name), '/etc/nginx/conf.d/{}.conf'.format(remote_name))
 
 
 def config_supervisor(local_name, remote_name=None):
@@ -23,7 +28,10 @@ def config_supervisor(local_name, remote_name=None):
     if remote_name is None:
         remote_name = local_name
 
-    put('./config/supervisord/{}.ini /etc/supervisor.d/{}.ini'.format(local_name, remote_name))
+    if ez_env.group != 'ol':
+        local_name += '_' + ez_env.group
+
+    put('./config/supervisord/{}.ini'.format(local_name), '/etc/supervisor.d/{}.ini'.format(remote_name))
 
 
 

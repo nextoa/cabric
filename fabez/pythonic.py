@@ -10,7 +10,7 @@ from fabez.cmd import (cmd_git)
 
 # @note if name start py, this is install tools
 
-def py_python(tag='3.4.2', force=True, compatible=True,pypy='2.4'):
+def py_python(tag='3.4.2', force=True, compatible=True, pypy='2.4'):
     '''
     install python. include python,setuptools,pip and supervisord
     :param pip_index_url:proxy url
@@ -36,14 +36,15 @@ def py_python(tag='3.4.2', force=True, compatible=True,pypy='2.4'):
             py_pypy(pypy)
         else:
             pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag), force=force)
+            pip('Sphinx', pip_path='/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag))
+
     else:
         py_pip('/usr/local/lib/python/Versions/{}/bin/python'.format(tag))
         python_fix('/usr/local/lib/python/Versions/{}/bin/python'.format(tag), force=force)
         pip_fix('/usr/local/lib/python/Versions/{}/bin/pip'.format(tag), force=force)
         pip('supervisor', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
         supervisor_fix('/usr/local/lib/python/Versions/{}/bin'.format(tag))
-
-    pip('Sphinx', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
+        pip('Sphinx', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
 
     if force:
         python_bin_path('/usr/local/lib/python/Versions/{}/bin'.format(tag))
@@ -71,7 +72,7 @@ def rm_python():
 
 
 def py_pypy(version='2.4', server='https://github.com/nextoa/portable-pypy-arch/blob/master'):
-    run('wget {1}/pypy-{0}-linux_x86_64-portable.tar.bz2?raw=true -O /tmp/pypy-{0}-linux_x86_64-portable.tar.bz2'.format(version,server))
+    run('wget {1}/pypy-{0}-linux_x86_64-portable.tar.bz2?raw=true -O /tmp/pypy-{0}-linux_x86_64-portable.tar.bz2'.format(version, server))
 
     run('cd /tmp && tar -xvjpf pypy-{}-linux_x86_64-portable.tar.bz2'.format(version))
     run('rsync -r /tmp/pypy-{0}-linux_x86_64-portable/ /usr/local/pypy-{0}-linux_x86_64-portable'.format(version))
@@ -134,12 +135,12 @@ def py_setup_py(code_dir=None, python='pypy'):
         run('%s setup.py install' % python)
 
 
-def py_pip(python='/usr/bin/pypy'):
+def py_pip(python='/usr/local/bin/pypy'):
     """
     install pip package
     :return:
     """
-    run('curl -sS https://gist.githubusercontent.com/9nix00/d70733d0728ce05cf6ed/raw/get-pip.py | %s ' % python)
+    run('curl -sS https://raw.githubusercontent.com/nextoa/get-pip/master/get-pip.py | %s ' % python)
     pass
 
 
@@ -162,10 +163,32 @@ def pip(package=None, upgrade=True, pip_path=None):
         pip_path = 'pip'
 
     if package:
+
+        if package.lower() in ['pillow']:
+            return pip_c(package, upgrade=upgrade, pip_path=pip_path)
+
         if upgrade:
             run('%s install %s --upgrade' % (pip_path, package))
         else:
             run('%s install %s' % (pip_path, package))
+
+
+def pip_c(pkg_name, upgrade=True, pip_path='pip'):
+    """
+    some package need c include
+    :param pkg_name:
+    :return:
+    """
+
+    pip_path = run('readlink -f `which {}`'.format(pip_path))
+    python_dir = pip_path.rsplit('/', 2)[0]
+
+    if upgrade:
+        run('export C_INCLUDE_PATH={0}/include && export CPLUS_INCLUDE_PATH={0}/include && {1} install {2} -U && echo "C_INCLUDE_PATH is:" $C_INCLUDE_PATH'.format(python_dir, pip_path, pkg_name))
+    else:
+        run('export C_INCLUDE_PATH={0}/include && export CPLUS_INCLUDE_PATH={0}/include && {1} install {2} && echo "C_INCLUDE_PATH is:" $C_INCLUDE_PATH'.format(python_dir, pip_path, pkg_name))
+
+    pass
 
 
 def pip_uninstall(package):

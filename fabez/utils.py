@@ -3,7 +3,7 @@
 from fabric.api import *
 
 
-def utils_git(proxy=None):
+def utils_git(proxy=None,ignore_perm=True):
     '''
     Install git
     :param proxy:proxy server
@@ -13,6 +13,9 @@ def utils_git(proxy=None):
 
     if proxy:
         run('git config --global http.proxy {}'.format(proxy))
+
+    if ignore_perm:
+        run('git config --global core.fileMode false')
 
     pass
 
@@ -43,6 +46,10 @@ def utils_baselib():
 
 
 
+def utils_imagelib():
+    run('yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel  lcms2-devel libwebp-devel tcl-devel tk-devel -y')
+    pass
+
 
 
 def utils_epel():
@@ -56,6 +63,18 @@ def utils_epel():
 
 
 
+def utils_remi():
+    """
+    install epel lib
+    :return:
+    """
+    with settings(warn_only=True):
+        run('rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm')
+    pass
+
+
+
+
 def utils_hg(proxy=None):
     '''
     Install Mercurial
@@ -65,4 +84,6 @@ def utils_hg(proxy=None):
     run('yum install mercurial -y')
 
     pass
+
+
 

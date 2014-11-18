@@ -167,6 +167,10 @@ def pip(package=None, upgrade=True, pip_path=None):
         if package.lower() in ['pillow']:
             return pip_c(package, upgrade=upgrade, pip_path=pip_path)
 
+        if package.lower() in ['lxml']:
+            yum_install('libxslt-devel libxml2-devel')
+
+
         if upgrade:
             run('%s install %s --upgrade' % (pip_path, package))
         else:

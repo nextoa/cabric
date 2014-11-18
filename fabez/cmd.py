@@ -213,6 +213,8 @@ def cmd_git(path=None, url=None, branch='master', tag=None, user=None, ignore_pe
                     cmd_su("cd %s && git checkout -- ." % path, user)
                     cmd_su("cd %s && git checkout %s" % (path, branch), user)
 
+
+        cmd_su("cd %s && git config core.fileMode false" % (path), user)
         cmd_su("cd %s && git pull origin %s" % (path, branch), user)
         cmd_su("cd %s && git pull origin %s --tags" % (path, branch), user)
         if tag:

@@ -20,7 +20,7 @@ def io_tmpfs(path,boot=True,size=8,uid='root',gid='root',mode='777'):
 
     if boot is True:
         with settings(warn_only=True):
-            run('mkdir %s' % path)
+            run('mkdir -p %s' % path)
             run('grep "%s" /etc/fstab && sed -i -e "s/%s.*//g" /etc/fstab' % (match, '\/'.join(match.split('/'))))
         run('grep "%s" /etc/fstab || echo "%s" >> /etc/fstab ' % (match, replace))
 
@@ -117,6 +117,32 @@ def io_slowlog(path,user=None):
 
 def rm_io_slowlog(path):
     return rm_io_disk(path)
+
+
+def io_aircache(path,size=1):
+    """
+    create air cache
+    :return:
+    """
+
+    real_path = '/aircache/%s' % path
+    return io_tmpfs(real_path,size=size)
+
+
+def io_aircache(path, size=1):
+    """
+    create air cache
+    :return:
+    """
+
+    real_path = '/aircache/%s' % path
+    return io_tmpfs(real_path, size=size)
+
+
+def rm_io_aircache(path):
+    return rm_io_tmpfs(path)
+
+
 
 
 

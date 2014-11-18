@@ -42,8 +42,8 @@ def py_python(tag='3.4.2', force=True, compatible=True, pypy='2.4'):
         py_pip('/usr/local/lib/python/Versions/{}/bin/python'.format(tag))
         python_fix('/usr/local/lib/python/Versions/{}/bin/python'.format(tag), force=force)
         pip_fix('/usr/local/lib/python/Versions/{}/bin/pip'.format(tag), force=force)
-        pip('supervisor', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
-        supervisor_fix('/usr/local/lib/python/Versions/{}/bin'.format(tag))
+        # pip('supervisor', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
+        # supervisor_fix('/usr/local/lib/python/Versions/{}/bin'.format(tag))
         pip('Sphinx', pip_path='/usr/local/lib/python/Versions/{}/bin/pip'.format(tag))
 
     if force:
@@ -64,7 +64,7 @@ def rm_python():
         run('rm -rf /usr/local/bin/pip*')
         run('rm -rf /usr/local/bin/python*')
         run('rm -rf /usr/local/*/python*')
-        run('rm -rf /usr/local/etc/supervisor*')
+        # run('rm -rf /usr/local/etc/supervisor*')
         run('rm -rf /tmp/python')
         run('rm -rf /tmp/pip')
         run('rm -rf /tmp/setuptools')
@@ -80,8 +80,8 @@ def py_pypy(version='2.4', server='https://github.com/nextoa/portable-pypy-arch/
     py_pip('/usr/local/pypy-{0}-linux_x86_64-portable/bin/pypy'.format(version))
     python_fix('/usr/local/lib/python/Versions/{}/bin/pypy'.format(version), force=True, replace='pypy')
     pip_fix('/usr/local/pypy-{0}-linux_x86_64-portable/bin/pip'.format(version), force=True)
-    pip('supervisor', pip_path='/usr/local/pypy-{0}-linux_x86_64-portable/bin/pip'.format(version))
-    supervisor_fix('/usr/local/pypy-{0}-linux_x86_64-portable/bin'.format(version), force=True)
+    # pip('supervisor', pip_path='/usr/local/pypy-{0}-linux_x86_64-portable/bin/pip'.format(version))
+    # supervisor_fix('/usr/local/pypy-{0}-linux_x86_64-portable/bin'.format(version), force=True)
 
     run('ln -snf /usr/local/pypy-{0}-linux_x86_64-portable /usr/local/pypy'.format(version))
 

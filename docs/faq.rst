@@ -107,28 +107,6 @@ demo::
         * 文件后缀必须为*.conf
         * 文件需要放置在 [fabfile root]/config/nginx|monit/ 目录下
 
-    举例::
-
-    ├── config
-    │   ├── fabez
-    │   │   ├── _beta.conf
-    │   │   ├── _db.conf
-    │   │   ├── _mongodb.conf
-    │   │   ├── _online.conf
-    │   │   ├── _redis.conf
-    │   │   ├── _remote.conf
-    │   │   ├── _test.conf
-    │   │   └── crawler.conf
-    │   ├── github.cfg
-    │   ├── monit
-    │   │   ├── pupils.conf
-    │   │   └── pupils_beta.conf
-    │   └── nginx
-    │       ├── pupils.conf
-    │       ├── pupils_beta.conf
-    │       ├── pupils_lgaa.conf
-    │       └── pupils_test.conf
-
 
 
 

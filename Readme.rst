@@ -1,5 +1,8 @@
-Tara
+Cabric
 ==================
+A deploy tool for Centos, base on Fabric.
+
+
 
 
 Release Note

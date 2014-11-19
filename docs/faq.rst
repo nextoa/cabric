@@ -5,8 +5,69 @@ FAQ [Chinese Version]
 鉴于目前的小伙伴提问的零碎问题太多，整理至此，供查询。
 
 
+
+目标与限制
+--------------------------
+* 针对centos系统
+* 目前暂不考虑PHP的自动化部署需求
+* 使用cabric安装的包会覆盖原有的配置，建议在新机器上安装
+
+
+
+
+安装篇
+--------------------------
+
+
+安装web套件
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+目前我们的安装套件，为 Tengine+tornado，快速安装::
+
+    server_websuite()  #安装pypy版本
+
+    server_websuite(only_pypy=False,complicate=False)  #安装python3版本
+
+    server_websuite(only_pypy=False,complicate=True)  #安装python3+pypy版本
+
+
+技术细节：
+
+    * 部署webuser用户
+    * 构造web目录 /webdata
+    * 构造log目录 /logs/tornado
+    * 安装tengine tornado python|pypy monit
+
+
+
+
+安装redis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+demo::
+
+    utils_remi()
+    server_redis(card='eth0')       #绑定eth0网卡
+
+
+
+更多
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+文档撰写中…… 写文档很辛苦有木有
+
+
+
+
+
+
+配置篇
+--------------------------
+
+
 如何用monit启动tornado
----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 配置::
 
@@ -29,11 +90,23 @@ FAQ [Chinese Version]
 
 
 
+
 如何上传配置
----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-* Nginx（Tengine）和 monit配置，建议使用config_*()上传，参考etc.py
+* Nginx（Tengine）和 monit配置，建议使用config_*()上传，参考 etc.py
+
+    注意事项：
+        * 除online环境之外，其他需要加后缀，如果上传名称为project
+            * ol环境  实际上传为project
+            * test环境 实际上传为project_test
+            * dev环境 实际上传为project_test
+
+
+        * 文件后缀必须为*.conf
+        * 文件需要放置在 [fabfile root]/config/nginx|monit/ 目录下
+
 
 * 其他的自行使用run命令上传
 

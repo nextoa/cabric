@@ -107,8 +107,7 @@ demo::
         * 文件后缀必须为*.conf
         * 文件需要放置在 [fabfile root]/config/nginx|monit/ 目录下
 
-    举例：
-..
+    举例::
 
     ├── config
     │   ├── fabez

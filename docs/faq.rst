@@ -95,7 +95,7 @@ demo::
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-* Nginx（Tengine）和 monit配置，建议使用config_*()上传，参考 etc.py
+* Nginx（Tengine）和 monit配置，建议使用config_*()上传，比如：config_monit('project')，具体参考 etc.py
 
     注意事项：
         * 除online环境之外，其他需要加后缀，如果上传名称为project

@@ -51,6 +51,11 @@ def utils_imagelib():
     pass
 
 
+def utils_disktools():
+    run('yum install parted xfsprogs kmod-xfs -y')
+    pass
+
+
 
 def utils_epel():
     """

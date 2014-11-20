@@ -2,5 +2,5 @@
 
 
 
-version = '0.8.17'
-version_info = (0, 8, 17)
+version = '0.8.18'
+version_info = (0, 8, 18)

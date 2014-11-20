@@ -115,3 +115,50 @@ demo::
 
 
 
+如何自动挂载云服务商分配到的新硬盘
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+目前使用xfs文件格式，其他模式，有时间再开发
+
+demo::
+
+    def init_large_disk():
+        utils_disktools()
+
+        io_big_disk('/dev/sdb')
+        io_format_disk('/dev/sdb1')
+        io_mount_disk('/dev/sdb1', '/mnt/storage')
+
+    pass
+
+
+
+
+如何为硬盘扩容
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+*resize脚本待验证，考虑到成本问题等真实扩容时在做，因为硬盘一旦扩容不能再缩小*
+
+按照目前主流厂商的操作，目前大多数不支持不卸载扩容。
+针对这一场景，你需要做如下操作
+
+
+* 卸载硬盘::
+
+    def umount_large_disk():
+        io_umount_disk('/mnt/storage')
+        pass
+
+
+* 在云平台中调整硬盘的大小
+
+
+* 执行remount操作::
+
+    def resize_large_disk():
+        print("请先确认硬盘已经被扩容")
+        io_mount_disk('/dev/sdb1', '/mnt/storage')
+    pass
+
+
+

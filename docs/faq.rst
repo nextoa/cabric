@@ -8,8 +8,7 @@ FAQ [Chinese Version]
 
 目标与限制
 --------------------------
-* 针对centos系统
-* 目前暂不考虑PHP的自动化部署需求
+* 只针对centos系统做优化
 * 使用cabric安装的包会覆盖原有的配置，建议在新机器上安装
 
 
@@ -56,6 +55,20 @@ demo::
 安装mongodb
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 demo::
+
+    service_mongo(card='eth0')
+
+
+
+
+安装php
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+demo::
+
+    server_phpd(user)
+
+
+
 
 
 更多
@@ -154,6 +167,9 @@ demo::
         io_mount_disk('/dev/sdb1', '/mnt/storage')
 
     pass
+
+
+
 
 
 

@@ -2,6 +2,9 @@ Cabric
 ==================
 A deploy tool for Centos, base on Fabric.
 
+FAQ
+----------------------------
+`Chinese Version <https://github.com/nextoa/cabric/blob/master/docs/faq.rst>`_
 
 
 Release Note

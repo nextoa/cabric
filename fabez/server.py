@@ -28,6 +28,8 @@ def server_nginx(user=None, worker_processes=1, worker_connections=512, old_user
     :return:None
     """
 
+    cmd_ulimit()
+
     run('yum install nginx -y')
 
     run('chkconfig --level 35 nginx on')
@@ -63,6 +65,9 @@ def server_redis(card='eth0', size=None, newer='remi'):
     @todo support change database numbers
     :return:
     """
+    cmd_ulimit()
+
+    io_slowlog('redis', 'redis')
 
     with settings(warn_only=True):
         run('mkdir -p /storage/redis')
@@ -88,6 +93,7 @@ def rm_server_redis(clean=False):
     :param clean:
     :return:
     """
+
     run('yum earse redis -y')
 
     if clean is True:
@@ -101,6 +107,13 @@ def server_mongo(card='lo'):
     @note this mongo only support 64-bit system
     :return:
     """
+    cmd_ulimit()
+
+    io_slowlog('mongo', 'mongod')
+
+    with settings(warn_only=True):
+        run('mkdir -p /storage/mongo')
+
 
     try:
         buf = pkg_resources.resource_string('fabez', 'tpl/mongodb.repo')
@@ -235,6 +248,9 @@ def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy
 
 
 def server_mysql():
+
+    cmd_ulimit()
+
     with settings(warn_only=True):
         run('rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm')
 
@@ -338,7 +354,53 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
 
                     ' --with-http_footer_filter_module=shared'.format(user))
 
+            else:
+                run('./configure --prefix=/usr/local --user={0} --group={0} --conf-path=/etc/nginx  --sbin-path=/usr/local/sbin '
+                    ' --without-http_uwsgi_module --without-http_scgi_module --without-http_memcached_module --without-http_autoindex_module '
+                    ' --without-http_auth_basic_module'
+                    ' --with-http_spdy_module'
+                    ' --with-jemalloc --with-http_spdy_module'
+                    ' --with-http_realip_module'
+                    ' --with-http_concat_module '
 
+                    # dir path
+                    '--pid-path=/usr/local/var/run/nginx.pid --lock-path=/usr/local/var/lock/nginx '
+
+                    #file path
+                    ' --http-client-body-temp-path=/aircache/nginx/body_temp'
+                    ' --http-proxy-temp-path=/aircache/nginx/proxy_temp'
+                    ' --error-log-path=/logs/nginx/error.log --http-log-path=/logs/nginx/access.log'
+                    ' --with-syslog'
+                    # ' --with-http_reqstat_module'
+                    ' --with-http_stub_status_module'
+                    ' --with-http_geoip_module'
+
+                    ' --with-http_gzip_static_module'
+                    ' --with-http_ssl_module'
+                    ' --with-pcre'
+                    ' --with-file-aio'
+
+                    # ' --with-http_upstream_keepalive_module'
+
+                    ' --with-http_ssl_module '
+                    ' --with-http_footer_filter_module=shared'
+                    ' --with-http_sysguard_module=shared'
+                    ' --with-http_addition_module=shared'
+                    # ' --with-http_xslt_module=shared'
+                    # ' --with-http_image_filter_module=shared'
+                    # ' --with-http_rewrite_module=shared '
+                    ' --with-http_sub_module=shared'
+                    ' --with-http_flv_module=shared'
+                    ' --with-http_slice_module=shared'
+                    ' --with-http_mp4_module=shared'
+                    ' --with-http_random_index_module=shared'
+                    ' --with-http_secure_link_module=shared'
+                    ' --with-http_sysguard_module=shared'
+                    ' --with-http_charset_filter_module=shared'
+                    ' --with-http_userid_filter_module=shared'
+
+
+                    ' --with-http_footer_filter_module=shared'.format(user))
 
 
             run('make')
@@ -421,6 +483,36 @@ def server_monit(version='5.5-1'):
         run('rpm -Uvh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
     run('chkconfig --level 35 monit on')
     pass
+
+
+
+
+def server_phpd(user='webuser'):
+    """
+    install php
+    :return:
+    """
+    utils_baselib()
+    utils_remi()
+    cmd_useradd(user)
+    cmd_ulimit()
+    utils_git()
+    io_webdata(uid=user, gid=user)
+    io_slowlog('nginx', user)
+    io_slowlog('php-fpm', user)
+    server_tengine(user=user,tornado=False)
+
+    yum_install('php', newer='remi')
+    yum_install('php-fpm', newer='remi')
+    yum_install('php-redis', newer='remi')
+    yum_install('php-pecl-yaf', newer='remi')
+    yum_install('php-pecl-mongo', newer='remi')
+    yum_install('php-pecl-zendopcache', newer='remi')
+
+    run('chkconfig --level 35 php-fpm on')
+    pass
+
+
 
 
 # restart feature

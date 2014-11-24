@@ -19,6 +19,7 @@ FAQ [Chinese Version]
 --------------------------
 
 
+
 安装web套件
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -50,6 +51,11 @@ demo::
     utils_remi()
     server_redis(card='eth0')       #绑定eth0网卡
 
+
+
+安装mongodb
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+demo::
 
 
 更多
@@ -108,9 +114,27 @@ demo::
         * 文件需要放置在 [fabfile root]/config/nginx|monit/ 目录下
 
 
-
-
 * 其他的自行使用run命令上传
+
+
+
+
+如何动态配置mongodb
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+首先，config目录中需要存在 config/mongo/mongod.conf
+配置文件中，bind_ip={}
+
+demo::
+
+    from fabez.cmd import cmd_ip
+    ....
+
+
+    config_mongo('mongod', *[cmd_ip('eth0')])
+
+
+
+
 
 
 

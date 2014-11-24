@@ -161,7 +161,7 @@ def _valid_partition(partition):
     pass
 
 
-def io_big_disk(device, label='gpt', rebuild=False):
+def io_large_disk(device, label='gpt', rebuild=False):
     """
     force limit 1 partition
     :param device:

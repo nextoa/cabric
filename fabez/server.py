@@ -505,9 +505,11 @@ def server_phpd(user='webuser'):
     yum_install('php', newer='remi')
     yum_install('php-fpm', newer='remi')
     yum_install('php-redis', newer='remi')
+    yum_install('php-mysql', newer='remi')
     yum_install('php-pecl-yaf', newer='remi')
     yum_install('php-pecl-mongo', newer='remi')
     yum_install('php-pecl-zendopcache', newer='remi')
+
 
     run('chkconfig --level 35 php-fpm on')
     pass

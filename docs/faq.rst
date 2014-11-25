@@ -42,13 +42,6 @@ FAQ [Chinese Version]
 
 
 
-PHP
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-..highlight:: php
-
-    echo('hello world');
-
 
 
 安装redis

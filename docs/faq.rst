@@ -45,7 +45,7 @@ FAQ [Chinese Version]
 PHP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-demo:: php
+..highlight:: php
 
     echo('hello world');
 

@@ -519,22 +519,58 @@ def server_phpd(user='webuser'):
 
 
 
-def server_smtp():
-    utils_remi()
-    cmd_ulimit()
-    yum_install('sendmail', newer="remi")
+# def server_smtp():
+#     utils_remi()
+#     cmd_ulimit()
+#
+#     yum_install('sendmail', newer="remi")
+#
+#     run('chkconfig --level 35 sendmail on')
+#
+#     with settings(warn_only=True):
+#         run("sed -i -e \"s/^DAEMON_OPTIONS.*dnl/DAEMON_OPTIONS(\\\`Port=smtp,Name=MTA\')dnl/g\" /etc/mail/sendmail.mc")
+#
+#
+# # yum install postfix dovecot
+# # yum remove sendmail
+#
+#
+#     pass
 
-    run('chkconfig --level 35 sendmail on')
 
-    with settings(warn_only=True):
-        run("sed -i -e \"s/^DAEMON_OPTIONS.*dnl/DAEMON_OPTIONS(\\\`Port=smtp,Name=MTA\')dnl/g\" /etc/mail/sendmail.mc")
+def server_smtp(host,domain,networks):
+    # utils_remi()
+    # cmd_ulimit()
+
+    # yum_install('postfix', newer="remi")
+    # run('yum remove sendmail -y')
 
 
-# yum install postfix dovecot
-# yum remove sendmail
 
+    try:
+        template = pkg_resources.resource_string('fabez', 'tpl/postfix.cf')
+    except:
+        template = open(os.path.join(os.path.dirname(__file__), 'tpl','postfix.cf')).read()
+        pass
+
+    buf = template.replace('{$myhostname}', host) \
+        .replace('{$mydomain}', domain) \
+        .replace('{$mynetworks}', networks) \
+
+
+    # only support python2.x
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buf
+
+    put(fh.name, '/etc/postfix/main.cf')
+    os.remove(fh.name)
+
+    run('chkconfig --level 35 postfix on')
 
     pass
+
+
+
 
 
 

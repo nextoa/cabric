@@ -65,12 +65,15 @@ def server_redis(card='eth0', size=None, newer='remi'):
     @todo support change database numbers
     :return:
     """
-    cmd_ulimit()
 
-    io_slowlog('redis', 'redis')
+    utils_remi()
+    cmd_ulimit()
 
     with settings(warn_only=True):
         run('mkdir -p /storage/redis')
+        run('useradd redis -r -s /sbin/nologin')
+
+    io_slowlog('redis', 'redis')
 
     yum_install('redis', newer='remi')
 
@@ -512,6 +515,25 @@ def server_phpd(user='webuser'):
 
 
     run('chkconfig --level 35 php-fpm on')
+    pass
+
+
+
+def server_smtp():
+    utils_remi()
+    cmd_ulimit()
+    yum_install('sendmail', newer="remi")
+
+    run('chkconfig --level 35 sendmail on')
+
+    with settings(warn_only=True):
+        run("sed -i -e \"s/^DAEMON_OPTIONS.*dnl/DAEMON_OPTIONS(\\\`Port=smtp,Name=MTA\')dnl/g\" /etc/mail/sendmail.mc")
+
+
+# yum install postfix dovecot
+# yum remove sendmail
+
+
     pass
 
 

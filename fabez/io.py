@@ -62,7 +62,7 @@ def io_disk(real_path, uid=None, gid=None, mode='777'):
     if uid is None:
         run('chmod {} -Rf {}'.format(mode, real_path))
     else:
-        run('chown -Rf {}.{} {} '.format(uid, gid, real_path))
+        run('chown -Rf {}:{} {} '.format(uid, gid, real_path))
         run('chmod 700 -Rf {}'.format(real_path))
 
     pass

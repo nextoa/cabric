@@ -4,7 +4,7 @@ A deploy tool for Centos, base on Fabric.
 
 FAQ
 ----------------------------
-`Chinese Version <https://github.com/nextoa/cabric/blob/master/docs/faq.rst>`_
+`Chinese Version <https://github.com/baixing/cabric/blob/master/docs/faq.rst>`_
 
 
 Release Note
@@ -12,7 +12,8 @@ Release Note
 
 
 * 0.8.x
-    * support deploy php
+    * support smtp server
+    * support php
     * support more config type
     * improve install python lxml
     * support tengine

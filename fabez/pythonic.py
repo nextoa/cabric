@@ -5,7 +5,7 @@
 import os
 from fabric.api import *
 from fabez.utils import (utils_baselib)
-from fabez.cmd import (cmd_git)
+from fabez.cmd import (cmd_git, yum_install)
 
 
 # @note if name start py, this is install tools
@@ -169,7 +169,6 @@ def pip(package=None, upgrade=True, pip_path=None):
 
         if package.lower() in ['lxml']:
             yum_install('libxslt-devel libxml2-devel')
-
 
         if upgrade:
             run('%s install %s --upgrade' % (pip_path, package))

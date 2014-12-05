@@ -4,6 +4,11 @@ from fabric.api import *
 from fabez.env import *
 from fabez.cmd import *
 from fabez.server import *
+from fabez.api import *
+
+
+
+
 
 import os
 

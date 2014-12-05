@@ -56,3 +56,6 @@ resources
 wwwroot/static/icons
 __pycache__
 trash/*.py
+sketch
+
+config/cabric

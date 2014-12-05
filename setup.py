@@ -10,8 +10,8 @@ setup(
     name='fabez',
     version=fabez.version,
     packages=['fabez'],
-    url='https://github.com/kbonez/fabez',
-    download_url='https://github.com/kbonez/fabez/tarball/master',
+    url='https://github.com/baixing/cabric',
+    download_url='https://github.com/baixing/cabric/tarball/master',
     license='http://opensource.org/licenses/MIT',
     install_requires=[
         'fabric',
@@ -19,9 +19,9 @@ setup(
         'qingcloud-sdk'
     ],
     author='Breeze.Kay',
-    author_email='wangwenpei@kbonez.com',
-    description='fabric helper tools',
-    keywords='fabric,fabez,ez',
+    author_email='wangwenpei@nextoa.com',
+    description='A deploy tool for CentOS, based on fabric.',
+    keywords='fabric,fabez,cabric',
     package_data={
         'fabez': ['tpl/*.*']
     },

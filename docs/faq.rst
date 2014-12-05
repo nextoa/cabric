@@ -204,3 +204,31 @@ demo::
 
 
 
+
+通知篇
+--------------------------
+
+
+
+如何发起release通知
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+cabric集成了自动发送上线通知的功能，要使用本功能，需要满足如下条件:
+
+* 需要使用git管理本地安装库
+* 安装msmtp
+* fabfile目录配置 ./config/cabric/release-note.conf::
+    [mail]
+        title:邮件标题
+        to:mail@example.com
+        hello:Dear All
+        current:Current Release
+        plan:Planing Feature
+        sign:Thanks
+
+
+
+
+执行 fab release_note:[发送邮箱]
+
+

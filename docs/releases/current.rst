@@ -1,4 +1,4 @@
-* (HEAD, baixing/master, master) support send release-note use mail
+* (baixing/master) support send release-note use mail
 * fix yum_install missing bug
 * drop private file
 * add postfix feature and prepare for cloud

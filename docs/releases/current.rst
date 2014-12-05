@@ -1,16 +1,11 @@
-* (baixing/master) support send release-note use mail
-* fix yum_install missing bug
-* drop private file
 * add postfix feature and prepare for cloud
-* add postfix feature and prepare for cloud
-* move to baixing repo
-* more feature
-* add auto mount large disk feature
-* 更新faq
-* 更新faq
-* 更新faq
-* 更新faq
 * change project name again...
-* improve python lxml
 * add license
+* move to baixing repo
+* fix yum_install missing bug
 * fix file miss bug
+* drop private file
+* add auto mount large disk feature
+* improve python lxml
+* more feature
+* 更新faq

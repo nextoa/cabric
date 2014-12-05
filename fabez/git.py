@@ -63,6 +63,8 @@ def git_pick_release_log(limit=1000):
         'Merge pull',
         '(origin/dev',
         '(origin/beta',
+        '(baixing/',
+        '(upstream/',
 
     ]
 
@@ -86,7 +88,7 @@ def git_pick_release_log(limit=1000):
 
         pass
 
-    return rtn
+    return set(rtn)
 
 
 def git_release_mail(conf, curr_buff, next_buff, to=None):

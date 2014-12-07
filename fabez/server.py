@@ -135,6 +135,8 @@ def server_mongo(card='lo',user='webuser'):
     io_slowlog('mongo', 'mongod')
     with settings(warn_only=True):
         run('mkdir -p /storage/mongo')
+        run('chown -Rf mongod.mongod /storage/mongo')
+
 
     pass
 

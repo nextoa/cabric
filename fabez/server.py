@@ -105,18 +105,12 @@ def rm_server_redis(clean=False):
     pass
 
 
-def server_mongo(card='lo'):
+def server_mongo(card='lo',user='webuser'):
     """
     @note this mongo only support 64-bit system
     :return:
     """
     cmd_ulimit()
-
-    io_slowlog('mongo', 'mongod')
-
-    with settings(warn_only=True):
-        run('mkdir -p /storage/mongo')
-
 
     try:
         buf = pkg_resources.resource_string('fabez', 'tpl/mongodb.repo')
@@ -137,6 +131,11 @@ def server_mongo(card='lo'):
         run('sed -i -e "s/\(bind_ip\s*=\s*\)[0-9\.]*/\\1%s/g" /etc/mongod.conf' % ip)
 
     run('chkconfig --level 35 mongod on')
+
+    io_slowlog('mongo', 'mongod')
+    with settings(warn_only=True):
+        run('mkdir -p /storage/mongo')
+
     pass
 
 

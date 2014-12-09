@@ -105,6 +105,14 @@ def rm_server_redis(clean=False):
     pass
 
 
+def server_nscd():
+
+    yum_install('nscd')
+    run('chkconfig --level 35 nscd on')
+    run('service nscd start')
+    pass
+
+
 def server_mongo(card='lo',user='webuser'):
     """
     @note this mongo only support 64-bit system

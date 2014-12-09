@@ -199,7 +199,8 @@ demo::
 
     def resize_large_disk():
         print("请先确认硬盘已经被扩容")
-        io_mount_disk('/dev/sdb1', '/mnt/storage')
+        #io_mount_disk('/dev/sdb1', '/mnt/storage')  #可以尝试不使用此行来扩容试试看
+        io_resize_disk('/mnt/storage')
     pass
 
 

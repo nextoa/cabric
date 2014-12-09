@@ -184,6 +184,19 @@ def io_large_disk(device, label='gpt', rebuild=False):
     pass
 
 
+
+
+def io_resize_disk(mount_path,disk_type='xfs'):
+    if disk_type == 'xfs':
+        run('xfs_growfs {}'.format(mount_path))
+        pass
+    else:
+        raise Exception("no support disk type")
+
+    pass
+
+
+
 def io_format_disk(partition, fs_type='xfs',force=True):
     """
     :param device:

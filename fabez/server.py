@@ -106,14 +106,13 @@ def rm_server_redis(clean=False):
 
 
 def server_nscd():
-
     yum_install('nscd')
     run('chkconfig --level 35 nscd on')
     run('service nscd start')
     pass
 
 
-def server_mongo(card='lo',user='webuser'):
+def server_mongo(card='lo', user='webuser'):
     """
     @note this mongo only support 64-bit system
     :return:
@@ -144,7 +143,6 @@ def server_mongo(card='lo',user='webuser'):
     with settings(warn_only=True):
         run('mkdir -p /storage/mongo')
         run('chown -Rf mongod.mongod /storage/mongo')
-
 
     pass
 
@@ -182,7 +180,7 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
     # pass
     #
     # with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-    #     print>> fh, buf
+    # print>> fh, buf
     #
     # put(fh.name, '/etc/init.d/supervisord')
     # os.remove(fh.name)
@@ -222,6 +220,7 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
 def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy_version='2.4', compatible=False):
     run('yum install wget -y')
 
+    server_nscd()
     cmd_useradd(user)
     cmd_ulimit()
     utils_epel()
@@ -260,7 +259,6 @@ def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy
 
 
 def server_mysql():
-
     cmd_ulimit()
 
     with settings(warn_only=True):
@@ -289,8 +287,6 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
     :param tornado:
     :return:
     """
-
-
 
     utils_baselib()
     run('yum install jemalloc jemalloc-devel  -y')
@@ -330,7 +326,7 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
                     # dir path
                     '--pid-path=/usr/local/var/run/nginx.pid --lock-path=/usr/local/var/lock/nginx '
 
-                    #file path
+                    # file path
                     ' --http-client-body-temp-path=/aircache/nginx/body_temp'
                     ' --http-proxy-temp-path=/aircache/nginx/proxy_temp'
                     ' --error-log-path=/logs/nginx/error.log --http-log-path=/logs/nginx/access.log'
@@ -378,7 +374,7 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
                     # dir path
                     '--pid-path=/usr/local/var/run/nginx.pid --lock-path=/usr/local/var/lock/nginx '
 
-                    #file path
+                    # file path
                     ' --http-client-body-temp-path=/aircache/nginx/body_temp'
                     ' --http-proxy-temp-path=/aircache/nginx/proxy_temp'
                     ' --error-log-path=/logs/nginx/error.log --http-log-path=/logs/nginx/access.log'
@@ -413,7 +409,6 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
 
 
                     ' --with-http_footer_filter_module=shared'.format(user))
-
 
             run('make')
 
@@ -479,15 +474,11 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
     pass
 
 
-
-
-
 def server_monit(version='5.5-1'):
-
     # 5.5.1-41
     # run('yum install monit -y')
     # with settings(warn_only=True):
-    #     run('for i in `rpm -ql monit`;do rm -rf $i; done;')
+    # run('for i in `rpm -ql monit`;do rm -rf $i; done;')
     #     run('rpm -e `rpm -qa | grep -i monit`')
 
     with settings(warn_only=True):
@@ -495,8 +486,6 @@ def server_monit(version='5.5-1'):
         run('rpm -Uvh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
     run('chkconfig --level 35 monit on')
     pass
-
-
 
 
 def server_phpd(user='webuser'):
@@ -512,7 +501,8 @@ def server_phpd(user='webuser'):
     io_webdata(uid=user, gid=user)
     io_slowlog('nginx', user)
     io_slowlog('php-fpm', user)
-    server_tengine(user=user,tornado=False)
+    server_tengine(user=user, tornado=False)
+    server_nscd()
 
     yum_install('php', newer='remi')
     yum_install('php-fpm', newer='remi')
@@ -522,14 +512,52 @@ def server_phpd(user='webuser'):
     yum_install('php-pecl-mongo', newer='remi')
     yum_install('php-pecl-zendopcache', newer='remi')
 
-
     run('chkconfig --level 35 php-fpm on')
     pass
 
 
+def server_nodejs(user='webuser'):
+    utils_baselib()
+    utils_remi()
+    cmd_useradd(user)
+    yum_install('nodejs', newer='remi')
+    pass
+
+
+def server_statsd(root, repo='https://github.com/nextoa/statsd.git', user='webuser', monit='5.5-1'):
+    if monit:
+        server_monit(monit)
+
+    server_nodejs(user)
+    io_slowlog('statsd', user)
+    cmd_git(root, repo, branch='master', user=user)
+
+    cmd_su('cp {0}/exampleConfig.js {0}/userconfig.js'.format(root))
+
+
+    try:
+        template = pkg_resources.resource_string('fabez', 'tpl/monit-statsd.conf')
+    except:
+        template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'monit-statsd.conf')).read()
+        pass
+
+    node_path = run('which node')
+    buf = template.format(node_path,root,user)
+
+
+    # only support python2.x
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buf
+
+    put(fh.name, '/etc/monit.d/statsd.conf')
+    os.remove(fh.name)
+
+
+    pass
+
 
 # def server_smtp():
-#     utils_remi()
+# utils_remi()
 #     cmd_ulimit()
 #
 #     yum_install('sendmail', newer="remi")
@@ -547,7 +575,7 @@ def server_phpd(user='webuser'):
 #     pass
 
 
-def server_smtp(host,domain,networks):
+def server_smtp(host, domain, networks):
     # utils_remi()
     # cmd_ulimit()
 
@@ -559,14 +587,14 @@ def server_smtp(host,domain,networks):
     try:
         template = pkg_resources.resource_string('fabez', 'tpl/postfix.cf')
     except:
-        template = open(os.path.join(os.path.dirname(__file__), 'tpl','postfix.cf')).read()
+        template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'postfix.cf')).read()
         pass
 
     buf = template.replace('{$myhostname}', host) \
         .replace('{$mydomain}', domain) \
         .replace('{$mynetworks}', networks) \
-
-
+ \
+ \
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
         print>> fh, buf
@@ -577,11 +605,6 @@ def server_smtp(host,domain,networks):
     run('chkconfig --level 35 postfix on')
 
     pass
-
-
-
-
-
 
 
 # restart feature

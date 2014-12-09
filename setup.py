@@ -15,8 +15,7 @@ setup(
     license='http://opensource.org/licenses/MIT',
     install_requires=[
         'fabric',
-        'cliez',
-        'qingcloud-sdk'
+        'cliez'
     ],
     author='Breeze.Kay',
     author_email='wangwenpei@nextoa.com',

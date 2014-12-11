@@ -110,3 +110,81 @@ def config_php_fpm(local_name, remote_name=None):
 
     put('./config/php-fpm/{}.conf'.format(local_name), '/etc/php-fpm.d/{}.conf'.format(remote_name))
 
+
+
+def config_graphite(local_name, *args):
+    """
+    directory must be ./config/graphite-web/*.conf
+    """
+
+    buf = open('./config/graphite-web/{}.py'.format(local_name)).read()
+    buff = buf
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buff
+
+    put(fh.name, '/etc/graphite-web/local_settings.py')
+    os.remove(fh.name)
+    pass
+
+
+
+def config_carbon(local_name,*args):
+    """
+    directory must be ./config/carbon/*.conf
+    """
+
+    buf = open('./config/carbon/{}.conf'.format(local_name)).read()
+    buff = buf
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buff
+
+    put(fh.name, '/etc/carbon/storage-schemas.conf')
+    os.remove(fh.name)
+
+
+    pass
+
+
+
+def config_statsd(local_name,root='/webdata/statsd',*args):
+    """
+    directory must be ./config/statsd/*.conf
+    """
+
+    buf = open('./config/statsd/{}.js'.format(local_name)).read()
+    # buff = buf.format(*args)
+    buff = buf
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buff
+
+    put(fh.name, '{}/config.js'.format(root))
+    os.remove(fh.name)
+
+
+    pass
+
+
+
+def config_grafana(local_name,root='/webdata/grafana',*args):
+    """
+    directory must be ./config/grafana/*.conf
+    """
+
+    buf = open('./config/grafana/{}.js'.format(local_name)).read()
+    buff = buf
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buff
+
+    put(fh.name, '{}/config.js'.format(root))
+    os.remove(fh.name)
+
+    put('./config/grafana/{}.json'.format(local_name),'{}/app/dashboards/default.json'.format(root))
+
+    pass
+
+
+

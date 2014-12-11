@@ -213,7 +213,6 @@ def cmd_git(path=None, url=None, branch='master', tag=None, user=None, ignore_pe
                     cmd_su("cd %s && git checkout -- ." % path, user)
                     cmd_su("cd %s && git checkout %s" % (path, branch), user)
 
-
         cmd_su("cd %s && git config core.fileMode false" % (path), user)
         cmd_su("cd %s && git pull origin %s" % (path, branch), user)
         cmd_su("cd %s && git pull origin %s --tags" % (path, branch), user)
@@ -242,3 +241,18 @@ def yum_install(package_name, newer=None):
         run('yum install {} -y'.format(package_name))
     pass
 
+
+def wget_install_package(project, version, url, suffix='tar.gz'):
+    name = project + '-' + version
+
+    run('wget {1}/{0}.{2} -O /tmp/{0}.{2}'.format(name, url, suffix))
+
+    with cd('/tmp'):
+        with settings(warn_only=True):
+            if suffix == 'tar.gz':
+                run('tar -xvzpf {}.{}'.format(name, suffix))
+            elif suffix == 'tar.bz2':
+                run('tar -xvjpf {}.{}'.format(name, suffix))
+
+
+    pass

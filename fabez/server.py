@@ -314,9 +314,10 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
 
         with cd(real_path):
 
+            # --without-http_fastcgi_module --without-http_uwsgi_module
             if tornado:
                 run('./configure --prefix=/usr/local --user={0} --group={0} --conf-path=/etc/nginx  --sbin-path=/usr/local/sbin '
-                    ' --without-http_fastcgi_module --without-http_uwsgi_module --without-http_scgi_module --without-http_memcached_module --without-http_autoindex_module '
+                    ' --without-http_scgi_module --without-http_memcached_module --without-http_autoindex_module '
                     ' --without-http_auth_basic_module'
                     ' --with-http_spdy_module'
                     ' --with-jemalloc --with-http_spdy_module'
@@ -363,8 +364,9 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
                     ' --with-http_footer_filter_module=shared'.format(user))
 
             else:
+                # --without-http_uwsgi_module
                 run('./configure --prefix=/usr/local --user={0} --group={0} --conf-path=/etc/nginx  --sbin-path=/usr/local/sbin '
-                    ' --without-http_uwsgi_module --without-http_scgi_module --without-http_memcached_module --without-http_autoindex_module '
+                    ' --without-http_scgi_module --without-http_memcached_module --without-http_autoindex_module '
                     ' --without-http_auth_basic_module'
                     ' --with-http_spdy_module'
                     ' --with-jemalloc --with-http_spdy_module'
@@ -479,7 +481,7 @@ def server_monit(version='5.5-1'):
     # run('yum install monit -y')
     # with settings(warn_only=True):
     # run('for i in `rpm -ql monit`;do rm -rf $i; done;')
-    #     run('rpm -e `rpm -qa | grep -i monit`')
+    # run('rpm -e `rpm -qa | grep -i monit`')
 
     with settings(warn_only=True):
         run('rpm -ivh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
@@ -524,16 +526,14 @@ def server_nodejs(user='webuser'):
     pass
 
 
-def server_statsd(root, repo='https://github.com/nextoa/statsd.git', user='webuser', monit='5.5-1'):
-    if monit:
-        server_monit(monit)
+def server_statsd(root, repo='https://github.com/nextoa/statsd.git', user='webuser'):
+    # run('pip install graphite')
 
     server_nodejs(user)
     io_slowlog('statsd', user)
     cmd_git(root, repo, branch='master', user=user)
 
-    cmd_su('cp {0}/exampleConfig.js {0}/userconfig.js'.format(root))
-
+    cmd_su('cp {0}/exampleConfig.js {0}/config.js'.format(root))
 
     try:
         template = pkg_resources.resource_string('fabez', 'tpl/monit-statsd.conf')
@@ -542,7 +542,7 @@ def server_statsd(root, repo='https://github.com/nextoa/statsd.git', user='webus
         pass
 
     node_path = run('which node')
-    buf = template.format(node_path,root,user)
+    buf = template.format(node_path, root, user)
 
 
     # only support python2.x
@@ -552,15 +552,92 @@ def server_statsd(root, repo='https://github.com/nextoa/statsd.git', user='webus
     put(fh.name, '/etc/monit.d/statsd.conf')
     os.remove(fh.name)
 
+    pass
+
+
+# def server_grafana(root,repo='https://github.com/nextoa/grafana.git',user='webuser'):
+def server_grafana(root, version='1.9.0', user='webuser'):
+    yum_install('wget')
+    name = 'grafana-{0}'.format(version)
+    run('wget http://grafanarel.s3.amazonaws.com/{0}.tar.gz -O /tmp/{0}.tar.gz'.format(name))
+
+    with cd('/tmp'):
+        with settings(warn_only=True):
+            run('tar -xvzpf {}.tar.gz'.format(name))
+            run('rsync -av /tmp/{}/ {}'.format(name, root))
+
+    # cmd_git(root, repo, branch='master', user=user)
+
+    cmd_su('cp {0}/config.sample.js {0}/config.js'.format(root))
+    run('chown -Rf {}.{} {}'.format(user, user, root))
+
+    pass
+
+
+def server_graphite(user='webuser', port='10002', python='2.6'):
+    """
+    base on pypy current
+    :param version:
+    :param python_version:
+    :return:
+    """
+    yum_install('bitmap bitmap-fonts-compat cairo-devel python-whisper python-carbon graphite-web python-memcached memcached')
+    run('/usr/bin/python /usr/lib/python{}/site-packages/graphite/manage.py syncdb'.format(python))
+    run('chkconfig --level 35 carbon-cache on')
+    run('chkconfig --level 35 memcached on')
+
+    # version='1.10.0'):
+    # not work well for pypy
+    # name = 'py2cairo'
+    # wget_install_package(name,version,'http://cairographics.org/releases',suffix='tar.bz2')
+    #
+    # with cd('/tmp/{}-{}'.format(name,version)):
+    # run('/usr/local/pypy/bin/pypy setup.py install')
+    #     pass
+
+    ## pip('cairocffi')
+    # pip('graphite-web')
+    # pip('carbon')
+    # pip('whisper')
+    # pip('django')
+
+
+    try:
+        template = pkg_resources.resource_string('fabez', 'tpl/monit-graphite.conf')
+    except:
+        template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'monit-graphite.conf')).read()
+        pass
+
+    buf = template.format('/usr/bin/python /usr/lib/python{}/site-packages'.format(python), port, user)
+
+    # only support python2.x
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buf
+
+    put(fh.name, '/etc/monit.d/graphite.conf')
+    os.remove(fh.name)
+
+    pass
+
+
+def server_statsdsuite(user='webuser', monit=None):
+    if monit:
+        server_monit(monit)
+
+    server_graphite()
+    server_statsd('/webdata/statsd', user=user)
+    server_grafana('/webdata/grafana', user=user)
+
+    run('chown {0}.{0} /var/lib/graphite-web/graphite.db'.format(user))
 
     pass
 
 
 # def server_smtp():
 # utils_remi()
-#     cmd_ulimit()
+# cmd_ulimit()
 #
-#     yum_install('sendmail', newer="remi")
+# yum_install('sendmail', newer="remi")
 #
 #     run('chkconfig --level 35 sendmail on')
 #
@@ -595,7 +672,7 @@ def server_smtp(host, domain, networks):
         .replace('{$mynetworks}', networks) \
  \
  \
-    # only support python2.x
+        # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
         print>> fh, buf
 

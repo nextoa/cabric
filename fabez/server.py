@@ -11,7 +11,7 @@ from perm import *
 from utils import *
 from pythonic import *
 from etc import *
-
+from user import *
 
 try:
     import pkg_resources  # in package
@@ -483,9 +483,11 @@ def server_monit(version='5.5-1'):
     # run('for i in `rpm -ql monit`;do rm -rf $i; done;')
     # run('rpm -e `rpm -qa | grep -i monit`')
 
-    with settings(warn_only=True):
-        run('rpm -ivh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
-        run('rpm -Uvh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
+    # with settings(warn_only=True):
+    #     run('rpm -ivh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
+    #     run('rpm -Uvh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
+
+    yum_install('monit','remi')
     run('chkconfig --level 35 monit on')
     pass
 
@@ -528,6 +530,9 @@ def server_nodejs(user='webuser'):
 
 def server_statsd(root, repo='https://github.com/nextoa/statsd.git', user='webuser'):
     # run('pip install graphite')
+
+    utils_baselib()
+    classic_git()
 
     server_nodejs(user)
     io_slowlog('statsd', user)
@@ -583,6 +588,8 @@ def server_graphite(user='webuser', port='10002', python='2.6'):
     """
     yum_install('bitmap bitmap-fonts-compat cairo-devel python-whisper python-carbon graphite-web python-memcached memcached')
     run('/usr/bin/python /usr/lib/python{}/site-packages/graphite/manage.py syncdb'.format(python))
+    run('chown {0}.{0} /var/lib/graphite-web/graphite.db'.format(user))
+    run('chown -Rf {0}.{0} /var/log/graphite-web'.format(user))
     run('chkconfig --level 35 carbon-cache on')
     run('chkconfig --level 35 memcached on')
 
@@ -628,7 +635,8 @@ def server_statsdsuite(user='webuser', monit=None):
     server_statsd('/webdata/statsd', user=user)
     server_grafana('/webdata/grafana', user=user)
 
-    run('chown {0}.{0} /var/lib/graphite-web/graphite.db'.format(user))
+
+
 
     pass
 

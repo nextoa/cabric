@@ -27,7 +27,8 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'fabez = fabez.main:main'
+            'fabez = fabez.main:main',
+            'cabric = fabez.web:main'
         ]
     },
 

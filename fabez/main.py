@@ -73,7 +73,6 @@ def main():
 
         'Actions',
         ('@init', 'init fabric file'),
-        ('@web', 'start fabez web-server'),
         '',
         'Options:',
         ('--dir-name:', 'set config directory name,default is `./config/fabez`'),

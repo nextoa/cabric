@@ -222,15 +222,6 @@ def python_fix(file_path, force=False, replace='python'):
     pass
 
 
-def supervisor_fix(file_path, force=False):
-    if force:
-        run('ln -snf {}/supervisord /usr/local/bin/supervisord'.format(file_path))
-        run('ln -snf {}/supervisorctl /usr/local/bin/supervisorctl'.format(file_path))
-    else:
-        run('test -f /usr/local/bin/supervisord || ln -s {}/supervisord /usr/local/bin/supervisord'.format(file_path))
-        run('test -f /usr/local/bin/supervisorctl || ln -s {}/supervisorctl /usr/local/bin/supervisorctl'.format(file_path))
-
-    pass
 
 
 def python_path(path, user=''):

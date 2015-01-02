@@ -57,7 +57,7 @@ def rm_server_nginx():
     pass
 
 
-def server_redis(card='eth0', size=None, newer='remi'):
+def server_redis(card=None, size=None, newer='remi'):
     """
     Install redis server
     @todo support set unixsocket
@@ -80,7 +80,11 @@ def server_redis(card='eth0', size=None, newer='remi'):
     run('chown redis.redis /storage/redis')
     run('chkconfig --level 35 redis on')
 
-    ip = cmd_ip(card)
+    if card:
+        ip = cmd_ip(card)
+    else:
+        ip = '0.0.0.0'
+
     run('sed -i -e "s/\(bind\s*\)[0-9\.]*/\\1%s/g" /etc/redis.conf' % ip)
 
     # if size:
@@ -165,9 +169,13 @@ def server_gitolite(pubkey=None):
     pass
 
 
-def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', log_level='info'):
+def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/supervisor', log_level='info'):
     """
     Install supervisor
+    Default depends pypy
+    Focus on tornado
+
+    *note* current, don't use root account
     """
 
     # yum supervisor id tooooooooooooooooo old
@@ -187,13 +195,28 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
 
     # run('chkconfig --level 35 supervisord on')
 
+    # default is python_root
+
+
+
+    io_slowlog('supervisor')
+
+    pip('supervisor', pip_path=pip_path)
+    # pip('supervisor-logging', pip_path=pip_path)
+
+    if not pip_path:
+        python_root = '/usr/local/pypy/bin'
+
+    run('ln -snf {}/supervisord /usr/local/bin/supervisord'.format(python_root))
+    run('ln -snf {}/supervisorctl /usr/local/bin/supervisorctl'.format(python_root))
+
+    # with settings(warn_only=True):
+    # if run('cat /etc/rc.local | grep "/usr/local/bin/supervisord"').failed:
+    #         run('echo "/usr/local/bin/supervisord -c  /etc/supervisord.conf " >> /etc/rc.local')
 
     with settings(warn_only=True):
-        if run('cat /etc/rc.local | grep "/usr/local/bin/supervisord"').failed:
-            run('echo "/usr/local/bin/supervisord -c  /etc/supervisord.conf " >> /etc/rc.local')
-
-    with settings(warn_only=True):
-        run('test -d /etc/supervisor.d || mkdir /etc/supervisor.d')
+        run('mkdir /etc/supervisor.d')
+        pass
 
     try:
         template = pkg_resources.resource_string('fabez', 'tpl/supervisord.conf')
@@ -201,10 +224,18 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
         template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'supervisord.conf')).read()
         pass
 
-    buf = template.replace('{$username}', user) \
-        .replace('{$tmp}', tmp) \
-        .replace('{$logs}', log_dir) \
+    buf = template.replace('{$logs}', log_dir) \
         .replace('{$log_level}', log_level)
+
+
+    replace_variable = 'environment='
+
+    if variable:
+        replace_variable = '{},'.format(variable)
+
+    replace_variable += 'PYTHONUNBUFFERED="x"'
+
+    buf = buf.replace('{$variable}', replace_variable)
 
 
     # only support python2.x
@@ -213,6 +244,25 @@ def server_supervisor(user='webuser', tmp='/tmp', log_dir='/logs/supervisor', lo
 
     put(fh.name, '/etc/supervisord.conf')
     os.remove(fh.name)
+
+    try:
+        template = pkg_resources.resource_string('fabez', 'tpl/supervisord.start')
+    except:
+        template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'supervisord.start')).read()
+        pass
+
+    buf = template
+
+    # only support python2.x
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print>> fh, buf
+
+    put(fh.name, '/etc/init.d/supervisord')
+    run('chmod +x /etc/init.d/supervisord')
+
+    os.remove(fh.name)
+
+    run('chkconfig --level 35 supervisord on')
 
     pass
 
@@ -484,10 +534,10 @@ def server_monit(version='5.5-1'):
     # run('rpm -e `rpm -qa | grep -i monit`')
 
     # with settings(warn_only=True):
-    #     run('rpm -ivh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
-    #     run('rpm -Uvh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
+    # run('rpm -ivh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
+    # run('rpm -Uvh  https://github.com/nextoa/monit-bin/raw/master/monit-{}.el6.rf.x86_64.rpm'.format(version))
 
-    yum_install('monit','remi')
+    yum_install('monit', 'remi')
     run('chkconfig --level 35 monit on')
     pass
 
@@ -600,9 +650,9 @@ def server_graphite(user='webuser', port='10002', python='2.6'):
     #
     # with cd('/tmp/{}-{}'.format(name,version)):
     # run('/usr/local/pypy/bin/pypy setup.py install')
-    #     pass
+    # pass
 
-    ## pip('cairocffi')
+    # # pip('cairocffi')
     # pip('graphite-web')
     # pip('carbon')
     # pip('whisper')
@@ -635,9 +685,6 @@ def server_statsdsuite(user='webuser', monit=None):
     server_statsd('/webdata/statsd', user=user)
     server_grafana('/webdata/grafana', user=user)
 
-
-
-
     pass
 
 
@@ -647,17 +694,17 @@ def server_statsdsuite(user='webuser', monit=None):
 #
 # yum_install('sendmail', newer="remi")
 #
-#     run('chkconfig --level 35 sendmail on')
+# run('chkconfig --level 35 sendmail on')
 #
-#     with settings(warn_only=True):
-#         run("sed -i -e \"s/^DAEMON_OPTIONS.*dnl/DAEMON_OPTIONS(\\\`Port=smtp,Name=MTA\')dnl/g\" /etc/mail/sendmail.mc")
+# with settings(warn_only=True):
+# run("sed -i -e \"s/^DAEMON_OPTIONS.*dnl/DAEMON_OPTIONS(\\\`Port=smtp,Name=MTA\')dnl/g\" /etc/mail/sendmail.mc")
 #
 #
 # # yum install postfix dovecot
 # # yum remove sendmail
 #
 #
-#     pass
+# pass
 
 
 def server_smtp(host, domain, networks):
@@ -677,10 +724,9 @@ def server_smtp(host, domain, networks):
 
     buf = template.replace('{$myhostname}', host) \
         .replace('{$mydomain}', domain) \
-        .replace('{$mynetworks}', networks) \
- \
- \
-        # only support python2.x
+        .replace('{$mynetworks}', networks)
+
+    # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
         print>> fh, buf
 
@@ -703,10 +749,32 @@ def restart_web(config=None):
 
 
 def restart_monit(config=None):
+
     if config:
         config_monit(config)
-    run('service monit restart')
+        run('service monit restart')
 
+    pass
+
+
+def reboot_monit(name=None, config=None):
+    if config:
+        config_monit(config)
+        run('service monit restart')
+
+    if name:
+        run('monit restart {}'.format(name))
+    # run('service monit restart')
+
+
+
+def reboot_supervisor(name=None, config=None):
+    if config:
+        config_supervisor(config)
+        run('service supervisord restart')
+
+    if name:
+        run('supervisorctl restart {}'.format(name))
 
 
 

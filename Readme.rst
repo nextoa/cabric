@@ -12,6 +12,7 @@ Release Note
 
 
 * 0.8.x
+    * support supervisor
     * support statsd
     * support send release-note use mail
     * support smtp server

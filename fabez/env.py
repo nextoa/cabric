@@ -9,8 +9,9 @@ import time
 
 ez_env = _AttributeDict({
     'group': None,
+    'roles': None,
     'cloud': None,
-    'cloud_processor':None,
+    'cloud_processor': None,
 })
 
 
@@ -34,16 +35,7 @@ def _pssh(file):
     return machines
 
 
-def _bind_pssh(file):
-    """
-    Bind env from pssh-like file
-    :param file:
-    """
-    env.hosts = _pssh(file)
-    env.use_ssh_config = True
-
-
-def bind_hosts(curr, routes):
+def bind_hosts(curr, routes=None):
     """
     bind hosts from file
     :param curr:
@@ -51,12 +43,33 @@ def bind_hosts(curr, routes):
     :return:
     """
 
+    if not routes:
+        current_path = './config/fabez'
+
+        files = os.listdir(current_path)
+
+        routes = {}
+
+        for f in files:
+
+            if f.endswith('conf'):
+                k = f.rsplit('.')[0]
+                v = os.path.join(current_path, f)
+                routes[k] = v
+                pass
+
+            pass
+
+        pass
+
     ez_env.group = curr
+    ez_env.roles = {}
 
     for k, v in routes.items():
         if k == curr:
-            _bind_pssh(v)
-            break
+            env.hosts = _pssh(v)
+            env.use_ssh_config = True
+        ez_env.roles[k] = _pssh(v)
         pass
     pass
 
@@ -66,10 +79,6 @@ def bind_cloud(cloud_options):
     pass
 
 
-
-def bind_cloud_processor(func=None):
-    ez_env.cloud_processor=func
-    pass
 
 
 

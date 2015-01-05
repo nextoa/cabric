@@ -2,77 +2,67 @@
 
 from fabric.api import *
 from fabez.env import *
-from fabez.cmd import *
-from fabez.server import *
-from fabez.api import *
-
-
-
-
 
 import os
 
+
 def ez(curr):
-    routes = {
-        'dev':os.path.dirname(__file__)+'/config/fabez/dev.conf',
-        'test':os.path.dirname(__file__)+'/config/fabez/test.conf',
-        'ol':os.path.dirname(__file__)+'/config/fabez/online.conf',
-    }
 
-    bind_hosts(curr,routes)
+    # to specify routes
+    # routes = {
+    #     'dev': os.path.dirname(__file__) + '/config/fabez/dev.conf',
+    #     'beta': os.path.dirname(__file__) + '/config/fabez/beta.conf',
+    #     'ol': os.path.dirname(__file__) + '/config/fabez/online.conf',
+    # }
+    #
+    # bind_hosts(curr, routes)
+
+    # create routes auto
+    bind_hosts(curr)
+
+    # use cloud feature
+    # bind_cloud(['pek2','app_key','app_secret'])
     pass
 
 
-def fabez_debug():
-    local('echo "This message is from ."')
+def hello_fabric():
+    local('echo "You can delete this function after initial it."')
     pass
 
 
-
-def upload_server_key():
+def upgrade(tag=None, clean=False):
     """
-    上传私钥key
+    this function must contain `tag` and `clean` options
+    :param tag:
+    :param clean:
     :return:
     """
-    put_private_key('~/.ssh/baixing/id_weekweekup','webuser')
-    pass
 
-
-
-def upgrade(tag=None,clean=False,depend=False):
-    """
-    执行升级
-    :return:
-    """
-
-    root = '/webdata/fabez.ez.co'
-    repo = 'gitolite3@fabez.kbonez.com:fabez.git'
+    root = '/tmp/cabric'  # repo deploy path
+    repo = 'https://github.com/baixing/cabric.git'  # repo demo
 
     if clean:
         run('rm -rf %s' % root)
         pass
 
-
-
     if ez_env.group == 'ol':
-        cmd_git(root, repo, branch='master', user='webuser',tag=tag)
+        cmd_git(root, repo, branch='master', tag=tag)
         pass
-    elif ez_env.group == 'test':
-        cmd_git(root, repo, branch='beta', user='webuser',tag=tag)
+    elif ez_env.group == 'beta':
+        cmd_git(root, repo, branch='beta', tag=tag)
         pass
     elif ez_env.group == 'dev':
-        cmd_git(root, repo, branch='dev', user='webuser',tag=tag)
+        cmd_git(root, repo, branch='dev', tag=tag)
         pass
     else:
-        print "找不到指定的配置环境,SKIP"
+        print("[warn]:can't find default config,use master.")
+        cmd_git(root, repo, branch='master', tag=tag)
         pass
 
-    if depend:
-        run('cd /webdata/fabez.ez.co && python setup.py install')
-        run('chown -Rf webuser.webuser /webdata/fabez.ez.co')
-
-
     pass
+
+
+
 
 
 

@@ -7,13 +7,21 @@ import os
 
 
 def ez(curr):
-    routes = {
-        'dev': os.path.dirname(__file__) + '{0}/dev.conf',
-        'beta': os.path.dirname(__file__) + '{0}/beta.conf',
-        'ol': os.path.dirname(__file__) + '{0}/online.conf',
-    }
 
-    bind_hosts(curr, routes)
+    # to specify routes
+    # routes = {
+    #     'dev': os.path.dirname(__file__) + '{0}/dev.conf',
+    #     'beta': os.path.dirname(__file__) + '{0}/beta.conf',
+    #     'ol': os.path.dirname(__file__) + '{0}/online.conf',
+    # }
+    #
+    # bind_hosts(curr, routes)
+
+    # create routes auto
+    bind_hosts(curr)
+
+    # use cloud feature
+    # bind_cloud(['pek2','app_key','app_secret'])
     pass
 
 
@@ -30,8 +38,8 @@ def upgrade(tag=None, clean=False):
     :return:
     """
 
-    root = '/tmp/test.fabez.co'  # repo deploy path
-    repo = 'https://github.com/mybots/fabez-demo.git'  # repo demo
+    root = '/tmp/cabric'  # repo deploy path
+    repo = 'https://github.com/baixing/cabric.git'  # repo demo
 
     if clean:
         run('rm -rf %s' % root)

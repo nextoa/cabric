@@ -55,7 +55,8 @@ projects
 resources
 wwwroot/static/icons
 __pycache__
-trash/*.py
+trash
 sketch
-
+./fabfile.py
 config/cabric
+demo/qingcloud

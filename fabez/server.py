@@ -770,10 +770,11 @@ def reboot_monit(name=None, config=None):
 
 def reboot_supervisor(name=None, config=None):
     if config:
+        run('service supervisord stop')
         config_supervisor(config)
-        run('service supervisord restart')
+        run('service supervisord start')
 
-    if name:
+    if name and not config:
         run('supervisorctl restart {}'.format(name))
 
 

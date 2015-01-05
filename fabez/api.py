@@ -10,6 +10,7 @@ from pythonic import *
 from etc import *
 from git import *
 from dev import *
+from cloud import *
 
 
 

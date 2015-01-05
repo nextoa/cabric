@@ -4,13 +4,13 @@ import os
 from fabric.api import *
 from fabric.utils import _AttributeDict
 
+import time
+
 
 ez_env = _AttributeDict({
     'group': None,
-})
-
-ez_cloud = _AttributeDict({
-    'qingcloud': None,
+    'cloud': None,
+    'cloud_processor':None,
 })
 
 
@@ -61,16 +61,15 @@ def bind_hosts(curr, routes):
     pass
 
 
-
-
-def bind_cloud(qingcloud=None,**kwargs):
-
-    if qingcloud:
-        ez_cloud.qingcloud = qingcloud
-
-
+def bind_cloud(cloud_options):
+    ez_env.cloud = cloud_options
     pass
 
+
+
+def bind_cloud_processor(func=None):
+    ez_env.cloud_processor=func
+    pass
 
 
 

@@ -9,7 +9,7 @@ import os
 def ez(curr):
     routes = {
         'dev': os.path.dirname(__file__) + '{0}/dev.conf',
-        'test': os.path.dirname(__file__) + '{0}/test.conf',
+        'beta': os.path.dirname(__file__) + '{0}/beta.conf',
         'ol': os.path.dirname(__file__) + '{0}/online.conf',
     }
 
@@ -17,7 +17,7 @@ def ez(curr):
     pass
 
 
-def fabez_debug():
+def hello_fabric():
     local('echo "You can delete this function after initial it."')
     pass
 
@@ -40,17 +40,21 @@ def upgrade(tag=None, clean=False):
     if ez_env.group == 'ol':
         cmd_git(root, repo, branch='master', tag=tag)
         pass
-    elif ez_env.group == 'test':
+    elif ez_env.group == 'beta':
         cmd_git(root, repo, branch='beta', tag=tag)
         pass
     elif ez_env.group == 'dev':
         cmd_git(root, repo, branch='dev', tag=tag)
         pass
     else:
-        print "找不到指定的配置环境,使用默认"
-        cmd_git(root, repo, branch='master', user='webuser', tag=tag)
+        print("[warn]:can't find default config,use master.")
+        cmd_git(root, repo, branch='master', tag=tag)
         pass
 
     pass
+
+
+
+
 
 

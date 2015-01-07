@@ -21,7 +21,7 @@ def ez(curr):
     bind_hosts(curr)
 
     # use cloud feature
-    # bind_cloud(['pek2','app_key','app_secret'])
+    bind_cloud(['pek2', 'CBIWUAKJXMHLLQGYTEXO', 'DqtG1Uf7W7FbiydQje6pTF8PyWXdHubJBPZLtFdY'])
     pass
 
 
@@ -60,6 +60,19 @@ def upgrade(tag=None, clean=False):
         pass
 
     pass
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

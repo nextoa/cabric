@@ -55,7 +55,13 @@ def bind_hosts(curr, routes=None):
             if f.endswith('conf'):
                 k = f.rsplit('.')[0]
                 v = os.path.join(current_path, f)
+
+                if k == 'online':
+                    k = 'ol'
+                    pass
+
                 routes[k] = v
+
                 pass
 
             pass
@@ -65,10 +71,15 @@ def bind_hosts(curr, routes=None):
     ez_env.group = curr
     ez_env.roles = {}
 
+
     for k, v in routes.items():
         if k == curr:
             env.hosts = _pssh(v)
             env.use_ssh_config = True
+            pass
+        if k == 'online':
+            k = 'ol'
+            pass
         ez_env.roles[k] = _pssh(v)
         pass
     pass

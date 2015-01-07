@@ -739,13 +739,50 @@ def server_smtp(host, domain, networks):
 
 
 # restart feature
-def restart_web(config=None):
+def restart_tengine(config=None):
     # supervisor_restart()
     if config:
         config_nginx(config)
 
     run('service tengine reload')
     run('service tengine restart')
+
+
+
+
+def restart_web(name,config=None,strict=False):
+    """
+    limit:
+    supervisor and nginx config name must be same
+    :param config:
+    :return:
+    """
+
+    if config:
+        config_nginx(config)
+        if strict:
+            run('service tengine reload')
+        else:
+            with settings(warn_only=True):
+                run('service tengine reload')
+                pass
+
+        config_supervisor(config)
+
+        run('service tengine stop')
+        run('service supervisord stop')
+        run('service supervisord start')
+        run('service tengine start')
+        return
+    else:
+        run('service tengine stop')
+        run('supervisorctl restart {}'.format(name))
+        run('service tengine start')
+
+    pass
+
+
+
 
 
 def restart_monit(config=None):

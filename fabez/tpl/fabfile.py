@@ -51,6 +51,7 @@ def upgrade(tag=None, clean=False):
     elif ez_env.group == 'beta':
         cmd_git(root, repo, branch='beta', tag=tag)
         pass
+    # you should create branch and dev.conf files
     elif ez_env.group == 'dev':
         cmd_git(root, repo, branch='dev', tag=tag)
         pass

@@ -58,6 +58,6 @@ __pycache__
 trash
 sketch
 ./fabfile.py
-config/cabric/release-note.conf
+config/cabric/
 config/fabez/
 demo/qingcloud

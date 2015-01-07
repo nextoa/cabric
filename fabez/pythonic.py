@@ -8,7 +8,7 @@ from fabez.utils import (utils_baselib)
 from fabez.cmd import (cmd_git, yum_install)
 
 
-# @note if name start py, this is install tools
+# @note if name start py, this is used to install tools
 
 def py_python(tag='3.4.2', force=True, compatible=True, pypy='2.4'):
     '''
@@ -213,6 +213,26 @@ def pip_fix(file_path, force=False, replace='pip'):
     pass
 
 
+def pip_requirements(file='requirements.txt',upgrade=True,pip_path=None):
+    f = os.path.realpath(os.path.expanduser(file))
+
+    with open(f, 'r') as fp:
+        buffer = fp.read()
+
+    packages_list = buffer.strip("\n").split("\n")
+    depends = []
+
+    for p in packages_list:
+        if p and p.find('#') == -1:
+            depends.append(p)
+
+
+    for p in depends:
+        pip(p,upgrade,pip_path)
+
+    pass
+
+
 def python_fix(file_path, force=False, replace='python'):
     if force:
         run('ln -snf {} /usr/local/bin/{}'.format(file_path, replace))
@@ -220,8 +240,6 @@ def python_fix(file_path, force=False, replace='python'):
         run('test -f /usr/local/bin/{1} || ln -s {0} /usr/local/bin/{1}'.format(file_path, replace))
 
     pass
-
-
 
 
 def python_path(path, user=''):

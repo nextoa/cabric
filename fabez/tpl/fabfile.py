@@ -2,6 +2,7 @@
 
 from fabric.api import *
 from fabez.env import *
+from fabez.api import *
 
 import os
 

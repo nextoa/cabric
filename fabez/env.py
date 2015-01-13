@@ -93,4 +93,13 @@ def bind_cloud(cloud_options):
 
 
 
+def help():
+
+    support_type=['cmd','cloud','classic','config','git']
+
+
+
+    pass
+
+
 

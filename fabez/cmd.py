@@ -242,6 +242,18 @@ def yum_install(package_name, newer=None):
     pass
 
 
+
+def rpm_install():
+
+     with settings(warn_only=True):
+         run('rpm -ivh  {}'.format(url))
+         pass
+
+
+    pass
+
+
+
 def wget_install_package(project, version, url, suffix='tar.gz'):
     name = project + '-' + version
 

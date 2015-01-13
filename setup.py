@@ -15,7 +15,8 @@ setup(
     license='http://opensource.org/licenses/MIT',
     install_requires=[
         'fabric',
-        'cliez'
+        'cliez',
+        'pyyaml'
     ],
     author='Breeze.Kay',
     author_email='wangwenpei@nextoa.com',
@@ -28,7 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'fabez = fabez.main:main',
-            'cabric = fabez.web:main'
+            # 'cabric = fabez.web:main'
         ]
     },
 

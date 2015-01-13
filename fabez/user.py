@@ -273,28 +273,6 @@ def classic_gito(path=None, url=None, branch='master',user=None,host_bind=None,t
 
 
 
-def gitolite(pubkey=None):
-    '''
-    @TODO. create gitolite server
-    :param pubkey:
-    :return:
-    '''
-    run('mkdir /repo')
-    gito('/tmp/gitolite', 'https://github.com/kbonez/gitolite.git')
-
-    if pubkey is None:
-        abort("please set your pubkey.")
-
-
-    # put pub key
-    # 执行脚本 @todo 等下次在安装的时候再说
-
-
-
-
-    pass
-
-
 def put_private_key(path=None, user=None):
     """
     Upload private key to remote server

@@ -7,7 +7,7 @@ from cliez.loader import ArgLoader
 import os, sys
 import traceback
 
-from tornadoez.embed import embed
+# from tornadoez.embed import embed
 
 try:
     import pkg_resources
@@ -50,11 +50,10 @@ def main():
     for v in project_list:
         projects.append(os.path.expanduser(v))
 
-
     print(projects)
 
-    a.argv[1]='pro'
-    embed(a)
+    # a.argv[1]='pro'
+    # embed(a)
 
     pass
 

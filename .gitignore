@@ -56,6 +56,7 @@ resources
 wwwroot/static/icons
 __pycache__
 trash
+*/trash
 sketch
 ./fabfile.py
 config/cabric/

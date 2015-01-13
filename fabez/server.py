@@ -738,6 +738,24 @@ def server_smtp(host, domain, networks):
     pass
 
 
+
+
+
+def server_squid():
+    run("yum install -y squid")
+    run("/usr/sbin/squid -z")
+    run('chkconfig --level 35 squid on')
+    pass
+
+
+def influxdb():
+    run("wget http://s3.amazonaws.com/influxdb/influxdb-latest-1.x86_64.rpm")
+    run("rpm -ivh influxdb-latest-1.x86_64.rpm")
+
+
+
+
+
 # restart feature
 def restart_tengine(config=None):
     # supervisor_restart()

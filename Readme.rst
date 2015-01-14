@@ -1,15 +1,13 @@
+Cabric
+==================
+A deploy tool for Centos, base on Fabric.
+
 .. image:: https://pypip.in/v/fabez/badge.svg
     :target: https://pypi.python.org/pypi/fabez/
 .. image:: https://pypip.in/d/fabez/badge.svg
     :target: https://pypi.python.org/pypi/fabez/
-.. image:: https://pypip.in/wheel/fabez/badge.svg
-    :target: https://pypi.python.org/pypi/fabez/
 .. image:: https://pypip.in/license/fabez/badge.svg
     :target: https://pypi.python.org/pypi/fabez/
-
-Cabric
-==================
-A deploy tool for Centos, base on Fabric.
 
 
 

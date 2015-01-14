@@ -12,6 +12,7 @@ ez_env = _AttributeDict({
     'roles': None,
     'cloud': None,
     'cloud_processor': None,
+    'cloud_handler': None,
 })
 
 
@@ -84,9 +85,15 @@ def bind_hosts(curr, routes=None):
     pass
 
 
-def bind_cloud(cloud_options):
+def bind_cloud(cloud_options,handler=None):
     ez_env.cloud = cloud_options
+
+    if handler:
+        ez_env.cloud_handler = handler
+
+
     pass
+
 
 
 from fabric.main import list_commands, _task_names, _normal_list, _nested_list
@@ -140,7 +147,7 @@ def help():
         # result.append(docstring + trailer)
         # header = COMMANDS_HEADER
         # if format_ == "nested":
-        #     header += NESTED_REMINDER
+        # header += NESTED_REMINDER
         # result.append(header + ":\n")
         # c = _normal_list() if format_ == "normal" else _nested_list(state.commands)
         # result.extend(c)

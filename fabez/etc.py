@@ -50,6 +50,21 @@ def config_monit(local_name, remote_name=None):
     put('./config/monit/{}.conf'.format(local_name), '/etc/monit.d/{}.conf'.format(remote_name))
 
 
+
+def config_squid(local_name='squid', remote_name='squid'):
+    """
+    directory must be ./config/supervisor.d/*.ini
+    """
+
+    if remote_name is None:
+        remote_name = local_name
+
+    if ez_env.group != 'ol':
+        local_name += '_' + ez_env.group
+
+    put('./config/squid/{}.conf'.format(local_name), '/etc/squid/{}.conf'.format(remote_name))
+
+
 def config_mongo(local_name, *args):
     """
     directory must be ./config/mongo/*.conf

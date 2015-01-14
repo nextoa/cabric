@@ -242,16 +242,13 @@ def yum_install(package_name, newer=None):
     pass
 
 
-
 def rpm_install():
+    with settings(warn_only=True):
+        run('rpm -ivh  {}'.format(url))
+        pass
 
-     with settings(warn_only=True):
-         run('rpm -ivh  {}'.format(url))
-         pass
 
-
-    pass
-
+pass
 
 
 def wget_install_package(project, version, url, suffix='tar.gz'):
@@ -265,6 +262,5 @@ def wget_install_package(project, version, url, suffix='tar.gz'):
                 run('tar -xvzpf {}.{}'.format(name, suffix))
             elif suffix == 'tar.bz2':
                 run('tar -xvjpf {}.{}'.format(name, suffix))
-
 
     pass

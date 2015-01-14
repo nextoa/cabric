@@ -739,8 +739,6 @@ def server_smtp(host, domain, networks):
 
 
 
-
-
 def server_squid():
     run("yum install -y squid")
     run("/usr/sbin/squid -z")

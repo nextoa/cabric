@@ -71,7 +71,6 @@ def bind_hosts(curr, routes=None):
     ez_env.group = curr
     ez_env.roles = {}
 
-
     for k, v in routes.items():
         if k == curr:
             env.hosts = _pssh(v)
@@ -90,16 +89,65 @@ def bind_cloud(cloud_options):
     pass
 
 
-
+from fabric.main import list_commands, _task_names, _normal_list, _nested_list
 
 
 def help():
+    # print("called!")
 
-    support_type=['cmd','cloud','classic','config','git']
+    commands = list_commands(None, "nested")
+
+    support_type = ['cmd', 'cloud', 'classic', 'config', 'io', 'py', 'git']
+    ignore = ['Dumper', 'Loader', 'bind_cloud', 'bind_hosts', 'dump', 'dump_codes']
+    origin = ['Available commands:']
+
+    print(commands)
+
+    # commands.split("\n")
+
+    return
+
+    for c in commands_buff:
+
+        compare = c.strip()
+
+        print(compare)
+
+        if compare in ignore:
+            continue
+
+        if compare in origin:
+            print(c)
+            continue
 
 
 
-    pass
+        # print("    " + c)
+        pass
+
+
+
+
+
+        #
+        # if format_ == "short":
+        # return _task_names(state.commands)
+        # # Otherwise, handle more verbose modes
+        # result = []
+        # # Docstring at top, if applicable
+        # if docstring:
+        # trailer = "\n" if not docstring.endswith("\n") else ""
+        # result.append(docstring + trailer)
+        # header = COMMANDS_HEADER
+        # if format_ == "nested":
+        #     header += NESTED_REMINDER
+        # result.append(header + ":\n")
+        # c = _normal_list() if format_ == "normal" else _nested_list(state.commands)
+        # result.extend(c)
+        # return result
+
+
+
 
 
 

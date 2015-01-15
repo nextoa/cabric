@@ -65,6 +65,7 @@ def cloud_run(func, hold_func=None, strict=True, return_key=None, func_args=[], 
 
             counter += 1
             print("." * counter)
+
         if stop:
             break
         pass
@@ -95,7 +96,6 @@ def cc_instance_list():
     """
 
     h = cloud_connect()
-
     result = h.describe_instances()
 
     data = []
@@ -184,4 +184,54 @@ def cc_free_eips(wait=1, tries=100, *args, **kwargs):
     return list(addrs)
 
 
+
+
+def cc_create_datacenter():
+    """
+    create a data-center
+    :param pubkey:
+    :return:
+    """
+
+    config = cloud_read()
+
+    print(config)
+
+    h = cloud_connect()
+
+
+    pass
+
+
+
+def cc_create_instance():
+
+
+
+    pass
+
+
+
+def cc_create_sshkey(name='root',path='~/.ssh/id_rsa.pub'):
+
+    h = cloud_connect()
+
+    result = h.describe_key_pairs(search_word=config['author'])
+    compare = []
+    if result['total_count']:
+       compare = [v['keypair_name'] for v in result['keypair_set']]
+
+    if config['author'] in compare:
+        raise Exception("keypair name already exists.")
+
+    buff = None
+
+    with open(os.path.expanduser(config['pubkey'])) as fh:
+        buff = fh.read()
+        pass
+
+    h.create_keypair(config['author'],mode='user',public_key=buff)
+
+
+    pass
 

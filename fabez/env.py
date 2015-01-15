@@ -13,6 +13,7 @@ ez_env = _AttributeDict({
     'cloud': None,
     'cloud_processor': None,
     'cloud_handler': None,
+    'debug':None,
 })
 
 

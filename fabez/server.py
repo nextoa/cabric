@@ -118,6 +118,7 @@ def server_nscd():
 
 def server_mongo(card='lo', user='webuser'):
     """
+
     @note this mongo only support 64-bit system
     :return:
     """
@@ -278,21 +279,11 @@ def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy
     utils_git()
 
     io_webdata(uid=user, gid=user)
-
     io_slowlog('nginx', user)
-    # server_nginx(user)
     server_tengine(user=user)
-
-    io_slowlog('tornado', user)
-
-    # io_slowlog('supervisor', user)
-    # server_supervisor()
-
-    server_monit()
 
     if only_pypy:
         py_pypy(pypy_version)
-
     else:
         py_python(python_version, compatible=compatible, pypy=pypy_version)
 
@@ -304,6 +295,9 @@ def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy
     pip('pymongo')
     pip('redis')
     pip('pymysql')
+
+    io_slowlog('tornado', user)
+    server_supervisor()
 
     pass
 
@@ -527,6 +521,11 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
 
 
 def server_monit(version='5.5-1'):
+    """
+    @deprecated
+    :param version:
+    :return:
+    """
     # 5.5.1-41
     # run('yum install monit -y')
     # with settings(warn_only=True):
@@ -833,5 +832,8 @@ def reboot_supervisor(name=None, config=None):
 
 
 
+def reboot_all():
+    run('reboot')
+    pass
 
 

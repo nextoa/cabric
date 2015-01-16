@@ -8,7 +8,7 @@ Cabric
 .. image:: https://pypip.in/license/fabez/badge.svg
     :target: https://pypi.python.org/pypi/fabez/
 
-A deploy tool for Centos, base on Fabric.
+A deploy tool for Centos, based on Fabric.
 
 
 FAQ

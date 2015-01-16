@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 
 
 def _detected_ssh_private_key_type(path):
@@ -35,8 +36,8 @@ def _detected_ssh_public_key_type(path):
     key_type = None
 
     if key[0:7].find('ssh-dsa') > -1:
-        key_type = 'dsa'
+        key_type = 'ssh-dsa'
     elif key[0:7].find('ssh-dsa') > -1:
-        key_type = 'rsa'
+        key_type = 'ssh-rsa'
     pass
 

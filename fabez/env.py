@@ -13,7 +13,8 @@ ez_env = _AttributeDict({
     'cloud': None,
     'cloud_processor': None,
     'cloud_handler': None,
-    'debug':None,
+    'cloud_active': None,
+    'debug': None,
 })
 
 
@@ -82,19 +83,18 @@ def bind_hosts(curr, routes=None):
             k = 'ol'
             pass
         ez_env.roles[k] = _pssh(v)
+        env.roledefs[k] = ez_env.roles[k]
         pass
     pass
 
 
-def bind_cloud(cloud_options,handler=None):
+def bind_cloud(cloud_options, handler=None):
     ez_env.cloud = cloud_options
 
     if handler:
         ez_env.cloud_handler = handler
 
-
     pass
-
 
 
 from fabric.main import list_commands, _task_names, _normal_list, _nested_list
@@ -128,14 +128,8 @@ def help():
             print(c)
             continue
 
-
-
         # print("    " + c)
         pass
-
-
-
-
 
         #
         # if format_ == "short":

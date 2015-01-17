@@ -13,6 +13,8 @@ from pythonic import *
 from etc import *
 from user import *
 
+
+
 try:
     import pkg_resources  # in package
 except:
@@ -754,10 +756,13 @@ def influxdb():
 
 
 # restart feature
-def restart_tengine(config=None):
+def restart_tengine(config=None,strict=False):
     # supervisor_restart()
     if config:
         config_nginx(config)
+        with settings(warn_only=True):
+            run('service tengine reload')
+            pass
 
     run('service tengine reload')
     run('service tengine restart')
@@ -832,8 +837,13 @@ def reboot_supervisor(name=None, config=None):
 
 
 
-def reboot_all():
-    run('reboot')
+
+
+
+def reboot_system(tag=None):
+    reboot(wait=40)
+    if tag:
+        run('ps auwx | grep {}'.format(tag))
     pass
 
 

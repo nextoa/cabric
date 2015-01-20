@@ -14,7 +14,6 @@ from etc import *
 from user import *
 
 
-
 try:
     import pkg_resources  # in package
 except:
@@ -133,7 +132,7 @@ def server_mongo(card='lo', user='webuser'):
         pass
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/yum.repos.d/mongodb.repo')
     os.remove(fh.name)
@@ -150,6 +149,76 @@ def server_mongo(card='lo', user='webuser'):
     with settings(warn_only=True):
         run('mkdir -p /storage/mongo')
         run('chown -Rf mongod.mongod /storage/mongo')
+
+    pass
+
+
+def server_mongo_configsvr():
+
+    cmd_ulimit()
+
+    # @todo : can merge with server_mongo
+    try:
+        buf = pkg_resources.resource_string('fabez', 'tpl/mongodb.repo')
+    except:
+        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mongodb.repo')).read()
+        pass
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print >> fh, buf
+
+    put(fh.name, '/etc/yum.repos.d/mongodb.repo')
+    os.remove(fh.name)
+
+    run('yum install mongodb-org -y')
+
+    with settings(warn_only=True):
+        run('mkdir -p /storage/mconfigsvr')
+        run('chown -Rf mongod.mongod /storage/mconfigsvr')
+
+    try:
+        buf = pkg_resources.resource_string('fabez', 'tpl/mconfigsvr.start')
+    except:
+        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mconfigsvr.start')).read()
+        pass
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print >> fh, buf
+
+    put(fh.name, '/etc/init.d/mconfigsvr')
+    os.remove(fh.name)
+
+    run('chkconfig --level 35 mconfigsvr on')
+    run('chmod +x /etc/init.d/mconfigsvr')
+
+    pass
+
+
+def server_mongo_mongos():
+
+    cmd_ulimit()
+
+    try:
+        buf = pkg_resources.resource_string('fabez', 'tpl/mongodb.repo')
+    except:
+        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mongodb.repo')).read()
+        pass
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print >> fh, buf
+
+    put(fh.name, '/etc/yum.repos.d/mongodb.repo')
+    os.remove(fh.name)
+
+    run('yum install mongodb-org-mongos -y')
+
+
+
+    # io_slowlog('mongo', 'mongod')
+    # with settings(warn_only=True):
+    # run('mkdir -p /storage/mrouter')
+    # run('chown -Rf mongod.mongod /storage/mrouter')
+
 
     pass
 
@@ -215,7 +284,7 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
 
     # with settings(warn_only=True):
     # if run('cat /etc/rc.local | grep "/usr/local/bin/supervisord"').failed:
-    #         run('echo "/usr/local/bin/supervisord -c  /etc/supervisord.conf " >> /etc/rc.local')
+    # run('echo "/usr/local/bin/supervisord -c  /etc/supervisord.conf " >> /etc/rc.local')
 
     with settings(warn_only=True):
         run('mkdir /etc/supervisor.d')
@@ -230,7 +299,6 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
     buf = template.replace('{$logs}', log_dir) \
         .replace('{$log_level}', log_level)
 
-
     replace_variable = 'environment='
 
     if variable:
@@ -243,7 +311,7 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/supervisord.conf')
     os.remove(fh.name)
@@ -258,7 +326,7 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/init.d/supervisord')
     run('chmod +x /etc/init.d/supervisord')
@@ -479,7 +547,7 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/nginx/nginx.conf')
 
@@ -495,7 +563,7 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/init.d/tengine')
 
@@ -511,7 +579,7 @@ def server_tengine(user='webuser', version=None, tornado=True, process=1, connec
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/sysconfig/nginx')
 
@@ -603,7 +671,7 @@ def server_statsd(root, repo='https://github.com/nextoa/statsd.git', user='webus
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/monit.d/statsd.conf')
     os.remove(fh.name)
@@ -670,7 +738,7 @@ def server_graphite(user='webuser', port='10002', python='2.6'):
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/monit.d/graphite.conf')
     os.remove(fh.name)
@@ -729,7 +797,7 @@ def server_smtp(host, domain, networks):
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/postfix/main.cf')
     os.remove(fh.name)
@@ -737,7 +805,6 @@ def server_smtp(host, domain, networks):
     run('chkconfig --level 35 postfix on')
 
     pass
-
 
 
 def server_squid():
@@ -752,11 +819,8 @@ def influxdb():
     run("rpm -ivh influxdb-latest-1.x86_64.rpm")
 
 
-
-
-
 # restart feature
-def restart_tengine(config=None,strict=False):
+def restart_tengine(config=None, strict=False):
     # supervisor_restart()
     if config:
         config_nginx(config)
@@ -768,9 +832,7 @@ def restart_tengine(config=None,strict=False):
     run('service tengine restart')
 
 
-
-
-def restart_web(name,config=None,strict=False):
+def restart_web(name, config=None, strict=False):
     """
     limit:
     supervisor and nginx config name must be same
@@ -802,11 +864,7 @@ def restart_web(name,config=None,strict=False):
     pass
 
 
-
-
-
 def restart_monit(config=None):
-
     if config:
         config_monit(config)
         run('service monit restart')
@@ -821,8 +879,7 @@ def reboot_monit(name=None, config=None):
 
     if name:
         run('monit restart {}'.format(name))
-    # run('service monit restart')
-
+        # run('service monit restart')
 
 
 def reboot_supervisor(name=None, config=None):
@@ -833,11 +890,6 @@ def reboot_supervisor(name=None, config=None):
 
     if name and not config:
         run('supervisorctl restart {}'.format(name))
-
-
-
-
-
 
 
 def reboot_system(tag=None):

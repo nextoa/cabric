@@ -236,7 +236,7 @@ demo::
     def init_large_disk():
         utils_disktools()
 
-        io_big_disk('/dev/sdb')
+        io_large_disk('/dev/sdb')
         io_format_disk('/dev/sdb1')
         io_mount_disk('/dev/sdb1', '/mnt/storage')
 

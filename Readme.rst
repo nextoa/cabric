@@ -21,6 +21,7 @@ Release Note
 
 
 * 0.8.x
+    * support local web operation,like django's  manage.py collectstatic
     * support supervisor
     * support statsd
     * support send release-note use mail

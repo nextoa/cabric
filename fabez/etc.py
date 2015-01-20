@@ -50,7 +50,6 @@ def config_monit(local_name, remote_name=None):
     put('./config/monit/{}.conf'.format(local_name), '/etc/monit.d/{}.conf'.format(remote_name))
 
 
-
 def config_squid(local_name='squid', remote_name='squid'):
     """
     directory must be ./config/supervisor.d/*.ini
@@ -75,14 +74,14 @@ def config_mongo(local_name, *args):
     buff = buf.format(*args)
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buff
+        print >> fh, buff
 
     put(fh.name, '/etc/mongod.conf')
     os.remove(fh.name)
     pass
 
 
-def config_redis(local_name,*args):
+def config_redis(local_name, *args):
     """
     directory must be ./config/redis/*.conf
     """
@@ -91,7 +90,7 @@ def config_redis(local_name,*args):
     buff = buf.format(*args)
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buff
+        print >> fh, buff
 
     put(fh.name, '/etc/redis.conf')
     os.remove(fh.name)
@@ -126,7 +125,6 @@ def config_php_fpm(local_name, remote_name=None):
     put('./config/php-fpm/{}.conf'.format(local_name), '/etc/php-fpm.d/{}.conf'.format(remote_name))
 
 
-
 def config_graphite(local_name, *args):
     """
     directory must be ./config/graphite-web/*.conf
@@ -136,15 +134,14 @@ def config_graphite(local_name, *args):
     buff = buf
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buff
+        print >> fh, buff
 
     put(fh.name, '/etc/graphite-web/local_settings.py')
     os.remove(fh.name)
     pass
 
 
-
-def config_carbon(local_name,*args):
+def config_carbon(local_name, *args):
     """
     directory must be ./config/carbon/*.conf
     """
@@ -153,17 +150,15 @@ def config_carbon(local_name,*args):
     buff = buf
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buff
+        print >> fh, buff
 
     put(fh.name, '/etc/carbon/storage-schemas.conf')
     os.remove(fh.name)
 
-
     pass
 
 
-
-def config_statsd(local_name,root='/webdata/statsd',*args):
+def config_statsd(local_name, root='/webdata/statsd', *args):
     """
     directory must be ./config/statsd/*.conf
     """
@@ -173,17 +168,15 @@ def config_statsd(local_name,root='/webdata/statsd',*args):
     buff = buf
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buff
+        print >> fh, buff
 
     put(fh.name, '{}/config.js'.format(root))
     os.remove(fh.name)
 
-
     pass
 
 
-
-def config_grafana(local_name,root='/webdata/grafana',*args):
+def config_grafana(local_name, root='/webdata/grafana', *args):
     """
     directory must be ./config/grafana/*.conf
     """
@@ -192,14 +185,37 @@ def config_grafana(local_name,root='/webdata/grafana',*args):
     buff = buf
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buff
+        print >> fh, buff
 
     put(fh.name, '{}/config.js'.format(root))
     os.remove(fh.name)
 
-    put('./config/grafana/{}.json'.format(local_name),'{}/app/dashboards/default.json'.format(root))
+    put('./config/grafana/{}.json'.format(local_name), '{}/app/dashboards/default.json'.format(root))
 
     pass
 
 
+def config_mongos(*args):
+    if len(args) < 1:
+        raise "you must at least set one configdb."
 
+    try:
+        buf = pkg_resources.resource_string('fabez', 'tpl/mongos.start')
+    except:
+        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mongos.start')).read()
+        pass
+
+    user='root'
+    buf = buf.replace('{routers}', ','.join(args)).replace('{user}', user)
+
+    with tempfile.NamedTemporaryFile('w', delete=False) as fh:
+        print >> fh, buf
+
+    put(fh.name, '/etc/init.d/mongos')
+    os.remove(fh.name)
+
+    run('chkconfig --level 35 mongos on')
+    run('chmod +x /etc/init.d/mongos')
+    run('service mongos restart')
+
+    pass

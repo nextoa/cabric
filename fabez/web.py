@@ -1,65 +1,41 @@
 # -*- coding: utf-8 -*-
 
 
-# -*- coding: utf-8 -*-
-
-from cliez.loader import ArgLoader
-import os, sys
-import traceback
-
-# from tornadoez.embed import embed
-
-try:
-    import pkg_resources
-except:
-    pass
+# used for python web world
 
 
-def main():
-    importer = __import__
+from fabric.api import *
+import shutil
 
-    a = ArgLoader((
-        ('Useage: cabric project1,project2,projectN'),
-        '',
-        'Arguments',
-        '    project1...N a project depends on fabez style file ',
-        '',
-        'Options:',
-        ('--host:', 'tornado bind host default is None'),
-        ('--port:', 'bind port to work,default is 6001'),
-        ('--help:', 'print help document'),
-    ))
+def web_fetch_app():
+    """
+    get current apps, exclude web,docs,resources,config,template,static dirs
+    :return:
+    """
+    current_path = local('pwd', capture=True)
+    files = os.listdir(current_path)
 
-    if a.options.get('--help'):
-        print a
-        return
+    filters = ['web', 'config', 'docs', 'resources', 'templates', 'static']
 
-    try:
-        project_list = a.argv[1].split(',')
-    except:
-        print(traceback.format_exc())
-        raise Exception("Please set your project list or use `--help` to see help manual.")
-        pass
+    apps = [v for v in files if v not in filters and os.path.isdir(v) and not v.startswith('_') and not v.startswith('.')]
 
-    port = int(a.options.get('port', '6001'))
+    return apps, current_path
 
-    # projects = [v for v in project_list: if v]
-
-    projects=[]
-
-    for v in project_list:
-        projects.append(os.path.expanduser(v))
-
-    print(projects)
-
-    # a.argv[1]='pro'
-    # embed(a)
+def web_sync_config():
+    apps, root = web_fetch_app()
+    for v in apps:
+        shutil.copy('config.py', os.path.join(root, v, 'config.py'))
 
     pass
 
 
-if __name__ == '__main__':
-    main()
-    pass
+def web_sync_static():
+    """
+    @todo
+    this feature like django's  manage.py collectstatic
+    but works for all packages
+    :return:
+    """
 
+    pass
 

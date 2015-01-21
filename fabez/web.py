@@ -45,9 +45,12 @@ def web_create_app(app_name):
     root = local('pwd', capture=True)
     current_path = os.path.join(root, app_name)
 
-    if os.path.isdir(current_path):
+    if os.path.isfile(current_path):
+        raise Exception("{} is a file,can't create app,please set another name or delete it.".format(app_name))
 
-        pass
+
+
+
 
     pass
 

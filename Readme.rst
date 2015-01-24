@@ -12,7 +12,7 @@ A deploy tool for Centos, based on Fabric.
 
 
 
-`fabez` record (old package)
+`Fabez` record (old package)
 --------------------------------------------------------
 
 .. image:: https://pypip.in/v/fabez/badge.svg

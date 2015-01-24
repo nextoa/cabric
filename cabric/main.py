@@ -20,16 +20,16 @@ def init_fabric(hosts, root, fabfile_name):
     :return:
     """
 
-    fabric_dir =  os.path.join(root,'fabric')
+    fabric_dir = os.path.join(root,'fabric')
     cabric_dir = os.path.join(root,'cabric')
 
-    dirs = [fabric_dir,cabric_dir]
+    dirs = [fabric_dir, cabric_dir]
 
     for v in dirs:
         if os.path.exists(v) is False:
             os.makedirs(v, 0755)  # can cause OSError.
         else:
-            print("Directory `%s' existed.skip init." % fabric_dir.replace(os.getcwd(), '.'))
+            print("Directory `%s' existed.skip init." % v.replace(os.getcwd(), '.'))
 
     # create config files
 

@@ -1,2 +1,2 @@
-include Readme.rst
+include README.rst
 recursive-include cabric/tpl *

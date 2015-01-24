@@ -38,6 +38,15 @@ Install
 
 
 
+Create New Project
+---------------------------
+.. code-block::
+
+    cabric init
+
+
+
+
 
 
 Release Note

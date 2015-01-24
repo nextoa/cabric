@@ -13,6 +13,7 @@ A deploy tool for Centos, based on Fabric.
 
 
 `fabez` record (old package)
+--------------------------------------------------------
 
 .. image:: https://pypip.in/v/fabez/badge.svg
     :target: https://pypi.python.org/pypi/fabez/

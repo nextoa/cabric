@@ -47,7 +47,7 @@ def bind_hosts(curr, routes=None):
     """
 
     if not routes:
-        current_path = './config/cabric'
+        current_path = './config/fabric'
 
         files = os.listdir(current_path)
 

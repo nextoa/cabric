@@ -16,27 +16,27 @@ def init_fabric(hosts, root, fabfile_name):
     """
     init fabfile system
     :param hosts:
-    :param dir:
+    :param fabric_dir:
     :return:
     """
 
-    dir =  os.path.join(root,'cabric')
+    fabric_dir =  os.path.join(root,'fabric')
     cabric_dir = os.path.join(root,'cabric')
 
-    dirs = [dir,cabric_dir]
+    dirs = [fabric_dir,cabric_dir]
 
     for v in dirs:
         if os.path.exists(v) is False:
             os.makedirs(v, 0755)  # can cause OSError.
         else:
-            print("Directory `%s' existed.skip init." % dir.replace(os.getcwd(), '.'))
+            print("Directory `%s' existed.skip init." % fabric_dir.replace(os.getcwd(), '.'))
 
     # create config files
 
     files = {
-        # 'dev': os.path.join(dir, 'dev.conf'),
-        'beta': os.path.join(dir, 'beta.conf'),
-        'online': os.path.join(dir, 'online.conf'),
+        # 'dev': os.path.join(fabric_dir, 'dev.conf'),
+        'beta': os.path.join(fabric_dir, 'beta.conf'),
+        'online': os.path.join(fabric_dir, 'online.conf'),
         'fabfile': fabfile_name + '.py',
         'cloud_file': os.path.join(cabric_dir, 'cloud.yaml'),
     }
@@ -57,7 +57,7 @@ def init_fabric(hosts, root, fabfile_name):
                     pass
 
                 with open(f, 'w') as fh:
-                    print>> fh, template.replace('{0}', dir.replace(os.getcwd(), ''))
+                    print>> fh, template.replace('{0}', fabric_dir.replace(os.getcwd(), ''))
 
                 pass
             elif k == 'cloud_file':
@@ -68,7 +68,7 @@ def init_fabric(hosts, root, fabfile_name):
                     pass
 
                 with open(f, 'w') as fh:
-                    print>> fh, template.replace('{0}', dir.replace(os.getcwd(), ''))
+                    print>> fh, template.replace('{0}', fabric_dir.replace(os.getcwd(), ''))
 
                 pass
             else:

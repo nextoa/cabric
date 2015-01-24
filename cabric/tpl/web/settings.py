@@ -19,7 +19,7 @@ def dev():
     return {}
 
 
-def ci():
+def ci(io_loop=None):
     """
     for Continuous integration
     :return:

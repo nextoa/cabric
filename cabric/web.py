@@ -72,7 +72,7 @@ def web_create_app(app_name):
         with open(file_path, 'w') as fh:
             print >> fh, buf
 
-    safe_tpls = ['web/settings.py', 'web/config.py', 'web/handlers.py', 'web/__init__.py']
+    safe_tpls = ['web/settings.py', 'web/config.py', 'web/handlers.py', 'web/__init__.py', 'web/test.py']
     for tpl in safe_tpls:
         file_path = os.path.join(current_path, os.path.basename(tpl))
         if not os.path.exists(file_path):

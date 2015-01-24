@@ -2,6 +2,7 @@
 
 from fabric.api import *
 from cabric.env import *
+from cabric.api import *
 
 import os
 
@@ -10,9 +11,9 @@ def ez(curr):
 
     # to specify routes
     # routes = {
-    #     'dev': os.path.dirname(__file__) + '/config/cabric/dev.conf',
-    #     'beta': os.path.dirname(__file__) + '/config/cabric/beta.conf',
-    #     'ol': os.path.dirname(__file__) + '/config/cabric/online.conf',
+    #     'dev': os.path.dirname(__file__) + '{0}/dev.conf',
+    #     'beta': os.path.dirname(__file__) + '{0}/beta.conf',
+    #     'ol': os.path.dirname(__file__) + '{0}/online.conf',
     # }
     #
     # bind_hosts(curr, routes)
@@ -21,7 +22,7 @@ def ez(curr):
     bind_hosts(curr)
 
     # use cloud feature
-    bind_cloud(['pek2', 'CBIWUAKJXMHLLQGYTEXO', 'DqtG1Uf7W7FbiydQje6pTF8PyWXdHubJBPZLtFdY'])
+    # bind_cloud(['pek2','app_key','app_secret'],CLOUD_CLASS)
     pass
 
 
@@ -51,6 +52,7 @@ def upgrade(tag=None, clean=False):
     elif ez_env.group == 'beta':
         cmd_git(root, repo, branch='beta', tag=tag)
         pass
+    # you should create branch and dev.conf files
     elif ez_env.group == 'dev':
         cmd_git(root, repo, branch='dev', tag=tag)
         pass
@@ -60,20 +62,6 @@ def upgrade(tag=None, clean=False):
         pass
 
     pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

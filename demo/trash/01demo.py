@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from fabric.api import *
-from fabez.env import *
-from fabez.cmd import *
-from fabez.server import *
-from fabez.io import io_airlog,rm_io_airlog
+from cabric.env import *
+from cabric.cmd import *
+from cabric.server import *
+from cabric.io import io_airlog,rm_io_airlog
 
 
-from fabez.docs import *
+from cabric.docs import *
 
 
 import os
@@ -57,10 +57,10 @@ def drop_fastfs():
 def upgrade():
 
     if ez_env.group == 'ol':
-        cmd_git('/tmp/web-master','https://github.com/kbonez/fabezweb.git',user='webuser')
+        cmd_git('/tmp/web-master','https://github.com/kbonez/cabricweb.git',user='webuser')
         pass
     else:
-        cmd_git('/tmp/web-dev','https://github.com/kbonez/fabezweb.git',branch='dev')
+        cmd_git('/tmp/web-dev','https://github.com/kbonez/cabricweb.git',branch='dev')
         pass
 
     pass

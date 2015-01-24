@@ -50,7 +50,7 @@ dist/
 build/
 
 
-# for fabez user config
+# for cabric user config
 projects
 resources
 wwwroot/static/icons
@@ -62,3 +62,5 @@ sketch
 config/cabric/
 config/fabez/
 demo/qingcloud
+webapp
+

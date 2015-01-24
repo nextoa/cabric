@@ -53,7 +53,7 @@ def dev(**ez_settings):
 
 # for quick test
 if __name__ == '__main__':
-    __requires__ = 'tornadoez'
+    __requires__ = 'bree'
     import sys
     from pkg_resources import load_entry_point
 
@@ -64,6 +64,6 @@ if __name__ == '__main__':
     sys.argv.append("9801")
 
     sys.exit(
-        load_entry_point('tornadoez', 'console_scripts', 'ez')()
+        load_entry_point('bree', 'console_scripts', 'ez')()
     )
 

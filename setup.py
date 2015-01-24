@@ -3,13 +3,12 @@
 from distutils.core import setup
 from setuptools import find_packages
 
-
-import fabez
+import cabric
 
 setup(
-    name='fabez',
-    version=fabez.version,
-    packages=['fabez'],
+    name='cabric',
+    version=cabric.version,
+    packages=['cabric'],
     url='https://github.com/baixing/cabric',
     download_url='https://github.com/baixing/cabric/tarball/master',
     license='http://opensource.org/licenses/MIT',
@@ -18,18 +17,18 @@ setup(
         'cliez',
         'pyyaml'
     ],
-    author='Breeze.Kay',
+    author='WANG WENPEI',
     author_email='wangwenpei@nextoa.com',
     description='A deploy tool for CentOS, based on fabric.',
-    keywords='fabric,fabez,cabric',
+    keywords='fabric,cabric',
     package_data={
-        'fabez': ['tpl/*.*']
+        'cabric': ['tpl/*.*', 'tpl/web/*']
     },
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'fabez = fabez.main:main',
-            # 'cabric = fabez.web:main'
+            'cabric = cabric.main:main',
+            # 'cabric = cabric.web:main'
         ]
     },
 

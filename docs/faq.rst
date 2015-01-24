@@ -21,7 +21,7 @@ FAQ [Chinese Version]
 安装
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
-    pip install fabez
+    pip install cabric
 
 会同时安装底层的依赖
 
@@ -32,7 +32,7 @@ FAQ [Chinese Version]
 ::
     mkdir project
     cd project
-    fabez init  # 如果已经有机器，可以使用  fabez init  root@example.com
+    fabez init  # 如果已经有机器，可以使用  cabric init  root@example.com
     git init . #[可选]
 
 
@@ -213,7 +213,7 @@ demo::
 
 demo::
 
-    from fabez.cmd import cmd_ip
+    from cabric.cmd import cmd_ip
     ....
 
 

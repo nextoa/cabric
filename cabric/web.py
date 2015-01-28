@@ -8,6 +8,7 @@ from cabric.lib import read_template
 import shutil
 
 import os
+import re
 
 
 def web_fetch_app():
@@ -112,3 +113,33 @@ def web_sync_static(clean=False):
 
     pass
 
+
+def web_parse_webapp(name):
+    """
+    convert html to ios html
+
+    css and js file must be use double-quote should prefix with "static/"
+
+    image path in css file should be same as css path
+
+    :param name:
+    :return:
+    """
+
+    file_path = os.path.join(os.getcwd(), name + '.tt')
+
+    write_path = os.path.join(os.getcwd(), name + '.html')
+
+    if not os.path.exists(file_path):
+        raise IOError("File not found.")
+    else:
+        with open(file_path, 'r') as h:
+            buf = h.read()
+
+        buf = buf.replace(' href="static/css/', ' href="').replace(' src="static/js/', ' src="')
+
+        with open(write_path, 'w') as fh:
+            print >> fh, buf
+
+
+pass

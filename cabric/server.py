@@ -220,6 +220,8 @@ def server_mongo_mongos():
     # run('chown -Rf mongod.mongod /storage/mrouter')
 
 
+    # shading note
+    # shardCollection key:{"_id":"hashed"} unique numInitialChunks
     pass
 
 
@@ -777,13 +779,11 @@ def server_statsdsuite(user='webuser', monit=None):
 
 
 def server_smtp(host, domain, networks):
-    # utils_remi()
-    # cmd_ulimit()
+    utils_remi()
+    cmd_ulimit()
 
-    # yum_install('postfix', newer="remi")
-    # run('yum remove sendmail -y')
-
-
+    run('yum remove sendmail -y')
+    yum_install('postfix', newer="remi")
 
     try:
         template = pkg_resources.resource_string('cabric', 'tpl/postfix.cf')

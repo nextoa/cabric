@@ -13,6 +13,16 @@ except:
     pass
 
 
+def git_proxy(proxy=None):
+    if proxy:
+        run('git config --global http.proxy {}'.format(proxy))
+        run('git config --global --get http.proxy')
+    else:
+        run('git config --global --unset http.proxy')
+
+    pass
+
+
 def git_ensure_status():
     """
     :return: raise exception when has untracked files
@@ -102,8 +112,9 @@ def git_release_mail(conf, curr_buff, next_buff, to=None):
     title_plan = conf.get('mail', 'plan', '')
     msg_sign = conf.get('mail', 'sign', '')
 
-    buff = "Subject:{}\nTO:{}\r\nContent-Type: text/plain; charset=UTF-8\n{}\n\n\n{}\n\n{}\n\n\n{}\n\n{}\n\n\n-------\n\n{}\n\n\n".format(title, to, hello, title_curr, curr_buff, title_plan, next_buff,
-                                                                                                                                msg_sign)
+    buff = "Subject:{}\nTO:{}\r\nContent-Type: text/plain; charset=UTF-8\n{}\n\n\n{}\n\n{}\n\n\n{}\n\n{}\n\n\n-------\n\n{}\n\n\n".format(title, to, hello, title_curr, curr_buff, title_plan,
+                                                                                                                                          next_buff,
+                                                                                                                                          msg_sign)
 
     return buff, to
 
@@ -155,19 +166,14 @@ def release_note(send_to=None, limit=1000):
         buff_next = fh.read()
         pass
 
+    text, to = git_release_mail(conf, buff_current, buff_next, to=send_to)
 
-
-
-    text, to = git_release_mail(conf, buff_current, buff_next,to=send_to)
-
-
-    local("echo '{}' | msmtp {}".format(text,to))
+    local("echo '{}' | msmtp {}".format(text, to))
 
     pass
 
 
 def tag(tag_name=None):
-
     git_ensure_status()
     git_ensure_master()
 
@@ -176,12 +182,10 @@ def tag(tag_name=None):
     try:
         input = raw_input
     except:
-        #python3
+        # python3
         pass
 
-
-    choice=input("Are you sure you want to named version {} or reset it:[y/n/version]".format(tag_name))
-
+    choice = input("Are you sure you want to named version {} or reset it:[y/n/version]".format(tag_name))
 
     if choice == 'n':
         return

@@ -154,7 +154,6 @@ def server_mongo(card='lo', user='webuser'):
 
 
 def server_mongo_configsvr():
-
     cmd_ulimit()
 
     # @todo : can merge with server_mongo
@@ -195,7 +194,6 @@ def server_mongo_configsvr():
 
 
 def server_mongo_mongos():
-
     cmd_ulimit()
 
     try:
@@ -807,10 +805,17 @@ def server_smtp(host, domain, networks):
     pass
 
 
-def server_squid():
+def server_squid(user=None):
     run("yum install -y squid")
     run("/usr/sbin/squid -z")
     run('chkconfig --level 35 squid on')
+
+    # if user:
+    #     run('yum install -y httpd-tools')
+    #     run('touch /etc/squid/passwd')
+    #     run('htpasswd /etc/squid/passwd {}'.format(user))
+    #     run('chown squid /etc/squid/passwd')
+
     pass
 
 

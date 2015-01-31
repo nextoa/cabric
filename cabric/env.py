@@ -8,12 +8,24 @@ import time
 
 
 ez_env = _AttributeDict({
+    'debug': None,
     'group': None,
     'roles': None,
     'cloud': None,
+
+    # cloud
+    'cc': {
+        'cloud_class': None,
+        'processor': None,
+        'connection': None,
+        'sleep_time': None,
+        'config': None,
+        'actions': {},
+    },
     'cloud_processor': None,
-    'cloud_handler': None,
-    'cloud_active': None,
+    'cloud_class': None,
+    'cloud_handler': None,  # current cloud handle
+    'cloud_hold_recyle': 3,  # sleep time when request jobs
     'debug': None,
 })
 
@@ -88,13 +100,27 @@ def bind_hosts(curr, routes=None):
     pass
 
 
-def bind_cloud(cloud_options, handler=None):
+def bind_cloud(cloud_options, cloud_class=None):
     ez_env.cloud = cloud_options
 
-    if handler:
-        ez_env.cloud_handler = handler
+    if cloud_class:
+        ez_env.cc['cloud_class'] = cloud_class
 
     pass
+
+
+def debug(flag=None):
+    """
+    get or set debug flag
+    :param flag:
+    :return:
+    """
+
+    if flag is not None:
+        ez_env.debug = flag
+
+    return ez_env.debug
+
 
 
 from fabric.main import list_commands, _task_names, _normal_list, _nested_list
@@ -108,7 +134,6 @@ def help():
     support_type = ['cmd', 'cloud', 'classic', 'config', 'io', 'py', 'git']
     ignore = ['Dumper', 'Loader', 'bind_cloud', 'bind_hosts', 'dump', 'dump_codes']
     origin = ['Available commands:']
-
 
     print(commands)
 
@@ -148,6 +173,8 @@ def help():
         # c = _normal_list() if format_ == "normal" else _nested_list(state.commands)
         # result.extend(c)
         # return result
+
+
 
 
 

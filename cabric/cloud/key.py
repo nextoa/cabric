@@ -6,8 +6,6 @@ from cabric.cloud.instance import cc_instance_find_all
 from cabric.lib import *
 from cabric.lib import _detected_ssh_public_key_type
 
-from cabric.env import debug
-
 
 # only use in develop for cabric
 try:

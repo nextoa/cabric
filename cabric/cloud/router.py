@@ -87,7 +87,7 @@ def cc_router_find_one(router_name=None, router_id=None):
     pass
 
 
-def cc_router_create(name='default', ip_network=None, lan_name='default'):
+def cc_router_create(name='default', firewall_name="default"):
     """
     create router
     :param name:
@@ -123,6 +123,7 @@ def cc_router_create(name='default', ip_network=None, lan_name='default'):
         print_debug(e)
         pass
 
+    cc_firewall_rule_route(firewall_name)
     pass
 
 
@@ -216,7 +217,6 @@ def cc_router_bind_vpn(router_name="default"):
                                                               'val1': "openvpn",
                                                           }]), hold_func=False)
 
-
         cloud_run(h.update_routers, [[router_id]])
     except Exception as e:
         if str(e).find(" VPN already enabled"):
@@ -224,12 +224,6 @@ def cc_router_bind_vpn(router_name="default"):
         else:
             raise
         pass
-
-
-    # todo open firewall
-
-
-
 
     for i in reversed(range(5, 10)):
         print("#" * i)
@@ -249,7 +243,7 @@ def cc_router_bind_vpn(router_name="default"):
     #
     # if result.lower().strip() == "yes":
     # break
-    #         pass
+    # pass
 
     print("VPN initial finished")
     pass

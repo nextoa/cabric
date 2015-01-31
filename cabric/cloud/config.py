@@ -3,7 +3,7 @@
 
 from cabric.cloud.core import cloud_config_guard, NoSectionError, cloud_config_save, NoOptionError
 from cabric.lib import print_error
-
+from cabric.escape import utf8,to_unicode
 
 def _format_key(section_key):
     section = None
@@ -52,6 +52,12 @@ def cc_config_get(section_key, default=''):
 
 
 def cc_config_set(section_key, value):
+    """
+    set config value,if section is not set then will create it
+    :param section_key:
+    :param value:
+    :return:
+    """
     parser = cloud_config_guard()
 
     section, key = _format_key(section_key)
@@ -59,6 +65,7 @@ def cc_config_set(section_key, value):
     if value is None:
         value = ''
 
+    value = utf8(value)
     if not isinstance(value, str) or isinstance(value, int) or isinstance(value, float):
         print_error("`{}' value argument only allow str,int,float,current is {}".format(cc_config_set.__name__, type(value)))
 
@@ -85,7 +92,7 @@ def cc_config_lget(section_key, default=[]):
     section, key = _format_key(section_key)
 
     if not isinstance(default, list) or isinstance(default, set):
-        print_error("`{}' value argument must be a list".format(cc_config_lget.__name__))
+        print_error("`{}' value argument must be a list or set,current is {}".format(cc_config_lget.__name__, type(default)))
 
     try:
         buff = parser.get(section, key, default)
@@ -120,7 +127,7 @@ def cc_config_lset(section_key, value):
 
     # only allow list or set
     if not isinstance(value, list) or isinstance(value, set):
-        print_error("`{}' value argument must be a list".format(cc_config_lset.__name__))
+        print_error("`{}' value argument must be a list or set,current is {}".format(cc_config_lset.__name__, type(value)))
 
     write_value = ','.join(value)
 

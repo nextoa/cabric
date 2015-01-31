@@ -16,9 +16,14 @@ except:
 def git_proxy(proxy=None):
     if proxy:
         run('git config --global http.proxy {}'.format(proxy))
+        run('git config --global https.proxy {}'.format(proxy))
         run('git config --global --get http.proxy')
+        run('git config --global --get https.proxy')
+
     else:
         run('git config --global --unset http.proxy')
+        run('git config --global --unset https.proxy')
+
 
     pass
 

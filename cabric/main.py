@@ -23,7 +23,7 @@ def init_fabric(hosts, root, fabfile_name):
     fabric_dir = os.path.join(root,'fabric')
     cabric_dir = os.path.join(root,'cabric')
 
-    dirs = [fabric_dir, cabric_dir]
+    dirs = [fabric_dir, cabric_dir]            
 
     for v in dirs:
         if os.path.exists(v) is False:

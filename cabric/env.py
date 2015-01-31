@@ -109,12 +109,13 @@ def help():
     ignore = ['Dumper', 'Loader', 'bind_cloud', 'bind_hosts', 'dump', 'dump_codes']
     origin = ['Available commands:']
 
+
     print(commands)
 
     # commands.split("\n")
 
     return
-
+    #
     for c in commands_buff:
 
         compare = c.strip()

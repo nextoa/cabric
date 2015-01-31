@@ -819,7 +819,7 @@ def server_squid(user=None):
     pass
 
 
-def influxdb():
+def server_influxdb():
     run("wget http://s3.amazonaws.com/influxdb/influxdb-latest-1.x86_64.rpm")
     run("rpm -ivh influxdb-latest-1.x86_64.rpm")
 

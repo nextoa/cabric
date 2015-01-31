@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
-# -*- coding: utf-8 -*-
-
 from cliez.loader import ArgLoader
 import os, sys, pickle
 
@@ -38,7 +35,7 @@ def init_fabric(hosts, root, fabfile_name):
         'beta': os.path.join(fabric_dir, 'beta.conf'),
         'online': os.path.join(fabric_dir, 'online.conf'),
         'fabfile': fabfile_name + '.py',
-        'cloud_file': os.path.join(cabric_dir, 'cloud.yaml'),
+        'cloud_file': os.path.join(cabric_dir, 'cloud.conf'),
     }
 
     for k, f in files.items():
@@ -62,9 +59,9 @@ def init_fabric(hosts, root, fabfile_name):
                 pass
             elif k == 'cloud_file':
                 try:
-                    template = pkg_resources.resource_string('cabric', 'tpl/cloud.yaml')
+                    template = pkg_resources.resource_string('cabric', 'tpl/cloud.conf')
                 except:
-                    template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'cloud.yaml')).read()
+                    template = open(os.path.join(os.path.dirname(__file__), 'tpl', 'cloud.conf')).read()
                     pass
 
                 with open(f, 'w') as fh:
@@ -103,6 +100,10 @@ def main():
         return
 
     try:
+
+        if a.argv[1].find('@') == -1:
+            print("host format is invalid. e.g: root@example.com")
+            return -1
         hosts = a.argv[1].split(',')
     except:
         hosts = ''

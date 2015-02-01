@@ -20,6 +20,7 @@ Cabric 主要针对CentOS做优化，同时内部集成对云平台的操作，�
 目前我们的测试环境为pypy2.4
 
 ::
+
     pip install cabric
     pip install qingcloud-sdk  #可选，如果不使用青云可无视
 

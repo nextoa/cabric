@@ -3,12 +3,13 @@
 from distutils.core import setup
 from setuptools import find_packages
 
+
 import cabric
 
 setup(
     name='cabric',
     version=cabric.version,
-    packages=['cabric'],
+    packages=['cabric','cabric.cloud'],
     url='https://github.com/baixing/cabric',
     download_url='https://github.com/baixing/cabric/tarball/master',
     license='http://opensource.org/licenses/MIT',

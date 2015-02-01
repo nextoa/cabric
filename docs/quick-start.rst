@@ -62,6 +62,34 @@ Cabric 主要针对CentOS做优化，同时内部集成对云平台的操作，�
 
 该操作会帮你自动搭建一个数据中心。
 
+常见错误
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+如果在首次执行时，出现类似如下提示，则很可能是因为使用了错误的APP Key
+
+::
+
+    Traceback (most recent call last):
+      File "/usr/local/pypy/site-packages/fabric/main.py", line 743, in main
+        *args, **kwargs
+      File "/usr/local/pypy/site-packages/fabric/tasks.py", line 424, in execute
+        results['<local-only>'] = task.run(*args, **new_kwargs)
+      File "/usr/local/pypy/site-packages/fabric/tasks.py", line 174, in run
+        return self.wrapped(*args, **kwargs)
+      File "/Users/breezekay/Downloads/zero/fabfile.py", line 85, in init_datacenter
+        cc_key_create()
+      File "/usr/local/pypy/site-packages/cabric/cloud/key.py", line 75, in cc_key_create
+        _, key_id = cc_key_find_one(name)
+      File "/usr/local/pypy/site-packages/cabric/cloud/key.py", line 44, in cc_key_find_one
+        key_pairs = cc_key_find_all(name)
+      File "/usr/local/pypy/site-packages/cabric/cloud/key.py", line 32, in cc_key_find_all
+        if result['total_count']:
+    KeyError: 'total_count'
+
+
+
+
+
 *Note* 因为青云北京1机房与其他机房配置方式略有不同，
 且北京1区资源并不是对所有用户开放的。所以北京1机房不支持使用自动化部署
 
@@ -213,8 +241,8 @@ Cabric 主要针对CentOS做优化，同时内部集成对云平台的操作，�
    * 上传至 其他服务集群，则需要加后缀，比如beta：project1_beta.conf 文件。
 
 
-如果 redis 的配置名称是 redis.conf  那么 上传至任意服务器，都是:
-    * 上传至 online 服务集群，则只需要 redis.conf 文件。
+如果 redis 的配置名称是 redis.conf
+    * 上传至任意集群，则只需要 redis.conf 文件。
 
 
 相关文档后期会整理，一个简单的规则是：如果服务器涉及后端存储，则使用通用配置，其他使用动态配置

@@ -23,6 +23,10 @@ A deploy tool for Centos, based on Fabric.
     :target: https://pypi.python.org/pypi/fabez/
 
 
+Quick Start
+----------------------------
+`Chinese Version <https://github.com/baixing/cabric/blob/master/docs/quick-start.rst>`_
+
 
 FAQ
 ----------------------------
@@ -52,8 +56,20 @@ Create New Project
 Release Note
 ----------------------------
 
+* 0.2.x
+
+    * support cloud feature
+        * currently,we only support `qingcloud <https://www.qingcloud.com>`_
+        * support create router
+        * support create pubkey
+        * support create lan
+        * support create internet
+        * support create instance
+        * support create part-time instance
+
 
 * 0.1.x
+
     * support create tornado app easily,depends on `bree <https://github.com/nextoa/bree>`_
     * support mongo shard feature
     * support local web operation,like django's  manage.py collectstatic

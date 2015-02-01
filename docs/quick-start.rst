@@ -15,6 +15,10 @@ Cabric 主要针对CentOS做优化，同时内部集成对云平台的操作，�
 安装
 --------------------------
 
+因为fabric只支持python2.x版本，所以请确认自己的python版本是否能正常工作。
+
+目前我们的测试环境为pypy2.4
+
 ::
     pip install cabric
     pip install qingcloud-sdk  #可选，如果不使用青云可无视

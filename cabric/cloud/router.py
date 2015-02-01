@@ -102,10 +102,12 @@ def cc_router_create(name='default', firewall_name="default"):
 
     # try to create router if not exists
     router_info = cc_router_find_one(name)
-    if router_info:
+
+    if router_info and router_id:
         print_debug("router `{}' already exists.".format(name))
         router_id = router_info['router_id']
-
+    elif router_info and not router_id:
+        router_id = router_info['router_id']
     else:
         print_debug("router `{}' will be create.".format(name))
         result = cloud_run(h.create_routers, func_kwargs=dict(router_name=name), return_key='routers')

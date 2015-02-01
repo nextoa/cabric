@@ -64,9 +64,11 @@ def cc_lan_find_one(lan_name=None, lan_id=None):
         if pos > -1:
             return lan_list[pos]
     else:
-        lan_list = cc_lan_find_all(lan_name)
-        if lan_list:
-            return lan_list[0]
+        lan_list = cc_lan_find_all()
+        compare = [v['vxnet_name'] for v in lan_list]
+        pos = cloud_name_match(lan_name, compare)
+        if pos > -1:
+            return lan_list[pos]
 
     pass
 
@@ -82,21 +84,20 @@ def cc_lan_create(name='default'):
     if not name:
         print_error("limit name,please set a real name for your LAN.")
 
-    vxnet_id = cc_config_get('lan.' + name)
+    lan_id = cc_config_get('lan.' + name)
+    lan_info = cc_lan_find_one(name)
 
-    if cc_lan_find_one(lan_id=vxnet_id):
-        print_debug("lan {} already exists.".format(vxnet_id))
+    if cc_lan_find_one(name) and lan_id:
+        print_debug("lan {} already exists.".format(name))
         return
+    elif lan_info and not lan_id:
+        lan_id = lan_info['vxnet_id']
+    else:
+        print_debug("lan `{}' will be create.".format(name))
+        result = cloud_run(h.create_vxnets, [name], return_key='vxnets', hold_func=False)
+        lan_id = result[0]
 
-    print_debug("lan `{}' will be create.".format(name))
-
-    result = h.create_vxnets(name)
-
-    if result['ret_code']:
-        raise Exception(result)
-
-    vxnet_id = result['vxnets'][0]
-    cc_config_set('lan.' + name, vxnet_id)
+    cc_config_set('lan.' + name, lan_id)
     cc_config_save()
     pass
 

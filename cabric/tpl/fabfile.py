@@ -93,6 +93,8 @@ def init_datacenter():
     cc_router_bind_lan()
     # bind router to public ip
     cc_router_bind_internet()
+    # bind vpn
+    cc_router_bind_vpn()
 
     # todo create load balancer
 

@@ -94,9 +94,11 @@ def cc_inet_create(name='router'):
     # try to create inet if not exists
     inet_info = cc_inet_find_one(name)
 
-    if inet_info:
+    if inet_info and inet_id:
         print_debug("inet `{}' already exists.".format(name))
         return
+    elif inet_info and not inet_id:
+        inet_id = inet_info['eip_id']
     else:
         print_debug("inet `{}' will be create.".format(name))
         result = cloud_run(h.allocate_eips, func_kwargs=dict(bandwidth=1, eip_name=name), return_key='eips', hold_func=False)

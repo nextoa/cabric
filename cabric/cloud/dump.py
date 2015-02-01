@@ -101,7 +101,9 @@ def cc_dump(names, to, hold=True):
 
     # write to file
     with open('./config/fabric/{}.conf'.format(to), 'w') as fh:
-        fh.write("####Create By Cabric#####\n\n" + "\n".join(remote_list))
+        # todo
+        # fh.write("####Create By Cabric#####\n\n" + "\n".join(remote_list))
+        fh.write("\n".join(remote_list))
 
     pass
 

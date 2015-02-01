@@ -182,7 +182,7 @@ def cc_router_bind_internet(router_name="default", inet_name="router"):
         if router_info['eip']['eip_id'] == inet_id:
             print_debug("router `{}' already bind to public ip:`{}'.".format(router_name, inet_name))
         else:
-            print_debug("router `{}' already bind a public ip {},please dissociate it first,ip:{}".format(router_name, router['eip']['eip_addr']))
+            print_debug("router `{}' already bind a public ip {},please dissociate it first".format(router_name, router_info['eip']['eip_addr']))
         return
 
     print_debug("router `{}' will bind to internet `{}'".format(router_name, inet_name))

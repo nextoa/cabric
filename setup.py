@@ -15,7 +15,6 @@ setup(
     install_requires=[
         'fabric',
         'cliez',
-        'pyyaml'
     ],
     author='WANG WENPEI',
     author_email='wangwenpei@nextoa.com',

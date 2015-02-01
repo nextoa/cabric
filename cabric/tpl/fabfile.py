@@ -21,7 +21,7 @@ def ez(curr):
     # create routes auto
     bind_hosts(curr)
 
-    # use cloud feature
+    # use cloud feature, if you have multiple cloud data center, set bind_cloud here
     # bind_cloud(['pek2','app_key','app_secret'],CLOUD_CLASS)
     pass
 
@@ -65,6 +65,67 @@ def upgrade(tag=None, clean=False):
 
 
 
+# currently, cloud deploy feature only support qingcloud
+try:
+    import qingcloud.iaas
+    # use cloud feature, if you have multiple cloud data center,comment it and set it in `ez` inside.
+    bind_cloud(["pek2", "APP-KEY", "APP-SECRET"], qingcloud.iaas)
+except:
+    print("can't find qingcloud-sdk, if you don't want to use cloud feature,remove this code")
+    pass
+
+
+
+def init_datacenter():
+    """
+    create datacenter
+    :return:
+    """
+    # create key
+    cc_key_create()
+    # create lan
+    cc_lan_create()
+    # create public ip
+    cc_inet_create()
+    # create router
+    cc_router_create()
+    # bind router to lan
+    cc_router_bind_lan()
+    # bind router to public ip
+    cc_router_bind_internet()
+
+    # todo create load balancer
+
+    pass
+
+
+def init_instance(group, nums=1, part_time=False):
+    """
+    create instance
+    :param group:
+    :param nums:
+    :param part_time:
+    :return:
+    """
+    try:
+        nums = int(nums)
+    except:
+        nums = 1
+
+    for i in range(0, nums):
+        cc_instance_create(group, part_time=part_time)
+
+    pass
+
+
+def init_parttime_instance(group, nums=1):
+    """
+    create part-time
+    :param group:
+    :param nums:
+    :return:
+    """
+    return init_instance(group, nums=nums, part_time=True)
 
 
 

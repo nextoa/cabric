@@ -117,11 +117,12 @@ def cc_instance_create(group, owner=None, lan_name='default', part_time=False, i
 
     if part_time:
         parttime_instances = set(parttime_instances)
-        parttime_instances.add(instances['instances_id'])
+        parttime_instances.add(instances[0])
         cc_config_lset('parttime.' + group, parttime_instances)
         cc_config_save()
+        print(cc_config_lget('parttime.' + group))
 
-    pass
+        pass
 
 
 def cc_instance_parttime_start(group):
@@ -139,14 +140,23 @@ def cc_instance_parttime_start(group):
         print("no part-time instances found. skip")
         return
 
-    cloud_run(h.start_instances, func_args=[
-        list(instances)
-    ])
+    for v in instances:
+        try:
+            cloud_run(h.start_instances, func_args=[
+                list([v])
+            ])
+        except Exception as e:
+            if str(e).find('is not stopped'):
+                print(e)
+                pass
+            else:
+                raise
+            pass
 
     pass
 
 
-def cc_instance_stop_part_time(group):
+def cc_instance_parttime_stop(group):
     """
     stop part-time instances
     :param group:
@@ -160,16 +170,26 @@ def cc_instance_stop_part_time(group):
         print("no part-time instances found. skip")
         return
 
-    cloud_run(h.stop_instances, func_args=[
-        list(instances)
-    ])
+    for v in instances:
+        try:
+            cloud_run(h.stop_instances, func_args=[
+                list([v])
+            ])
+        except Exception as e:
+            if str(e).find('is not running'):
+                print(e)
+                pass
+            else:
+                raise
+            pass
+        pass
+
     pass
-
-
 
 
 def cc_instance_port_forward(https=False):
     """
+    @todo
     only allow to forward 80 or 443
     :return:
     """
@@ -178,8 +198,6 @@ def cc_instance_port_forward(https=False):
 
     if https:
         port = 443
-
-
 
     pass
 

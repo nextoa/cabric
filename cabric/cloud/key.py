@@ -2,7 +2,9 @@
 
 
 from cabric.cloud.core import *
-from cabric.cloud.instance import cc_instance_find_all
+from cabric.cloud.config import *
+import cabric.cloud.instance
+
 from cabric.lib import *
 from cabric.lib import _detected_ssh_public_key_type
 
@@ -54,7 +56,7 @@ def cc_key_find_one(name):
     return None, None
 
 
-def cc_key_create(name='root', pub_key='~/.ssh/id_rsa.pub', strict=False):
+def cc_key_create(pub_key='~/.ssh/id_rsa.pub', name=None, strict=False):
     """
     upload a new key to cloud
     :param name: key name
@@ -64,13 +66,22 @@ def cc_key_create(name='root', pub_key='~/.ssh/id_rsa.pub', strict=False):
     """
     h = cloud_init()
     buff = None
+
+    name = cc_config_get('global.author')
+
+    if not name:
+        print_error("system can't find your username")
+
     _, key_id = cc_key_find_one(name)
 
     if key_id:
+        print_debug("key {} exist on cloud".format(name))
         if strict:
             print_error("{} key already on cloud.please check it. or use disable strict mode".format(name))
         else:
             return True
+
+    print_debug("upload key,username:{}".format(name))
 
     with open(os.path.expanduser(pub_key)) as fh:
         buff = fh.read()
@@ -95,7 +106,7 @@ def cc_key_delete(name):
     if not key_id:
         return
 
-    instances_data = cc_instance_find_all(tag='all')
+    instances_data = cabric.cloud.instance.cc_instance_find_all(tag='all')
 
 
     def rebuild(instance):

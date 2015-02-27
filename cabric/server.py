@@ -813,8 +813,8 @@ def server_squid(user=None):
     run('chkconfig --level 35 squid on')
 
     # if user:
-    #     run('yum install -y httpd-tools')
-    #     run('touch /etc/squid/passwd')
+    # run('yum install -y httpd-tools')
+    # run('touch /etc/squid/passwd')
     #     run('htpasswd /etc/squid/passwd {}'.format(user))
     #     run('chown squid /etc/squid/passwd')
 
@@ -872,6 +872,11 @@ def restart_web(name, config=None, strict=False):
 
 
 def restart_monit(config=None):
+    """
+    @deprecated
+    :param config:
+    :return:
+    """
     if config:
         config_monit(config)
         run('service monit restart')
@@ -880,6 +885,12 @@ def restart_monit(config=None):
 
 
 def reboot_monit(name=None, config=None):
+    """
+    @deprecated
+    :param name:
+    :param config:
+    :return:
+    """
     if config:
         config_monit(config)
         run('service monit restart')
@@ -893,9 +904,15 @@ def reboot_supervisor(name=None, config=None):
     if config:
         run('service supervisord stop')
         config_supervisor(config)
-        sleep(3)
-        run('service supervisord start')
-
+        sleep(1)
+        for i in range(0, 3):
+            run('service supervisord start')
+            sleep(1)
+            with settings(warn_only=True):
+                if not run('ps auwx | grep supervisord | grep -v grep').failed:
+                    break
+                pass
+            pass
 
     if name and not config:
         run('supervisorctl restart {}'.format(name))

@@ -177,6 +177,17 @@ def pip(package=None, upgrade=True, pip_path=None):
             run('%s install %s' % (pip_path, package))
 
 
+def pip3(package=None, upgrade=True):
+    """
+    short alias for  pip(...,pip_path='pip3')
+    :param package:
+    :param upgrade:
+    :return:
+    """
+
+    return pip(package=package, upgrade=upgrade, pip_path='pip3')
+
+
 def pip_c(pkg_name, upgrade=True, pip_path='pip'):
     """
     some package need c include
@@ -214,7 +225,7 @@ def pip_fix(file_path, force=False, replace='pip'):
     pass
 
 
-def pip_requirements(file='requirements.txt',upgrade=True,pip_path=None):
+def pip_requirements(file='requirements.txt', upgrade=True, pip_path=None):
     f = os.path.realpath(os.path.expanduser(file))
 
     with open(f, 'r') as fp:
@@ -227,11 +238,21 @@ def pip_requirements(file='requirements.txt',upgrade=True,pip_path=None):
         if p and p.find('#') == -1:
             depends.append(p)
 
-
     for p in depends:
-        pip(p,upgrade,pip_path)
+        pip(p, upgrade, pip_path)
 
     pass
+
+
+def pip3_requirements(file='requirements.txt', upgrade=True):
+    """
+    short alias for pip_requirements(...,pip_path='pip3')
+    :param file:
+    :param upgrade:
+    :return:
+    """
+
+    return pip_requirements(file=file, upgrade=upgrade,pip_path='pip3')
 
 
 def python_fix(file_path, force=False, replace='python'):

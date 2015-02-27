@@ -82,7 +82,7 @@ def cmd_ulimit(limit=65535):
 
     # only support python2.x
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
-        print>> fh, buf
+        print >> fh, buf
 
     put(fh.name, '/etc/security/limits.d/90-nproc.conf')
     os.remove(fh.name)
@@ -252,6 +252,14 @@ pass
 
 
 def wget_install_package(project, version, url, suffix='tar.gz'):
+    """
+    @experimental
+    :param project:
+    :param version:
+    :param url:
+    :param suffix:
+    :return:
+    """
     name = project + '-' + version
 
     run('wget {1}/{0}.{2} -O /tmp/{0}.{2}'.format(name, url, suffix))
@@ -262,5 +270,18 @@ def wget_install_package(project, version, url, suffix='tar.gz'):
                 run('tar -xvzpf {}.{}'.format(name, suffix))
             elif suffix == 'tar.bz2':
                 run('tar -xvjpf {}.{}'.format(name, suffix))
+
+    pass
+
+
+def ps(process_name):
+    """
+    grep proecess
+    :param process_name:
+    :return:
+    """
+    with settings(warn_only=True):
+        run('ps auwx | grep {} | grep -v grep'.format(process_name))
+        pass
 
     pass

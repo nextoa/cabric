@@ -13,6 +13,8 @@ from pythonic import *
 from etc import *
 from user import *
 
+from time import sleep
+
 
 try:
     import pkg_resources  # in package
@@ -891,7 +893,9 @@ def reboot_supervisor(name=None, config=None):
     if config:
         run('service supervisord stop')
         config_supervisor(config)
+        sleep(3)
         run('service supervisord start')
+
 
     if name and not config:
         run('supervisorctl restart {}'.format(name))

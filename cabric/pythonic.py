@@ -33,7 +33,8 @@ def py_python(tag='3.4.2', force=True, compatible=True, pypy='2.4'):
         if compatible:
             pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag), force=force, replace='pip3')
             # use pypy instead python2
-            py_pypy(pypy)
+            if pypy:
+                py_pypy(pypy)
         else:
             pip_fix('/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag), force=force)
             pip('Sphinx', pip_path='/usr/local/lib/python/Versions/{}/bin/pip3'.format(tag))

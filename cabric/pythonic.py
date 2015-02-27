@@ -165,7 +165,7 @@ def pip(package=None, upgrade=True, pip_path=None):
 
     if package:
 
-        if package.lower() in ['pillow']:
+        if package.lower() in ['pillow','uwsgi']:
             return pip_c(package, upgrade=upgrade, pip_path=pip_path)
 
         if package.lower() in ['lxml']:

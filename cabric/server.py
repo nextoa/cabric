@@ -902,10 +902,20 @@ def reboot_monit(name=None, config=None):
 
 def reboot_supervisor(name=None, config=None):
     if config:
-        run('service supervisord stop')
-        config_supervisor(config)
-        sleep(1)
         for i in range(0, 3):
+            print("try stop supervisor...")
+            run('service supervisord stop')
+            sleep(1)
+            with settings(warn_only=True):
+                if run('ps auwx | grep supervisord | grep -v grep').failed:
+                    break
+                pass
+            pass
+
+        config_supervisor(config)
+
+        for i in range(0, 3):
+            print("try start supervisor...")
             run('service supervisord start')
             sleep(1)
             with settings(warn_only=True):

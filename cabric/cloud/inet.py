@@ -52,7 +52,7 @@ def cc_inet_find_all(search_word=None, tag="all"):
     return data
 
 
-def cc_inet_find_one(inet_name=None, inet_id=None):
+def cc_inet_find_one(inet_name=None, inet_id=None, tag="all"):
     """
     get first match inet info
     if set inet_id and inet_name sametime, use inet_id
@@ -62,7 +62,7 @@ def cc_inet_find_one(inet_name=None, inet_id=None):
     """
 
     if inet_id:
-        inet_list = cc_inet_find_all()
+        inet_list = cc_inet_find_all(tag=tag)
 
         compare = [v['eip_id'] for v in inet_list]
 
@@ -71,7 +71,7 @@ def cc_inet_find_one(inet_name=None, inet_id=None):
         if pos > -1:
             return inet_list[pos]
     else:
-        inet_list = cc_inet_find_all(inet_name)
+        inet_list = cc_inet_find_all(inet_name, tag=tag)
         if inet_list:
             return inet_list[0]
 
@@ -108,5 +108,47 @@ def cc_inet_create(name='router'):
     cc_config_set('inet.' + name, inet_id)
     cc_config_save()
     pass
+
+
+def cc_inet_associate(instance_id, inet_id=None):
+    # h = qingcloud.iaas.connect_to_zone()
+    h = cloud_init()
+    cloud_run(h.associate_eip, func_args=[inet_id, instance_id])
+    pass
+
+
+def cc_inet_dissociate(inet_id):
+    # h = qingcloud.iaas.connect_to_zone()
+    h = cloud_init()
+
+    is_associated = cc_inet_find_one(inet_id=inet_id, tag="associated")
+
+    if is_associated:
+        cloud_run(h.dissociate_eips, func_args=[[inet_id]])
+
+    pass
+
+
+def cc_inet_release(inet_id):
+    # h = qingcloud.iaas.connect_to_zone()
+    h = cloud_init()
+
+    is_available = cc_inet_find_one(inet_id=inet_id, tag="available")
+
+
+
+    if is_available:
+        cloud_run(h.release_eips, func_args=[[inet_id]])
+
+    pass
+
+
+
+def cc_inet_change_name(inet_id, new_name):
+    # h = qingcloud.iaas.connect_to_zone()
+    h = cloud_init()
+    h.modify_eip_attributes(inet_id, new_name)
+    pass
+
 
 

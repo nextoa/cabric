@@ -340,7 +340,7 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
     pass
 
 
-def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy_version='2.4', compatible=False):
+def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy_version='2.4', compatible=False,skip_nginx=False):
     run('yum install wget -y')
 
     server_nscd()
@@ -351,8 +351,10 @@ def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy
     utils_git()
 
     io_webdata(uid=user, gid=user)
-    io_slowlog('nginx', user)
-    server_tengine(user=user)
+
+    if not skip_nginx:
+        io_slowlog('nginx', user)
+        server_tengine(user=user)
 
     if only_pypy:
         py_pypy(pypy_version)
@@ -779,6 +781,12 @@ def server_statsdsuite(user='webuser', monit=None):
 
 
 def server_smtp(host, domain, networks):
+    """
+    :param host: smtp domain name. e.g: smtp.nextoa.com
+    :param domain: domain name. e.g: nextoa.com
+    :param networks: 127.0.0.0/8
+    :return:
+    """
     utils_remi()
     cmd_ulimit()
 

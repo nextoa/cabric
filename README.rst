@@ -27,7 +27,7 @@ A deploy tool for Centos, based on Fabric.
 NOTE
 ----------------------------
 
-`This project moved to <https://github.com/nextoa/cabric> permanently`_
+This project moved to `<https://github.com/nextoa/cabric>`_ permanently
 
 
 

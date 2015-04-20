@@ -27,12 +27,12 @@ A deploy tool for Centos, based on Fabric.
 
 Quick Start
 ----------------------------
-`Chinese Version <https://github.com/baixing/cabric/blob/master/docs/quick-start.rst>`_
+`Chinese Version <https://github.com/nextoa/cabric/blob/master/docs/quick-start.rst>`_
 
 
 FAQ
 ----------------------------
-`Chinese Version <https://github.com/baixing/cabric/blob/master/docs/faq.rst>`_
+`Chinese Version <https://github.com/nextoa/cabric/blob/master/docs/faq.rst>`_
 
 
 Install

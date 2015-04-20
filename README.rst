@@ -23,6 +23,14 @@ A deploy tool for Centos, based on Fabric.
     :target: https://pypi.python.org/pypi/fabez/
 
 
+
+NOTE
+----------------------------
+
+`This project moved to <https://github.com/nextoa/cabric> permanently`_
+
+
+
 Quick Start
 ----------------------------
 `Chinese Version <https://github.com/baixing/cabric/blob/master/docs/quick-start.rst>`_
@@ -57,7 +65,6 @@ Release Note
 ----------------------------
 
 * 0.2.x
-
     * support cloud feature
         * currently,we only support `qingcloud <https://www.qingcloud.com>`_
         * support create router

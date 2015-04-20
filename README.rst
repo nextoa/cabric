@@ -24,12 +24,6 @@ A deploy tool for Centos, based on Fabric.
 
 
 
-NOTE
-----------------------------
-
-This project moved to `<https://github.com/nextoa/cabric>`_ permanently
-
-
 
 Quick Start
 ----------------------------
@@ -65,6 +59,7 @@ Release Note
 ----------------------------
 
 * 0.2.x
+    * support mongodb 3.x repo
     * support cloud feature
         * currently,we only support `qingcloud <https://www.qingcloud.com>`_
         * support create router

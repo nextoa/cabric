@@ -14,6 +14,8 @@ from etc import *
 from user import *
 
 from time import sleep
+from lib import read_template
+
 
 
 try:
@@ -119,7 +121,7 @@ def server_nscd():
     pass
 
 
-def server_mongo(card='lo', user='webuser'):
+def server_mongo(card='lo', user='webuser',repo='mongodb3.repo'):
     """
 
     @note this mongo only support 64-bit system
@@ -127,11 +129,7 @@ def server_mongo(card='lo', user='webuser'):
     """
     cmd_ulimit()
 
-    try:
-        buf = pkg_resources.resource_string('cabric', 'tpl/mongodb.repo')
-    except:
-        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mongodb.repo')).read()
-        pass
+    buf = read_template(repo)
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
         print >> fh, buf
@@ -155,15 +153,11 @@ def server_mongo(card='lo', user='webuser'):
     pass
 
 
-def server_mongo_configsvr():
+def server_mongo_configsvr(repo='mongodb3.repo'):
     cmd_ulimit()
 
     # @todo : can merge with server_mongo
-    try:
-        buf = pkg_resources.resource_string('cabric', 'tpl/mongodb.repo')
-    except:
-        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mongodb.repo')).read()
-        pass
+    buf = read_template(repo)
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
         print >> fh, buf
@@ -195,14 +189,10 @@ def server_mongo_configsvr():
     pass
 
 
-def server_mongo_mongos():
+def server_mongo_mongos(repo='mongodb3.repo'):
     cmd_ulimit()
 
-    try:
-        buf = pkg_resources.resource_string('cabric', 'tpl/mongodb.repo')
-    except:
-        buf = open(os.path.join(os.path.dirname(__file__), 'tpl', 'mongodb.repo')).read()
-        pass
+    buf = read_template(repo)
 
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
         print >> fh, buf
@@ -211,7 +201,6 @@ def server_mongo_mongos():
     os.remove(fh.name)
 
     run('yum install mongodb-org-mongos -y')
-
 
 
     # io_slowlog('mongo', 'mongod')

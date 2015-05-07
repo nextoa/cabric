@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     settings_debug = None
     if debug:
-        print("[tornado]:service_notice default mode:{}.".format(current_env))
+        print("[tornado]:settings default used:{}.".format(current_env))
         print("[tornado]:demo debug mode enabled.")
         settings_debug = settings.dev
         pass

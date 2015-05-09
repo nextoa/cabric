@@ -17,7 +17,6 @@ from time import sleep
 from lib import read_template
 
 
-
 try:
     import pkg_resources  # in package
 except:
@@ -38,6 +37,7 @@ def server_nginx(user=None, worker_processes=1, worker_connections=512, old_user
     run('yum install nginx -y')
 
     run('chkconfig --level 35 nginx on')
+    run('chkconfig --level 35 tengine off')
 
     # custom config
     if user:
@@ -121,7 +121,7 @@ def server_nscd():
     pass
 
 
-def server_mongo(card='lo', user='webuser',repo='mongodb3.repo'):
+def server_mongo(card='lo', user='webuser', repo='mongodb3.repo'):
     """
 
     @note this mongo only support 64-bit system
@@ -234,11 +234,8 @@ def server_gitolite(pubkey=None):
 
 def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/supervisor', log_level='info'):
     """
+    @experimental we are planning to use syslog instead log_dir
     Install supervisor
-    Default depends pypy
-    Focus on tornado
-
-    *note* current, don't use root account
     """
 
     # yum supervisor id tooooooooooooooooo old
@@ -268,7 +265,7 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
     # pip('supervisor-logging', pip_path=pip_path)
 
     if not pip_path:
-        python_root = '/usr/local/pypy/bin'
+        python_root = run('dirname `realpath /usr/local/bin/pip`')
 
     run('ln -snf {}/supervisord /usr/local/bin/supervisord'.format(python_root))
     run('ln -snf {}/supervisorctl /usr/local/bin/supervisorctl'.format(python_root))
@@ -329,7 +326,18 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
     pass
 
 
-def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy_version='2.4', compatible=False,skip_nginx=False):
+def server_websuite(user='webuser', python_version='3.4.2', only_pypy=True, pypy_version='2.4', compatible=False, skip_nginx=False):
+    """
+    @deprecated from 1.0,for suite feature,please use suite_* functions
+    :param user:
+    :param python_version:
+    :param only_pypy:
+    :param pypy_version:
+    :param compatible:
+    :param skip_nginx:
+    :return:
+    """
+
     run('yum install wget -y')
 
     server_nscd()
@@ -376,9 +384,18 @@ def server_mysql():
     pass
 
 
+def server_syslog():
+    """
+    centos install syslog-ng default
+    :return:
+    """
+
+    pass
+
+
 def server_tengine(user='webuser', version=None, tornado=True, process=1, connection=1024):
     """
-    syslog note
+    @experimental
     # need change config use syslog-ng
     # source s_sys {
     #         file ("/proc/kmsg" program_override("kernel: "));
@@ -606,6 +623,7 @@ def server_monit(version='5.5-1'):
 
 def server_phpd(user='webuser'):
     """
+    @experimental
     install php
     :return:
     """
@@ -812,7 +830,7 @@ def server_squid(user=None):
     # if user:
     # run('yum install -y httpd-tools')
     # run('touch /etc/squid/passwd')
-    #     run('htpasswd /etc/squid/passwd {}'.format(user))
+    # run('htpasswd /etc/squid/passwd {}'.format(user))
     #     run('chown squid /etc/squid/passwd')
 
     pass

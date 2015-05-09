@@ -287,14 +287,14 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
     buf = template.replace('{$logs}', log_dir) \
         .replace('{$log_level}', log_level)
 
-    replace_variable = 'environment='
-
-    if variable:
-        replace_variable = '{},'.format(variable)
-
-    replace_variable += 'PYTHONUNBUFFERED="x"'
-
-    buf = buf.replace('{$variable}', replace_variable)
+    # replace_variable = 'environment='
+    #
+    # if variable:
+    #     replace_variable = '{},'.format(variable)
+    #
+    # replace_variable += 'PYTHONUNBUFFERED="x"'
+    #
+    # buf = buf.replace('{$variable}', replace_variable)
 
 
     # only support python2.x

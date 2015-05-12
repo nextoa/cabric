@@ -14,7 +14,7 @@ import tornado.ioloop
 import tornado.web
 
 from demo import settings
-from demo.handlers import handlers
+
 
 
 if __name__ == "__main__":
@@ -55,6 +55,8 @@ if __name__ == "__main__":
 
     default_settings = bree.web.build_settings(base_settings, __file__, debug=settings_debug)
     bree.settings = default_settings
+
+    from demo.handlers import handlers
 
     application = tornado.web.Application(handlers, **default_settings)
     application.listen(port)

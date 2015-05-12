@@ -11,10 +11,10 @@ from cabric.cmd import (cmd_git, yum_install)
 # @note if name start py, this is used to install tools
 
 def py_python(tag='3.4.2', force=True, compatible=True, pypy='2.4'):
-    '''
+    """
     install python. include python,setuptools,pip and supervisord
     :param pip_index_url:proxy url
-    '''
+    """
 
     utils_baselib()
 
@@ -27,7 +27,8 @@ def py_python(tag='3.4.2', force=True, compatible=True, pypy='2.4'):
         run('make && make install')
 
     if tag.find('3') == 0:
-        py_pip('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag))
+        # python3 already included pip
+        # py_pip('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag))
         python_fix('/usr/local/lib/python/Versions/{}/bin/python3'.format(tag), force=force)
 
         if compatible:
@@ -165,8 +166,11 @@ def pip(package=None, upgrade=True, pip_path=None):
 
     if package:
 
-        if package.lower() in ['pillow','uwsgi']:
+        if package.lower() in ['pillow', 'uwsgi']:
             return pip_c(package, upgrade=upgrade, pip_path=pip_path)
+
+        if package.lower() in ['mysqlclient']:
+            return pip_hack_mysql(package, upgrade=upgrade, pip_path=pip_path)
 
         if package.lower() in ['lxml']:
             yum_install('libxslt-devel libxml2-devel')
@@ -203,6 +207,24 @@ def pip_c(pkg_name, upgrade=True, pip_path='pip'):
     else:
         run('export C_INCLUDE_PATH={0}/include && export CPLUS_INCLUDE_PATH={0}/include && {1} install {2} && echo "C_INCLUDE_PATH is:" $C_INCLUDE_PATH'.format(python_dir, pip_path, pkg_name))
 
+    pass
+
+
+def pip_hack_mysql(pkg_name, upgrade=True, pip_path='pip'):
+
+
+    run('yum install mysql-devel -y')
+
+    pip_path = run('readlink -f `which {}`'.format(pip_path))
+    python_dir = pip_path.rsplit('/', 2)[0]
+
+    command = 'export DYLD_LIBRARY_PATH="/usr/lib64/mysql" && {0} install {1}'.format(pip_path, pkg_name)
+
+    if upgrade:
+        command += ' -U'
+        pass
+
+    run(command)
     pass
 
 
@@ -252,7 +274,7 @@ def pip3_requirements(file='requirements.txt', upgrade=True):
     :return:
     """
 
-    return pip_requirements(file=file, upgrade=upgrade,pip_path='pip3')
+    return pip_requirements(file=file, upgrade=upgrade, pip_path='pip3')
 
 
 def python_fix(file_path, force=False, replace='python'):

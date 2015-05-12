@@ -37,7 +37,10 @@ def server_nginx(user=None, worker_processes=1, worker_connections=512, old_user
     run('yum install nginx -y')
 
     run('chkconfig --level 35 nginx on')
-    run('chkconfig --level 35 tengine off')
+
+    with settings(warn_only=True):
+        run('chkconfig --level 35 tengine off')
+        pass
 
     # custom config
     if user:
@@ -238,7 +241,7 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
     Install supervisor
     """
 
-    # yum supervisor id tooooooooooooooooo old
+    # yum supervisor id too old
     # run('yum install supervisor -y')
 
     # try:
@@ -257,6 +260,10 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
 
     # default is python_root
 
+
+    with settings(warn_only=True):
+        run("which realpath || ln -sf `which readlink` /usr/local/bin/realpath")
+        pass
 
 
     io_slowlog('supervisor')
@@ -297,7 +304,7 @@ def server_supervisor(user=None, variable=None, pip_path=None, log_dir='/logs/su
     # buf = buf.replace('{$variable}', replace_variable)
 
 
-    # only support python2.x
+    # @todo this style only support python2.x,but fabric only suppport python 2.x,so we don't need worried it too much.
     with tempfile.NamedTemporaryFile('w', delete=False) as fh:
         print >> fh, buf
 
@@ -387,6 +394,7 @@ def server_mysql():
 def server_syslog():
     """
     centos install syslog-ng default
+    @todo we can change default storage
     :return:
     """
 
@@ -842,7 +850,32 @@ def server_influxdb():
 
 
 # restart feature
+
+def restart_nginx(config=None):
+    """
+    @experimental
+    :param config:
+    :param strict:
+    :return:
+    """
+
+    if config:
+        config_nginx(config)
+        with settings(warn_only=True):
+            run('service nginx reload')
+            pass
+    run('service nginx restart')
+
+
+
 def restart_tengine(config=None, strict=False):
+    """
+    @experimental
+    :param config:
+    :param strict:
+    :return:
+    """
+
     # supervisor_restart()
     if config:
         config_nginx(config)
@@ -856,6 +889,7 @@ def restart_tengine(config=None, strict=False):
 
 def restart_web(name, config=None, strict=False):
     """
+    @experimental
     limit:
     supervisor and nginx config name must be same
     :param config:
@@ -915,7 +949,7 @@ def reboot_monit(name=None, config=None):
         # run('service monit restart')
 
 
-def reboot_supervisor(name=None, config=None):
+def restart_supervisor(name=None, config=None):
     if config:
         for i in range(0, 3):
             print("try stop supervisor...")

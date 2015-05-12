@@ -10,6 +10,7 @@ from etc import *
 from git import *
 from dev import *
 from web import *
+from suite import *
 
 from cloud.core import *
 from cloud.config import *

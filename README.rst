@@ -1,28 +1,10 @@
 Cabric
 ==================
 
-.. image:: https://pypip.in/v/cabric/badge.svg
-    :target: https://pypi.python.org/pypi/cabric/
-.. image:: https://pypip.in/d/cabric/badge.svg
-    :target: https://pypi.python.org/pypi/cabric/
-.. image:: https://pypip.in/license/cabric/badge.svg
-    :target: https://pypi.python.org/pypi/cabric/
 
 A deploy tool for Centos, based on Fabric.
 
-
-
-`Fabez` (old package)
---------------------------------------------------------
-
-.. image:: https://pypip.in/v/fabez/badge.svg
-    :target: https://pypi.python.org/pypi/fabez/
-.. image:: https://pypip.in/d/fabez/badge.svg
-    :target: https://pypi.python.org/pypi/fabez/
-.. image:: https://pypip.in/license/fabez/badge.svg
-    :target: https://pypi.python.org/pypi/fabez/
-
-
+*The project has stopped maintenance, but you can still use it, we will focus on docker. please see Dandelion<https://github.com/9nix00/dandelion/>*
 
 
 Quick Start

@@ -4,9 +4,12 @@ Cabric
 
 A deploy tool for Centos, based on Fabric.
 
+Important Note
+---------------------
 
-The project has stopped maintenance, but you can still use it, we will focus on docker. please see `Dandelion <https://github.com/9nix00/dandelion/>`_ 
+this project was designed for Centos6,it's a little old.
 
+I am planning a more elegant solution for Centos In my spare time.
 
 Quick Start
 ----------------------------

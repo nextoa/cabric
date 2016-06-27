@@ -11,6 +11,16 @@ this project was designed for Centos6,it's a little old.
 
 I am planning a more elegant solution for Centos In my spare time.
 
+
+CentOS released 7.x
+
+Fabric added task feature
+
+I believe we can do more with a better way.
+
+
+
+
 Quick Start
 ----------------------------
 `Chinese Version <https://github.com/nextoa/cabric/blob/master/docs/quick-start.rst>`_

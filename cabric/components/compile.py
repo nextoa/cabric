@@ -17,7 +17,7 @@ class CompileComponent(Component):
         :param options:
         :return:
         """
-        tag = 'o' if options.optimize == 2 else 'c'
+        tag = 'o'
 
         for v in os.walk(options.dir):
             for base_name in v[2]:
@@ -26,13 +26,27 @@ class CompileComponent(Component):
                 file_name = os.path.join(v[0], base_name)
 
                 kwargs = {
-                    'optimize': 2
+
                 }
 
                 if sys.version > (3, 2):
                     kwargs = {
-                        'optimize': options.optimize
+                        'optimize': 2
                     }
+
+                    if options.keep_document:
+                        kwargs = {
+                            'optimize': 1
+                        }
+                        tag = 'c'
+
+                    if options.original:
+                        kwargs = {
+                            'optimize': 1
+                        }
+
+                        tag = 'c'
+
                     pass
 
                 py_compile.compile(file_name, cfile=file_name + tag, **kwargs)

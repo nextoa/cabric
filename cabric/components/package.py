@@ -17,6 +17,10 @@ class PackageComponent(Component):
             repo = options.source
             pass
 
+        if options.register is True:
+            os.system('python setup.py register -r %s' % repo)
+            pass
+
         os.system('python setup.py sdist upload -r %s' % repo)
         pass
 
@@ -26,7 +30,8 @@ class PackageComponent(Component):
         sub parser document
         """
         return [
-            (('--source', '-s'), dict(help='try load repo local path.', )),
+            (('--register', '-r'), dict(action='store_true', help='register package to repo.')),
+            (('--source', '-s'), dict(default='cabric', help='try load private repo.', )),
             (('--public',), dict(action='store_true', help='upload to pypi repo.')),
         ]
         pass

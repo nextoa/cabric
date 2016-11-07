@@ -11,6 +11,7 @@ conf.GENERAL_ARGUMENTS = [
     (('--dir',), dict(nargs='?', default=os.getcwd(), help='set working directory')),
     (('--debug',), dict(action='store_true', help='open debug mode')),
     (('--verbose', '-v'), dict(action='count')),
+    (('--env', '-s'), dict(nargs='?', default='beta', help='set environment')),
 ]
 conf.EPILOG = 'You can submit issues at: https://www.github.com/nextoa/cabric'
 

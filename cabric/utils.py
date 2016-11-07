@@ -1,92 +1,167 @@
 # -*- coding: utf-8 -*-
 
-from fabric.api import *
+
+import os
+import sys
+
+from fabric.state import env_options, env
+from fabric.main import parse_options, update_output_levels, load_settings, parse_arguments
+from fabric.api import put
+from fabric.api import run as fabric_run
+from fabric.api import local as fabric_local
+from fabric.tasks import execute as fabric_execute
+from fabric.network import disconnect_all
+from fabric.state import output
 
 
-def utils_git(proxy=None, ignore_perm=True):
-    '''
-    Install git
-    :param proxy:proxy server
-    :return:
-    '''
-    run('yum install git -y')
-
-    if proxy:
-        run('git config --global http.proxy {}'.format(proxy))
-
-    if ignore_perm:
-        run('git config --global core.fileMode false')
-
-    pass
-
-
-def rm_utils_git():
+def get_roots(project):
     """
-    remove git and git config
-    :return:
+    get relate config root of cabric.
+
+    ..note::
+
+        if config root or sub root not exist. it will raise OSError
+
+    :return: tuple package_root,stage_root,fabric_root
     """
-    with settings(warn_only=True):
-        run('yum erase git -y')
-        run('rm -rf ~/.gitconfig')
+
+    root = os.path.join(project, 'config')
+
+    if not os.path.exists(root):
+        raise OSError("%s not exists or permission denied" % root)
+
+    package_root = os.path.join(root, 'cabric')
+    config_root = os.path.join(root, 'stage')
+    fabric_root = os.path.join(root, 'fabric')
+
+    roots = (package_root, config_root, fabric_root)
+
+    for sub_root in roots:
+        if not os.path.exists(sub_root):
+            raise OSError("%s not exists or permission denied" % sub_root)
+        pass
+
+    return roots
 
 
-def utils_baselib():
+def mirror_put(local_root, remote_path, validate=True):
     """
-    install base package
-    :return:
-    """
-    run(
-        'yum install gcc-c++ make zlib-devel libxml2  libxml2-devel  bzip2-libs bzip2-devel  libcurl-devel  libjpeg libjpeg-devel  libpng libpng-devel  freetype freetype-devel  libmcrypt libmcrypt-devel  libtool-ltdl libtool-ltdl-devel openssl-devel autoconf re2c bison pcre_devel pcre   libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel -y')
-    run('mkdir -p /usr/local/var/run')
-    pass
+    mirror input
+    :param local_root:
+    :param remote_path:
+    :param validate:
 
-
-def utils_imagelib():
-    run('yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel  lcms2-devel libwebp-devel tcl-devel tk-devel -y')
-    pass
-
-
-def utils_disktools():
-    run('yum install parted xfsprogs kmod-xfs -y')
-    pass
-
-
-def utils_epel():
-    """
-    install epel lib
     :return:
     """
-    with settings(warn_only=True):
-        run('rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm')
+
+    local_path = local_root + remote_path
+
+    if validate:
+        checks = [
+            not os.path.exists(local_root),
+            not os.path.exists(local_path),
+        ]
+
+        if True in checks:
+            raise OSError("%s not exists" % local_path)
+
+    put(local_path, remote_path)
     pass
 
 
-def utils_remi():
+def parse_hosts(file):
     """
-    install epel lib
+    :param file:
     :return:
     """
-    with settings(warn_only=True):
-        run('rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm')
-    pass
+
+    file = os.path.expanduser(file)
+
+    with open(file, 'r') as fp:
+        buffer = fp.read()
+
+    host_list = buffer.strip("\n").split("\n")
+    machines = []
+    for v in host_list[:]:
+        addr = v.strip()
+        if addr.find('#') == 0:
+            continue
+
+        # support inline comment
+        machines.append(addr.split("#")[0].strip())
+
+    return machines
 
 
-def utils_hg(proxy=None):
+def bind_hosts(fabric_root, select_env):
     """
-    Install Mercurial
-    :param proxy:proxy server
+    bind hosts from file
+    :param fabric_root:
+    :param select_env:
     :return:
     """
-    run('yum install mercurial -y')
 
+    machine_config = os.path.join(fabric_root, select_env + '.conf')
+
+    if not os.path.exists(machine_config):
+        raise OSError("%s not exist or permission denied." % machine_config)
+
+    parser, options, arguments = parse_options()
+
+    # Handle regular args vs -- args
+    arguments = parser.largs
+    remainder_arguments = parser.rargs
+
+    for option in env_options:
+        env[option.dest] = getattr(options, option.dest)
+
+    env.hosts = parse_hosts(machine_config)
+    env.use_ssh_config = True
+    env.roledefs[select_env] = env.hosts
+
+    for key in ['hosts', 'roles', 'exclude_hosts']:
+        if key in env and isinstance(env[key], basestring):
+            env[key] = env[key].split(',')
+
+    # Handle output control level show/hide
+    update_output_levels(show=options.show, hide=options.hide)
+    env.update(load_settings(env.rcfile))
+
+    return machine_config
+
+
+def run(*args, **kwargs):
+    if env.hosts:
+        return fabric_run(*args, **kwargs)
+    else:
+        return fabric_local(*args, **kwargs)
     pass
 
 
-def utils_human():
-    """
-    Install some tools for human-readable
-    :return:
-    """
-    run('yum install htop ngrep -y')
-    pass
+def execute(commands):
+    try:
+        commands_to_run = [(v, [], {}, [], [], []) for v in commands]
 
+        for name, args, kwargs, arg_hosts, arg_roles, arg_exclude_hosts in commands_to_run:
+            fabric_execute(
+                    name,
+                    hosts=arg_hosts,
+                    roles=arg_roles,
+                    exclude_hosts=arg_exclude_hosts,
+                    *args, **kwargs
+            )
+
+    except SystemExit:
+        # a number of internal functions might raise this one.
+        raise
+    except KeyboardInterrupt:
+        if output.status:
+            sys.stderr.write("\nStopped.\n")
+        sys.exit(1)
+    except:
+        sys.excepthook(*sys.exc_info())
+        # we might leave stale threads if we don't explicitly exit()
+        sys.exit(1)
+    finally:
+        disconnect_all()
+    pass

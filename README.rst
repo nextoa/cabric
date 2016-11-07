@@ -8,7 +8,7 @@ Cabric
 .. image:: https://pypip.in/license/cabric/badge.svg
 :target: https://pypi.python.org/pypi/cabric/
 
-A deploy tool for Centos, based on Fabric.
+Cabric,Fabric companion.
 
 
 新候选词:
@@ -41,12 +41,21 @@ Feature
     cab prepare                  #安装缺失的依赖,并检测python的环境
     cab init                     #根据配置,初始化云资源
     cab init-project             #根据配置,初始化项目配置
+
     cab ez:<ENV> install         #根据环境,安装依赖包
     cab ez:<ENV> config          #根据环境,更新配置
     cab ez:<ENV> deploy          #根据环境,部署代码
+
     cab compile                  #针对python的编译策略
     cab ez:<ENV> release         #根据环境,发布包(只针对python,发布公网包,发布私有包,发布spider)
     cab clean                    #清理编译文件等
+
+
+原生fabric的一些不太喜欢的地方
+---------------------------
+
+每个入口的env都是独立的,这会带来一个讨厌的问题环境变量无法共享
+
 
 
 

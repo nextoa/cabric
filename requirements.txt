@@ -1,3 +1,3 @@
 requests
 fabric
-cliez>=2.0.7
+cliez

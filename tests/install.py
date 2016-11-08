@@ -26,4 +26,11 @@ class InstallComponentTests(unittest.TestCase):
                                                       '--dir', __file__.rsplit('/', 2)[0]])
         pass
 
+    def test_dev(self):
+        parser.parse(argparse.ArgumentParser(), argv=['command', 'install',
+                                                      '--debug',
+                                                      '--env', 'dev',
+                                                      '--dir', __file__.rsplit('/', 2)[0]])
+        pass
+
     pass

@@ -9,9 +9,19 @@ from fabric.main import parse_options, update_output_levels, load_settings, pars
 from fabric.api import put
 from fabric.api import run as fabric_run
 from fabric.api import local as fabric_local
-from fabric.tasks import execute as fabric_execute
+from fabric.job_queue import JobQueue
 from fabric.network import disconnect_all
 from fabric.state import output
+from fabric.task_utils import parse_kwargs
+from fabric.tasks import WrappedCallableTask, requires_parallel, _execute
+from fabric.exceptions import NetworkError
+from fabric.utils import abort, warn, error
+from fabric.context_managers import settings
+from fabric.tasks import execute as fab_execute
+
+
+def _is_network_error_ignored():
+    return not env.use_exceptions_for['network'] and env.skip_bad_hosts
 
 
 def get_roots(project):
@@ -56,16 +66,18 @@ def mirror_put(local_root, remote_path, validate=True):
 
     local_path = local_root + remote_path
 
-    if validate:
-        checks = [
-            not os.path.exists(local_root),
-            not os.path.exists(local_path),
-        ]
+    checks = [
+        not os.path.exists(local_root),
+        not os.path.exists(local_path),
+    ]
 
+    if validate:
         if True in checks:
             raise OSError("%s not exists" % local_path)
 
-    put(local_path, remote_path)
+    if False not in checks:
+        put(local_path, remote_path)
+
     pass
 
 
@@ -134,8 +146,149 @@ def run(*args, **kwargs):
     if env.hosts:
         return fabric_run(*args, **kwargs)
     else:
-        return fabric_local(*args, **kwargs)
+        return fabric_local(capture=True, *args, **kwargs)
     pass
+
+
+def fabric_execute(task, *args, **kwargs):
+    """
+
+    hack for `fabric.execute`. most of the code copy from `fabric.execute`
+
+    Execute ``task`` (callable or name), honoring host/role decorators, etc.
+
+    ``task`` may be an actual callable object, or it may be a registered task
+    name, which is used to look up a callable just as if the name had been
+    given on the command line (including :ref:`namespaced tasks <namespaces>`,
+    e.g. ``"deploy.migrate"``.
+
+    The task will then be executed once per host in its host list, which is
+    (again) assembled in the same manner as CLI-specified tasks: drawing from
+    :option:`-H`, :ref:`env.hosts <hosts>`, the `~fabric.decorators.hosts` or
+    `~fabric.decorators.roles` decorators, and so forth.
+
+    ``host``, ``hosts``, ``role``, ``roles`` and ``exclude_hosts`` kwargs will
+    be stripped out of the final call, and used to set the task's host list, as
+    if they had been specified on the command line like e.g. ``fab
+    taskname:host=hostname``.
+
+    Any other arguments or keyword arguments will be passed verbatim into
+    ``task`` (the function itself -- not the ``@task`` decorator wrapping your
+    function!) when it is called, so ``execute(mytask, 'arg1',
+    kwarg1='value')`` will (once per host) invoke ``mytask('arg1',
+    kwarg1='value')``.
+
+    :returns:
+        a dictionary mapping host strings to the given task's return value for
+        that host's execution run. For example, ``execute(foo, hosts=['a',
+        'b'])`` might return ``{'a': None, 'b': 'bar'}`` if ``foo`` returned
+        nothing on host `a` but returned ``'bar'`` on host `b`.
+
+        In situations where a task execution fails for a given host but overall
+        progress does not abort (such as when :ref:`env.skip_bad_hosts
+        <skip-bad-hosts>` is True) the return value for that host will be the
+        error object or message.
+
+    .. seealso::
+        :ref:`The execute usage docs <execute>`, for an expanded explanation
+        and some examples.
+
+    .. versionadded:: 1.3
+    .. versionchanged:: 1.4
+        Added the return value mapping; previously this function had no defined
+        return value.
+    """
+    my_env = {'clean_revert': True}
+    results = {}
+
+    dunder_name = getattr(task, '__name__', None)
+    my_env['command'] = getattr(task, 'name', dunder_name)
+
+    task = WrappedCallableTask(task)
+
+    # Filter out hosts/roles kwargs
+    new_kwargs, hosts, roles, exclude_hosts = parse_kwargs(kwargs)
+    # Set up host list
+    my_env['all_hosts'], my_env['effective_roles'] = task.get_hosts_and_effective_roles(hosts, roles,
+                                                                                        exclude_hosts, env)
+
+    parallel = requires_parallel(task)
+
+    if parallel:
+        # Import multiprocessing if needed, erroring out usefully
+        # if it can't.
+        try:
+            import multiprocessing
+        except ImportError:
+            import traceback
+            tb = traceback.format_exc()
+            abort(tb + """
+    At least one task needs to be run in parallel, but the
+    multiprocessing module cannot be imported (see above
+    traceback.) Please make sure the module is installed
+    or that the above ImportError is fixed.""")
+    else:
+        multiprocessing = None
+
+    # Get pool size for this task
+    pool_size = task.get_pool_size(my_env['all_hosts'], env.pool_size)
+    # Set up job queue in case parallel is needed
+    queue = multiprocessing.Queue() if parallel else None
+    jobs = JobQueue(pool_size, queue)
+    if output.debug:
+        jobs._debug = True
+
+    # Call on host list
+    if my_env['all_hosts']:
+        # Attempt to cycle on hosts, skipping if needed
+        for host in my_env['all_hosts']:
+            try:
+                results[host] = _execute(
+                        task, host, my_env, args, new_kwargs, jobs, queue,
+                        multiprocessing
+                )
+            except NetworkError, e:
+                results[host] = e
+                # Backwards compat test re: whether to use an exception or
+                # abort
+                if not env.use_exceptions_for['network']:
+                    func = warn if env.skip_bad_hosts else abort
+                    error(e.message, func=func, exception=e.wrapped)
+                else:
+                    raise
+
+            # If requested, clear out connections here and not just at the end.
+            if env.eagerly_disconnect:
+                disconnect_all()
+
+        # If running in parallel, block until job queue is emptied
+        if jobs:
+            err = "One or more hosts failed while executing task '%s'" % (
+                my_env['command']
+            )
+            jobs.close()
+            # Abort if any children did not exit cleanly (fail-fast).
+            # This prevents Fabric from continuing on to any other tasks.
+            # Otherwise, pull in results from the child run.
+            ran_jobs = jobs.run()
+            for name, d in ran_jobs.iteritems():
+                if d['exit_code'] != 0:
+                    if isinstance(d['results'], NetworkError) and \
+                            _is_network_error_ignored():
+                        error(d['results'].message, func=warn, exception=d['results'].wrapped)
+                    elif isinstance(d['results'], BaseException):
+                        error(err, exception=d['results'])
+                    else:
+                        error(err)
+                results[name] = d['results']
+
+    # Or just run once for local-only
+    else:
+        with settings(**my_env):
+            results['<local-only>'] = task.run(*args, **new_kwargs)
+    # Return what we can from the inner task executions
+
+    return results
 
 
 def execute(commands):
@@ -143,16 +296,9 @@ def execute(commands):
         commands_to_run = [(v, [], {}, [], [], []) for v in commands]
 
         for name, args, kwargs, arg_hosts, arg_roles, arg_exclude_hosts in commands_to_run:
-            fabric_execute(
-                    name,
-                    hosts=arg_hosts,
-                    roles=arg_roles,
-                    exclude_hosts=arg_exclude_hosts,
-                    *args, **kwargs
-            )
-
-    except SystemExit:
-        # a number of internal functions might raise this one.
+            fab_execute(name, hosts=arg_hosts, roles=arg_roles, exclude_hosts=arg_exclude_hosts, *args, **kwargs)
+            pass
+    except SystemExit:  # a number of internal functions might raise this one.
         raise
     except KeyboardInterrupt:
         if output.status:
@@ -165,3 +311,18 @@ def execute(commands):
     finally:
         disconnect_all()
     pass
+
+
+def get_platform():
+    remote_os = run('uname')
+    remote_os = remote_os.lower().strip("\n")
+
+    if remote_os == 'darwin':
+        return 'mac'
+    elif remote_os == 'linux':
+        distribute = run("gawk -F= '/^NAME/{print $2}' /etc/os-release")
+        if 'centos' in distribute.lower():
+            return 'centos'
+        pass
+
+    return 'unknown'

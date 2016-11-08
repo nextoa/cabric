@@ -4,16 +4,40 @@ import os
 import sys
 import json
 from cliez.component import Component
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform
 
 
 class InstallComponent(Component):
     # un-comment this can disable global options
     # exclude_global_option = True
 
-    def install_yum(self, root, pkg_list):
-        mirror_put(root, '/etc/yum.repos.d', validate=False)
-        run('yum install -y {}'.format(' '.join(pkg_list)))
+    def install_package(self, root, config):
+        """
+
+        :param root: config root directory path
+        :param config: package.json config
+        :return:
+        """
+
+        remote_os = get_platform()
+
+        if remote_os == 'centos':
+            pkg = config.get('yum')
+            if not pkg:
+                return
+
+            mirror_put(root, '/etc/yum.repos.d', validate=False)
+            run('yum install -y {}'.format(' '.join(pkg)))
+            pass
+        elif remote_os == 'mac':
+            pkg = config.get('brew')
+            if not pkg:
+                return
+            run('brew install {}'.format(' '.join(pkg)))
+            pass
+        else:
+            raise NotImplemented("not support platform.")
+
         pass
 
     def install_pypi(self):
@@ -42,14 +66,14 @@ class InstallComponent(Component):
 
         # try upload repo config if it can recognize
         using_config = os.path.join(config_root, options.env)
-        packages_config = json.load(open(os.path.join(package_root, options.env, 'packages.json'), 'r'))
+        try:
+            packages_config = json.load(open(os.path.join(package_root, options.env, 'packages.json'), 'r'))
+        except ValueError:
+            self.error("Invalid json syntax:%s" % os.path.join(package_root, options.env, 'packages.json'))
 
-
-        def hi():
-            run('echo hello')
-            pass
-
-        execute([hi])
+        execute([
+            lambda: self.install_package(using_config, packages_config)
+        ])
         pass
 
     @classmethod

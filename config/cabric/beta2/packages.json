@@ -1,0 +1,21 @@
+{
+  "yum": [
+    "epel-release",
+    "mariadb-devel",
+    "mariadb-libs",
+    "libxslt",
+    "libxslt-devel",
+    "tmux",
+    "certbot",
+    "telnet",
+    "htop",
+    "wget",
+    "sqlite-devel",
+    "libffi-devel"
+  ],
+  "brew": [
+  ],
+  "nodejs": [
+    "pug"
+  ]
+}

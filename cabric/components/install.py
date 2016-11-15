@@ -74,7 +74,7 @@ class InstallComponent(Component):
 
         run('test -d /usr/local/var/pyenv/plugins/pyenv-virtualenv || git clone https://github.com/yyuu/pyenv-virtualenv.git /usr/local/var/pyenv/plugins/pyenv-virtualenv')
         run('export PYENV_ROOT="/usr/local/var/pyenv/" && eval "$(pyenv init -)"')
-        run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install %s' % self.system_python_version)
+        run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % self.system_python_version)
 
         command_list = [
             """grep "PYENV_ROOT" /etc/profile || echo 'export PYENV_ROOT="/usr/local/var/pyenv/"' >> /etc/profile""",

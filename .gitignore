@@ -59,8 +59,6 @@ trash
 */trash
 sketch
 ./fabfile.py
-config/cabric/
-config/fabez/
 demo/qingcloud
 webapp
 demo

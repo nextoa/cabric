@@ -6,12 +6,12 @@ import sys
 
 from fabric.state import env_options, env
 from fabric.main import parse_options, update_output_levels, load_settings
-from fabric.api import put
 from fabric.api import run as fabric_run
 from fabric.api import local as fabric_local
 from fabric.network import disconnect_all
 from fabric.state import output
 from fabric.tasks import execute as fab_execute
+from fabric.context_managers import settings as fabric_settings
 
 
 def _is_network_error_ignored():
@@ -231,3 +231,35 @@ def get_platform():
         pass
 
     return 'unknown'
+
+
+def exist_user(user):
+    """
+    check user exist or not
+    :param user:
+    :return:
+    """
+
+    with fabric_settings(warn_only=True):
+        if run('cat /etc/passwd | grep ^%s:' % user).failed:
+            return False
+        else:
+            return True
+
+    pass
+
+
+def exist_group(group):
+    """
+    check group exist or not
+    :param user:
+    :return:
+    """
+
+    with fabric_settings(warn_only=True):
+        if run('cat /etc/group | grep ^%s:' % group).failed:
+            return False
+        else:
+            return True
+
+    pass

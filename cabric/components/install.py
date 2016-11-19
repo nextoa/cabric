@@ -5,7 +5,10 @@ import sys
 
 import json
 from cliez.component import Component
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, run_block
+from cabric.utils import get_roots, mirror_put, run, \
+    bind_hosts, execute, get_platform, run_block, \
+    exist_group, exist_user
+
 from fabric.context_managers import settings
 
 try:
@@ -19,6 +22,64 @@ class InstallComponent(Component):
     # exclude_global_option = True
 
     system_python_version = '2.7.11'
+
+    def install_user(self, users):
+        """
+        install user
+
+        ..note::
+
+            user will only install on linux machine.
+
+        :return:
+        """
+
+        def on_centos():
+            """
+            workflow
+
+            * parse config and set default value
+                * force set shell to /sbin/nologin when system flag is set
+                * cause error when config.name not exists
+            * skip create when user exists
+            * create group explicitly when user specify and not same config.name
+
+            :return:
+            """
+            for user in users:
+                username = user.get('name')
+                groupname = user.get('group', username)
+                home = user.get('home', '/home/{}'.format(username))
+                shell = user.get('shell', '`which bash`')
+                system_flag = user.get('system', False)
+
+                if system_flag:
+                    shell = '/sbin/nologin'
+
+                if not username:
+                    self.error("invalid user config")
+
+                if exist_user(username):
+                    self.warn("user `%s' exist.skip to create." % username)
+                    continue
+
+                system_str = '-r' if system_flag else ''
+
+                if groupname == username:
+                    group_str = '-U'
+                else:
+                    if not exist_group(groupname):
+                        run('groupadd {1} {0}'.format(groupname, system_str))
+                        pass
+                    group_str = '-g {}'.format(groupname)
+
+                run('useradd {1} -d {2} {4} -s {3} {0}'.format(username, group_str,
+                                                               home, shell, system_str))
+
+                pass
+
+        run_block(centos=on_centos)
+        pass
 
     def install_package(self, root, pkgs_config):
         """
@@ -141,6 +202,9 @@ class InstallComponent(Component):
 
             * try upload repo config if it can recognize
             * execute install
+            * create user if not exists (only on linux machine)
+            * execute custom script
+            * enable register service
             * finish
 
         :param options:
@@ -152,10 +216,16 @@ class InstallComponent(Component):
 
         # try upload repo config if it can recognize
         using_config = os.path.join(config_root, options.env)
+
         try:
             packages_config = json.load(open(os.path.join(package_root, options.env, 'packages.json'), 'r'))
         except ValueError:
             self.error("Invalid json syntax:%s" % os.path.join(package_root, options.env, 'packages.json'))
+
+        try:
+            env_config = json.load(open(os.path.join(package_root, options.env, 'env.json'), 'r'))
+        except ValueError:
+            self.error("Invalid json syntax:%s" % os.path.join(package_root, options.env, 'env.json'))
 
         execute_list = []
 
@@ -167,6 +237,9 @@ class InstallComponent(Component):
 
         if not options.skip_node:
             execute_list.append(lambda: self.install_node(using_config, packages_config))
+
+        if not options.skip_user:
+            execute_list.append(lambda: self.install_user(env_config.get('users', [])))
 
         if execute_list:
             execute(execute_list)
@@ -184,6 +257,7 @@ class InstallComponent(Component):
             (('--skip-pkg',), dict(action='store_true', help='skip install pkg', )),
             (('--skip-pyenv',), dict(action='store_true', help='skip install pyenv', )),
             (('--skip-node',), dict(action='store_true', help='skip install node', )),
+            (('--skip-user',), dict(action='store_true', help='skip install user', )),
         ]
         pass
 

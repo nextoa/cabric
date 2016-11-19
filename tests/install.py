@@ -24,6 +24,7 @@ class InstallComponentTests(unittest.TestCase):
                                                       '--debug',
                                                       '--skip-pyenv',
                                                       '--skip-node',
+                                                      '--skip-user',
                                                       '--env', 'beta',
                                                       '--dir', __file__.rsplit('/', 2)[0]])
         pass
@@ -50,6 +51,7 @@ class InstallComponentTests(unittest.TestCase):
                                                       '--debug',
                                                       '--skip-pkg',
                                                       '--skip-node',
+                                                      '--skip-user',
                                                       '--env', 'beta',
                                                       '--dir', __file__.rsplit('/', 2)[0]])
         pass
@@ -76,6 +78,7 @@ class InstallComponentTests(unittest.TestCase):
                                                       '--debug',
                                                       '--skip-pkg',
                                                       '--skip-pyenv',
+                                                      '--skip-user',
                                                       '--env', 'beta',
                                                       '--dir', __file__.rsplit('/', 2)[0]])
         pass
@@ -97,6 +100,16 @@ class InstallComponentTests(unittest.TestCase):
                                                       '--env', 'dev',
                                                       '--dir', __file__.rsplit('/', 2)[0]])
 
+        pass
+
+    def test_only_user_centos(self):
+        parser.parse(argparse.ArgumentParser(), argv=['command', 'install',
+                                                      '--debug',
+                                                      '--skip-pkg',
+                                                      '--skip-pyenv',
+                                                      '--skip-node',
+                                                      '--env', 'beta',
+                                                      '--dir', __file__.rsplit('/', 2)[0]])
         pass
 
     pass

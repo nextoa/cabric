@@ -5,13 +5,15 @@ import os
 import sys
 
 from fabric.state import env_options, env
-from fabric.main import parse_options, update_output_levels, load_settings
+
 from fabric.api import run as fabric_run
 from fabric.api import local as fabric_local
 from fabric.network import disconnect_all
 from fabric.state import output
 from fabric.tasks import execute as fab_execute
 from fabric.context_managers import settings as fabric_settings
+
+from cabric.bridge import parse_options, update_output_levels, load_settings
 
 
 def _is_network_error_ignored():
@@ -231,6 +233,10 @@ def get_platform():
         pass
 
     return 'unknown'
+
+
+def get_repo():
+    return fabric_local('git remote get-url origin --push', capture=True)
 
 
 def exist_user(user):

@@ -1,3 +1,5 @@
 requests
 fabric
 cliez
+pycrypto
+gitpython

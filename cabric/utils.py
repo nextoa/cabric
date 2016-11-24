@@ -50,6 +50,31 @@ def get_roots(project):
     return roots
 
 
+def put(local_path, remote_path):
+    """
+    ..todo::
+
+        this should be improved.
+        it may ignore .* file
+
+    :param local_path:
+    :param remote_path:
+    :return:
+    """
+    if env.hosts:
+        if os.path.isdir(local_path):
+            fabric_local("prsync {2} {0}/* {1}".format(local_path, remote_path,
+                                                       ' '.join(["-H %s" % v for v in env.hosts])))
+        else:
+            fabric_local("prsync {2} {0} {1}".format(local_path, remote_path,
+                                                     ' '.join(["-H %s" % v for v in env.hosts])))
+
+    else:
+        fabric_local("cp -rf %s %s" % (local_path, remote_path))
+
+    pass
+
+
 def mirror_put(local_root, remote_path, validate=True):
     """
     mirror input
@@ -77,11 +102,7 @@ def mirror_put(local_root, remote_path, validate=True):
 
     # all path exists,then try upload or copy it
     if True not in checks:
-        if env.hosts:
-            fabric_local("prsync {2} {0}/* {1}".format(local_path, remote_path,
-                                                       ' '.join(["-H %s" % v for v in env.hosts])))
-        else:
-            fabric_local("cp -rf %s %s" % (local_path, remote_path))
+        put(local_path, remote_path)
 
     pass
 
@@ -233,6 +254,16 @@ def get_platform():
         pass
 
     return 'unknown'
+
+
+def get_home(user):
+    with fabric_settings(warn_only=True):
+        if run('cat /etc/passwd | grep "^%s:"' % user).failed:
+            raise ValueError("User:%s not exits" % user)
+        else:
+            user_path = run("cat /etc/passwd | grep '^%s:' | awk -F ':' '{print $6}'" % user)
+            return user_path
+    pass
 
 
 def get_repo():

@@ -6,10 +6,8 @@ import requests
 import json
 from getpass import getpass
 from cliez.component import Component
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, get_repo
+from cabric.utils import get_roots, bind_hosts, execute, get_repo, put, run, get_home
 from Crypto.PublicKey import RSA
-
-print(sys.path)
 from git import config as pygit
 
 try:
@@ -19,38 +17,65 @@ except NameError:
 
 
 class DeployComponent(Component):
-    def upload_deploy_key(self, private_key, remote_user, github=None, force_upload=False, key_length=8192):
+    def upload_deploy_key(self, private_key, remote_user, project_name,
+                          github=None, force_renew=False, key_length=8192):
         """
         upload deploy key
 
         :param string private_key: private key local path
             default is ~/.ssh/.deploies/`github`.rsa
         :param string remote_user: remote user name to deploy
+        :param string project_name: a project name
         :param string github: github repo name
-        :param bool force_upload: try replace exist key if key exists,default is False
+        :param bool force_renew: try to replace deploy key when use auto-generate
         :param int key_length: must a legal ssh key length value. default is 8192
 
 
         ..note::
-            if private_key path is not exists,but github is set. cabric will try auto create private-key.
 
             if you use github and want to use auto generate private-key feature.
             there is two ways can do this:
 
                 - you must set access token in your ~/.gitconfig file
-                - you must disable github two-factor authentication.
-
+                - you must disable github two-factor authentication,
+                    input your username and password.
 
             currently, we use `<remote_user>@cabric` as our deploy key name.
             so if you upload your key use to other purpose, don't use `@cabric` as key suffix.
 
+
+
+            if github deploy key already exist and you want to replace deploy key. you must set `--fresh-new' option.
+
+
+            cabric allow each machine deploy multiple github project,
+            but disallow deploy same name project in one user.
+
+            if you still want do this.
+                - you can set github value if you use it.
+                - deploy them in different remote user.
+
+
+        ..note::
+
+            currently, this only works on linux.
+
         :return:
         """
 
-        if not os.path.exists(private_key) and github:
-            self.warn("deploy key `%s' is not exists,we will try generate it." % private_key)
+        if not os.path.exists(private_key):
+            if not github:
+                self.error("cabric can't find a invalid upload key,if you don't want to upload key. remove `--with-deploy-key' option")
+            else:
+                self.warn("deploy key `%s' is not exists,we will try generate it." % private_key)
 
-            authorized_methods = []
+        if (not os.path.exists(private_key) and github) or force_renew:
+
+            if force_renew:
+                self.warn("`fresh-new' mode actived,cabric will re-generate new key and clean old keys")
+            else:
+                self.warn("deploy key already exists,if you want to re-generate key,please set `--fresh-new' option")
+                return  # return and don't create key
 
             # login
             def use_personal_token():
@@ -94,6 +119,7 @@ class DeployComponent(Component):
                 auth_config = temp_config
                 keys = response.json
                 key_title = remote_user + '@cabric'
+
                 break
 
             if not auth_config:
@@ -104,18 +130,11 @@ class DeployComponent(Component):
             except TypeError:
                 uploaded_keys = []
 
-            if uploaded_keys:
-                if force_upload:
-                    self.warn("deploy key exits,but your set `--force-new-key',it will re-generate new key")
-                else:
-                    self.warn("deploy key exists,if you want to re-generate key,please set `--force-new-key' option")
-                    return  # return and don't create key
-
-            # clean old key if exists
+                # clean old key if exists
             for v in uploaded_keys:
                 response = requests.delete('https://api.github.com/repos/{}/keys/{}'.format(github, v.get('id')), auth=auth_config)
                 if response.status_code != 204:
-                    self.error("delete old deploy key failed,please try it later.")
+                    self.error("delete old deploy key failed,please try it later.server response:\n%s" % response.text)
                     pass
 
             # generate new key
@@ -145,9 +164,21 @@ class DeployComponent(Component):
             }), auth=auth_config)
 
             if response.status_code != 201:
-                self.error("create key failed. server return\n:%s" % response.text)
+                self.error("create key failed.server response:\n%s" % response.text)
                 pass
 
+            pass
+
+        if os.path.exists(private_key):
+            self.print_message("upload deploy key...")
+            remote_key = '{}/.cabric/{}.rsa'.format(get_home(remote_user), project_name)
+            remote_key_root = os.path.dirname(remote_key)
+
+            run('test -e {0} || mkdir -p {0}'.format(remote_key_root))
+            run('chmod 700 -Rf {}'.format(remote_key_root))
+
+            put(private_key, remote_key)
+            run('chmod 600 -Rf {}'.format(remote_key))
             pass
 
         pass
@@ -260,8 +291,8 @@ class DeployComponent(Component):
 
         command_list = []
 
-        if not options.skip_deploy_key:
-            command_list.append(lambda: self.upload_deploy_key(os.path.expanduser(private_key), user, github=github))
+        if options.with_deploy_key:
+            command_list.append(lambda: self.upload_deploy_key(os.path.expanduser(private_key), user, project_name, github=github, force_renew=options.force_renew))
 
         if not options.skip_enable_services:
             command_list.append(lambda: self.enable_services())
@@ -287,7 +318,8 @@ class DeployComponent(Component):
         """
         return [
             # ('commit', dict(nargs='?', help='set which commit to deploy,default is latest version', )),
-            (('--skip-deploy-key',), dict(action='store_true', help='skip upload deploy key', )),
+            (('--with-deploy-key',), dict(action='store_true', help='upload deploy key', )),
+            (('--force-renew',), dict(action='store_true', help='only works when user set github value', )),
             (('--skip-enable-services',), dict(action='store_true', help='skip enable system services', )),
             (('--skip-requirements',), dict(action='store_true', help='skip install requirements', )),
             (('--skip-compile-templates',), dict(action='store_true', help='skip compile templates', )),

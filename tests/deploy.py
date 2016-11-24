@@ -3,22 +3,42 @@
 import os
 import unittest
 import argparse
+import mock
 import shutil
 from cliez import parser
 
+try:
+    input = raw_input
+    mock_input = '__builtin__.raw_input'
+except NameError:
+    mock_input = 'builtins.input'
+    pass
+
 
 class DeployComponentTests(unittest.TestCase):
+    def clean_keys(self):
+        keys = {
+            'beta_private': os.path.expanduser('~/.ssh/.deploies/nextoa/cabric.rsa'),
+            'beta_pub': os.path.expanduser('~/.ssh/.deploies/nextoa/cabric.rsa'),
+            'beta2_private': os.path.expanduser('~/.ssh/.deploies/cabric.rsa'),
+            'beta2_pub': os.path.expanduser('~/.ssh/.deploies/cabric.rsa'),
+        }
 
+        for k in keys:
+            if os.path.exists(k):
+                os.unlink(k)
+            pass
 
+        self.test_keys = keys
+        pass
 
     def setUp(self):
         from cabric import main
+        self.clean_keys()
+        pass
 
-        test_key = os.path.expanduser('~/.ssh/cabric.rsa')
-
-        if os.path.exists(test_key):
-            os.unlink(test_key)
-
+    def tearDown(self):
+        self.clean_keys()
         pass
 
     def test_invalid_env(self):
@@ -32,20 +52,28 @@ class DeployComponentTests(unittest.TestCase):
     def test_only_upload_key(self):
         """
         ..note::
-            github token must be valid
+            for safety reason, we only use github token test github work progress.
+            so make sure your token is valid.
+
+        ..todo::
+            this feature doesn't test yet.
 
         :return:
         """
 
-        parser.parse(argparse.ArgumentParser(), argv=['command', 'deploy',
-                                                      '--debug',
-                                                      '--env', 'beta',
-                                                      '--skip-enable-services',
-                                                      '--skip-requirements',
-                                                      '--skip-compile-templates',
-                                                      '--skip-upload-resources',
-                                                      '--dir', __file__.rsplit('/', 2)[0]])
-        pass
+        with mock.patch(mock_input, side_effect=["\n", "\n"]):
+            parser.parse(argparse.ArgumentParser(), argv=['command', 'deploy',
+                                                          '--debug',
+                                                          '--env', 'beta',
+                                                          '--with-deploy-key',
+                                                          '--fresh-new',
+                                                          '--skip-enable-services',
+                                                          '--skip-requirements',
+                                                          '--skip-compile-templates',
+                                                          '--skip-upload-resources',
+                                                          '--dir', __file__.rsplit('/', 2)[0]])
+            pass
 
+        pass
 
     pass

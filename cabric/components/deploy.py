@@ -6,7 +6,11 @@ import requests
 import json
 from getpass import getpass
 from cliez.component import Component
-from cabric.utils import get_roots, bind_hosts, execute, get_repo, put, run, get_home
+from cabric.utils import get_roots, bind_hosts, \
+    execute, get_repo, put, run, \
+    get_home, get_platform, get_git_host, known_host, cd, run_block
+
+from fabric.context_managers import settings
 from Crypto.PublicKey import RSA
 from git import config as pygit
 
@@ -171,28 +175,77 @@ class DeployComponent(Component):
 
         if os.path.exists(private_key):
             self.print_message("upload deploy key...")
-            remote_key = '{}/.cabric/{}.rsa'.format(get_home(remote_user), project_name)
+            remote_key = self.get_remote_key(remote_user, project_name)
             remote_key_root = os.path.dirname(remote_key)
 
-            run('test -e {0} || mkdir -p {0}'.format(remote_key_root))
-            run('chmod 700 -Rf {}'.format(remote_key_root))
+            run('test -e {0} || mkdir -p {0}'.format(remote_key_root), remote_user)
+            run('chmod 700 -Rf {}'.format(remote_key_root), remote_user)
 
             put(private_key, remote_key)
-            run('chmod 600 -Rf {}'.format(remote_key))
+            run('chmod 600 -f {}'.format(remote_key))
+            run('chown {1} -f {0}'.format(remote_key, remote_user))
             pass
 
         pass
 
-    def enable_services(self):
+    def enable_services(self, services):
+        """
+
+        :param list services: service list
+        :return:
+        """
+
+        print('services is ', services)
+
+        if get_platform() == 'centos':
+            run('systemctl enable %s' % ' '.join(services))
+        else:
+            self.warn("not support platform.no services enabled.")
 
         pass
 
-    def install_requirements(self):
+    def install_requirements(self, user, project_name):
+        """
+        when requirements file exits. install it.
+
+        :param user: remote user to deploy
+        :param project_name: project name
+        :return:
+        """
+
+        project_path = self.get_remote_project_path(user, project_name)
+
+        requirement_files = [
+            os.path.join(project_path, 'requirements.txt'),
+            os.path.join(project_path, 'requirements-public.txt'),
+            os.path.join(project_path, 'requirements-private.txt'),
+        ]
+
+        for f in requirement_files:
+            if os.path.exists(f):
+                run('pip install -r %s' % f)
+                pass
+            pass
 
         pass
 
-    def compile_templates(self):
+    def compile_templates(self, user, project_name):
+        """
+        try compile pug template files
 
+        ..note::
+
+            cabric use project root as pug basedir root.
+            if you don't use this path,
+            use `--skip-compile-templates` to skip this progress.
+
+
+        :param user: remote user
+        :param project_name: project name
+        :return:
+        """
+        project_path = self.get_remote_project_path(user, project_name)
+        run('pug -E html -b {0} {0}'.format(project_path))
         pass
 
     def upload_resources(self):
@@ -207,34 +260,75 @@ class DeployComponent(Component):
 
         pass
 
-    def upgrade(self, config):
+    def upgrade(self, remote_user, project_name,
+                repo, branch, commit=None):
         """
-        config and default value
+        upgrade source code
 
-        * check values
-            - user, if not set user,it will cause an error
-            - repo, if not set use project root,repo
+        :param remote_user:deploy username
+        :param project_name: project name
+        :param repo:git repo address
+        :param branch:which branch to deploy
 
-                ..note::
-                    - currently,this only support git+ssh mode
-                    - if you use pull-request develop mode,and downstream has remote machine permission.
-                        you must set this value
+        ..note::
+            currently,if remote machine already cloned from repo,branch can't be change.
+            if you really need to change branch. you have to remove remote project directory,
+            do upgrade again.
+
+        :param commit:which commit to deploy,default use latest commit,support tags
+
+        ..note::
+            commit or tag must be valid in branch
 
 
-            - branch, default is master
-            - root, if not set,default is user-home + project-name
-
-                ..note::
-                    user must be set home
-
-        :param config:
         :return:
         """
 
-        user = config.get('user')
-        branch = config.get('branch', 'master')
+        host = get_git_host(repo)
+        known_host(host, remote_user)
+
+        remote_path = self.get_remote_project_path(remote_user, project_name)
+        deploy_key = self.get_remote_key(remote_user, project_name)
+
+        with settings(warn_only=True):
+            if run("test -d %s/.git" % remote_path).failed:
+                parent_path = os.path.dirname(remote_path)
+                run('test -d {0} || mkdir {0}'.format(parent_path), remote_user)
+                with cd(parent_path):
+                    run('git clone {} -b {} {}'.format(repo, branch, remote_path), remote_user)
+                    run("cd {} && git config core.fileMode false".format(remote_path), remote_user)
+
+        run("cd {} && git pull origin {}".format(remote_path, branch), remote_user)
+        run("cd {} && git pull origin {} --tags".format(remote_path, branch), remote_user)
+
+        if commit:
+            # run("cd {} && git checkout -- .".format(remote_path), remote_user)  # make sure there is no merge commit on remote server
+            run("cd {} && git checkout {}".format(remote_path, commit), remote_user)
 
         pass
+
+    def get_remote_key(self, user, project_name):
+        """
+        ..note::
+            currently,we force use ~/.ssh/id_rsa
+            if you saved more than on project deploy in same remote_user.
+            use `--with-deploy-key' to replace remote key.
+
+
+        ..todo::
+            make sure only one project is deploying
+
+
+        :param user:
+        :param project_name:
+        :return:
+        """
+
+        # return '{}/.cabric/{}.rsa'.format(get_home(user), project_name)
+        return '%s/.ssh/id_rsa' % get_home(user)
+
+    def get_remote_project_path(self, user, project_name):
+        return os.path.join(get_home(user), project_name)
 
     def run(self, options):
         """
@@ -277,6 +371,7 @@ class DeployComponent(Component):
 
         user = config['user']
         repo = config.get('repo', get_repo())
+        branch = config.get('branch', 'master')
 
         if repo.find('git') != 0:
             self.error("sorry,currently we only support git+ssh mode")
@@ -292,22 +387,26 @@ class DeployComponent(Component):
         command_list = []
 
         if options.with_deploy_key:
-            command_list.append(lambda: self.upload_deploy_key(os.path.expanduser(private_key), user, project_name, github=github, force_renew=options.force_renew))
+            command_list.append(lambda: self.upload_deploy_key(os.path.expanduser(private_key), user, project_name,
+                                                               github=github, force_renew=options.force_renew))
 
-        if not options.skip_enable_services:
-            command_list.append(lambda: self.enable_services())
+        # if not options.skip_enable_services:
+        #     command_list.append(lambda: self.enable_services(config.get('services', [])))
+
+        command_list.append(lambda: self.upgrade(user, project_name, repo, branch, commit=options.commit))
 
         if not options.skip_requirements:
-            command_list.append(lambda: self.install_requirements())
+            command_list.append(lambda: self.install_requirements(user, project_name))
 
         if not options.skip_compile_templates:
-            command_list.append(lambda: self.compile_templates())
+            command_list.append(lambda: self.compile_templates(user, project_name))
 
         if not options.skip_upload_resources:
             command_list.append(lambda: self.upload_resources())
 
         command_list.append(lambda: self.reload())
         command_list.append(lambda: self.restart())
+
         execute(command_list)
         pass
 
@@ -317,7 +416,7 @@ class DeployComponent(Component):
         python web project deploy tool
         """
         return [
-            # ('commit', dict(nargs='?', help='set which commit to deploy,default is latest version', )),
+            (('commit',), dict(nargs='?', help='set which commit to deploy,default is latest version', )),
             (('--with-deploy-key',), dict(action='store_true', help='upload deploy key', )),
             (('--force-renew',), dict(action='store_true', help='only works when user set github value', )),
             (('--skip-enable-services',), dict(action='store_true', help='skip enable system services', )),

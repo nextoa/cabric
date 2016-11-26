@@ -6,8 +6,11 @@ import sys
 
 from fabric.state import env_options, env
 
-from fabric.api import run as fabric_run
-from fabric.api import local as fabric_local
+from fabric.operations import run as fabric_run
+from fabric.operations import local as fabric_local
+from fabric.context_managers import cd as fabric_cd
+from fabric.context_managers import lcd as fabric_lcd
+
 from fabric.network import disconnect_all
 from fabric.state import output
 from fabric.tasks import execute as fab_execute
@@ -168,6 +171,14 @@ def bind_hosts(fabric_root, select_env):
     return machine_config
 
 
+def cd(path):
+    if env.hosts:
+        return fabric_cd(path)
+    else:
+        return fabric_lcd(path)
+    pass
+
+
 def run(cmd, user=None, capture=None, *args, **kwargs):
     """
     :param cmd: command to execute
@@ -220,11 +231,13 @@ def run_block(centos=None, mac=None, all=None, with_exception=True):
 
 
 def execute(commands):
+    results = []
+
     try:
         commands_to_run = [(v, [], {}, [], [], []) for v in commands]
 
         for name, args, kwargs, arg_hosts, arg_roles, arg_exclude_hosts in commands_to_run:
-            fab_execute(name, hosts=arg_hosts, roles=arg_roles, exclude_hosts=arg_exclude_hosts, *args, **kwargs)
+            results.append(fab_execute(name, hosts=arg_hosts, roles=arg_roles, exclude_hosts=arg_exclude_hosts, *args, **kwargs))
             pass
     except SystemExit:  # a number of internal functions might raise this one.
         raise
@@ -238,7 +251,8 @@ def execute(commands):
         sys.exit(1)
     finally:
         disconnect_all()
-    pass
+
+    return results
 
 
 def get_platform():
@@ -266,6 +280,16 @@ def get_home(user):
     pass
 
 
+def get_git_host(address):
+    host_begin = address.find('@')
+    host_end = address.find(':')
+
+    if host_begin <= 0 or host_end <= 0:
+        raise ValueError('invalid git address to parse')
+
+    return address[host_begin + 1:host_end].strip()
+
+
 def get_repo():
     return fabric_local('git remote get-url origin --push', capture=True)
 
@@ -289,7 +313,7 @@ def exist_user(user):
 def exist_group(group):
     """
     check group exist or not
-    :param user:
+    :param group: group name
     :return:
     """
 
@@ -298,5 +322,34 @@ def exist_group(group):
             return False
         else:
             return True
+
+    pass
+
+
+def known_host(address, user):
+    """
+    set ssh fingerprint
+    :param address:domain or ip
+    :param user:remote user name
+    """
+
+    user_path = get_home(user)
+    command0 = 'grep %s %s/.ssh/known_hosts' % (address, user_path)
+    command1 = 'ssh-keyscan %s >> %s/.ssh/known_hosts' % (address, user_path)
+    command2 = 'sed -i -e "s/%s//g" %s/.ssh/known_hosts' % (address, user_path)
+
+    if user:
+        command0 = 'su - %s -c "%s"' % (user, command0)
+        command1 = 'su - %s -c "%s"' % (user, command1)
+        command2 = 'su - %s -c "%s"' % (user, command2)
+        pass
+
+    with fabric_settings(warn_only=True):
+        if run(command0).failed:
+            run(command1)
+        else:
+            # clean old record
+            run(command2)
+            run(command1)
 
     pass

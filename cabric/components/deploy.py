@@ -188,22 +188,6 @@ class DeployComponent(Component):
 
         pass
 
-    def enable_services(self, services):
-        """
-
-        :param list services: service list
-        :return:
-        """
-
-        print('services is ', services)
-
-        if get_platform() == 'centos':
-            run('systemctl enable %s' % ' '.join(services))
-        else:
-            self.warn("not support platform.no services enabled.")
-
-        pass
-
     def install_requirements(self, user, project_name):
         """
         when requirements file exits. install it.
@@ -249,14 +233,6 @@ class DeployComponent(Component):
         pass
 
     def upload_resources(self):
-
-        pass
-
-    def reload(self):
-
-        pass
-
-    def restart(self):
 
         pass
 
@@ -390,9 +366,6 @@ class DeployComponent(Component):
             command_list.append(lambda: self.upload_deploy_key(os.path.expanduser(private_key), user, project_name,
                                                                github=github, force_renew=options.force_renew))
 
-        # if not options.skip_enable_services:
-        #     command_list.append(lambda: self.enable_services(config.get('services', [])))
-
         command_list.append(lambda: self.upgrade(user, project_name, repo, branch, commit=options.commit))
 
         if not options.skip_requirements:
@@ -403,9 +376,6 @@ class DeployComponent(Component):
 
         if not options.skip_upload_resources:
             command_list.append(lambda: self.upload_resources())
-
-        command_list.append(lambda: self.reload())
-        command_list.append(lambda: self.restart())
 
         execute(command_list)
         pass
@@ -419,12 +389,10 @@ class DeployComponent(Component):
             (('commit',), dict(nargs='?', help='set which commit to deploy,default is latest version', )),
             (('--with-deploy-key',), dict(action='store_true', help='upload deploy key', )),
             (('--force-renew',), dict(action='store_true', help='only works when user set github value', )),
-            (('--skip-enable-services',), dict(action='store_true', help='skip enable system services', )),
+
             (('--skip-requirements',), dict(action='store_true', help='skip install requirements', )),
             (('--skip-compile-templates',), dict(action='store_true', help='skip compile templates', )),
             (('--skip-upload-resources',), dict(action='store_true', help='skip upload resources', )),
-            (('--reload',), dict(nargs='*', help='set reload service', )),
-            (('--restart',), dict(nargs='*', help='set restart service', )),
         ]
         pass
 

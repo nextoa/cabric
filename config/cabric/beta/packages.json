@@ -12,7 +12,9 @@
     "htop",
     "wget",
     "sqlite-devel",
-    "libffi-devel"
+    "libffi-devel",
+    "nginx",
+    "redis"
   ],
   "brew": [
     "pyenv"

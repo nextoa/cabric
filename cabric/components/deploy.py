@@ -11,6 +11,7 @@ from cabric.utils import get_roots, bind_hosts, \
     get_home, get_platform, get_git_host, known_host, cd, run_block
 
 from fabric.context_managers import settings
+from fabric.operations import local as fabric_local
 from Crypto.PublicKey import RSA
 from git import config as pygit
 
@@ -233,6 +234,48 @@ class DeployComponent(Component):
         pass
 
     def upload_resources(self):
+        """
+        upload static resoures file is exists.
+
+        only works for django+nginx(start with nginx user) project.
+
+        cabric will upload:
+
+            - static    django resource directory
+            - assets    webpack resource directory
+
+        :return:
+        """
+
+        working_root = os.getcwd()
+        django_manage = os.path.join(working_root, 'manage.py')
+
+        if not os.path.exists(django_manage):
+            self.warn("not django project,skip upload resources")
+            return
+
+        nginx_home = get_home('nginx')
+
+        if not nginx_home:
+            self.warn("remote server only support nginx and must use nginx user start")
+            return
+
+        nginx_static_root = os.path.join(nginx_home, 'static')
+        # collectstatic by user
+        # fabric_local('python manage.py collectstatic --noinput')
+
+        run('test -e {0}/static || mkdir -p {0}/static'.format(nginx_home), nginx)
+
+        static_root = os.path.join(working_root, 'static')
+        assets_root = os.path.join(working_root, 'assets')
+
+        if os.path.exists(static_root):
+            put(static_root, nginx_static_root)
+            pass
+
+        if os.path.exists(assets_root):
+            put(assets_root, nginx_static_root)
+            pass
 
         pass
 
@@ -366,7 +409,8 @@ class DeployComponent(Component):
             command_list.append(lambda: self.upload_deploy_key(os.path.expanduser(private_key), user, project_name,
                                                                github=github, force_renew=options.force_renew))
 
-        command_list.append(lambda: self.upgrade(user, project_name, repo, branch, commit=options.commit))
+        if not options.skip_source_code:
+            command_list.append(lambda: self.upgrade(user, project_name, repo, branch, commit=options.commit))
 
         if not options.skip_requirements:
             command_list.append(lambda: self.install_requirements(user, project_name))
@@ -389,7 +433,7 @@ class DeployComponent(Component):
             (('commit',), dict(nargs='?', help='set which commit to deploy,default is latest version', )),
             (('--with-deploy-key',), dict(action='store_true', help='upload deploy key', )),
             (('--force-renew',), dict(action='store_true', help='only works when user set github value', )),
-
+            (('--skip-source-code',), dict(action='store_true', help='skip upgrade source code', )),
             (('--skip-requirements',), dict(action='store_true', help='skip install requirements', )),
             (('--skip-compile-templates',), dict(action='store_true', help='skip compile templates', )),
             (('--skip-upload-resources',), dict(action='store_true', help='skip upload resources', )),

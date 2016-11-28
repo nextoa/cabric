@@ -67,12 +67,35 @@ class DeployComponentTests(unittest.TestCase):
                                                           '--env', 'beta',
                                                           '--with-deploy-key',
                                                           '--fresh-new',
-                                                          '--skip-enable-services',
                                                           '--skip-requirements',
                                                           '--skip-compile-templates',
                                                           '--skip-upload-resources',
                                                           '--dir', __file__.rsplit('/', 2)[0]])
             pass
+
+        pass
+
+    def test_only_static(self):
+        """
+        ..note::
+            for safety reason, we only use github token test github work progress.
+            so make sure your token is valid.
+
+        ..todo::
+            this feature doesn't test yet.
+
+        :return:
+        """
+
+        # os.chdir(os.path.join(__file__.rsplit('/', 3)[0], 'dream'))
+
+        parser.parse(argparse.ArgumentParser(), argv=['command', 'deploy',
+                                                      '--debug',
+                                                      '--env', 'beta',
+                                                      '--skip-source-code',
+                                                      '--skip-requirements',
+                                                      '--skip-compile-templates',
+                                                      '--dir', __file__.rsplit('/', 2)[0]])
 
         pass
 

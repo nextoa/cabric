@@ -326,6 +326,26 @@ class DeployComponent(Component):
 
         pass
 
+    def upload_crontab(self, config, env_option, crontab_root):
+
+        user = config.get('user')
+        crontab_file = config.get('crontab', env_option + '.conf')
+
+        if not user:
+            self.warn("no user found,skip deploy crontab file `%s'" % config.get(crontab_file))
+            return
+
+        crontab_path = os.path.join(crontab_root, crontab_file)
+
+        if os.path.exists(crontab_path):
+            put(crontab_path, '/tmp/cabric_crontab')
+            run('crontab < /tmp/cabric_crontab', user)
+            pass
+        else:
+            self.warn("crontab file `%s' not found. skip to install it" % crontab_path)
+
+        pass
+
     def get_remote_key(self, user, project_name):
         """
         ..note::
@@ -421,6 +441,11 @@ class DeployComponent(Component):
         if not options.skip_upload_resources:
             command_list.append(lambda: self.upload_resources())
 
+        crons_config = config.get('crons', [])
+        if not options.skip_crontab and crons_config:
+            for crontab_config in crons_config:
+                command_list.append(lambda: self.upload_crontab(crontab_config, options.env, options.dir))
+
         execute(command_list)
         pass
 
@@ -437,6 +462,8 @@ class DeployComponent(Component):
             (('--skip-requirements',), dict(action='store_true', help='skip install requirements', )),
             (('--skip-compile-templates',), dict(action='store_true', help='skip compile templates', )),
             (('--skip-upload-resources',), dict(action='store_true', help='skip upload resources', )),
+            (('--skip-crontab',), dict(action='store_true', help='skip upload crontab', )),
+
         ]
         pass
 

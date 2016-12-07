@@ -3,7 +3,7 @@
 import os
 import json
 from cliez.component import Component
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, run_block
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, run_block, put
 
 try:
     from shlex import quote as shell_quote
@@ -39,6 +39,27 @@ class ConfigComponent(Component):
                 run('systemctl restart %s' % ' '.join(services))
             else:
                 self.warn("restart progress actived,but no restart service found.")
+        pass
+
+    def upload_crontab(self, config, env_option, crontab_root):
+
+        user = config.get('user')
+        crontab_file = config.get('crontab', env_option + '.conf')
+
+        if not user:
+            self.warn("no user found,skip deploy crontab file `%s'" % config.get(crontab_file))
+            return
+
+        crontab_path = os.path.join(crontab_root, 'config', 'crontab', crontab_file)
+
+        if os.path.exists(crontab_path):
+            put(crontab_path, '/tmp/cabric_crontab')
+            run('crontab < /tmp/cabric_crontab', user)
+            run('rm -f /tmp/cabric_crontab')
+            pass
+        else:
+            self.warn("crontab file `%s' not found. skip to install it" % crontab_path)
+
         pass
 
     def run(self, options):
@@ -82,6 +103,11 @@ class ConfigComponent(Component):
             command_list.append(lambda: self.restart(options.restart, services))
             pass
 
+        crons_config = env_config.get('crons', [])
+        if not options.skip_crontab and crons_config:
+            for crontab_config in crons_config:
+                command_list.append(lambda: self.upload_crontab(crontab_config, options.env, options.dir))
+
         execute(command_list)
         pass
 
@@ -93,6 +119,7 @@ class ConfigComponent(Component):
         return [
             (('--skip-enable-services',), dict(action='store_true', help='skip enable system services', )),
             (('--skip-upload',), dict(action='store_true', help='skip upload config files', )),
+            (('--skip-crontab',), dict(action='store_true', help='skip upload crontab', )),
             (('--reload',), dict(nargs='+', help='set reload service', )),
             (('--restart',), dict(nargs='+', help='set restart service', )),
         ]

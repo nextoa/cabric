@@ -19,6 +19,7 @@ class ConfigComponent(Component):
         """
 
         if get_platform() == 'centos':
+            # run('systemctl disable %s' % ' '.join(services))
             run('systemctl enable %s' % ' '.join(services))
         else:
             self.warn("not support platform.no services enabled.")
@@ -70,7 +71,7 @@ class ConfigComponent(Component):
         services = env_config.get('services', [])
 
         command_list = []
-        if not options.skip_enable_services:
+        if not options.skip_enable_services and services:
             command_list.append(lambda: self.enable_services(services))
 
         if options.reload:

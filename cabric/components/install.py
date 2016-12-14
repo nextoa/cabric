@@ -23,6 +23,11 @@ class InstallComponent(Component):
 
     system_python_version = '2.7.11'
 
+    def before_install(self, root):
+        mirror_put(root, '/etc/hosts', validate=False)
+        mirror_put(root, '/root/.bash_profile', validate=False)
+        pass
+
     def install_user(self, users):
         """
         install user
@@ -112,9 +117,9 @@ class InstallComponent(Component):
         run_block(centos=on_centos, mac=on_mac)
         pass
 
-    def install_pyenv(self):
+    def install_pyenv(self, versions=None):
         """
-        We will install pyenv by default. and repla
+        We will install pyenv by default. and with normal use lib
 
         Because pyenv is awesome!!!
 
@@ -125,6 +130,17 @@ class InstallComponent(Component):
 
         if remote_os == 'centos':
             run('yum install -y git')
+            run("yum install -y gcc gcc-c++ make autoconf certbot"
+                " libffi-devel ncurses-devel expat-devel"
+                " zlib-devel zlib bzip2-devel bzip2-libs libzip-devel"
+                " mariadb-devel mariadb-libs sqlite-devel lib-sqlite3-devel"
+                " libxml2 libxml2-devel libxslt libxslt-devel"
+                " libcurl-devel"
+                " pcre_devel pcre"
+                " libmcrypt libmcrypt-devel openssl-devel openssl-lib"
+                " libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel "
+                " libtiff-devel lcms2-devel libwebp-devel tcl-devel tk-devel"
+                )
             run('export PYENV_ROOT=/usr/local/var/pyenv && curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash')
             run('ln -sfv /usr/local/var/pyenv/bin/pyenv /usr/local/bin/pyenv')
             pass
@@ -135,7 +151,14 @@ class InstallComponent(Component):
 
         run('test -d /usr/local/var/pyenv/plugins/pyenv-virtualenv || git clone https://github.com/yyuu/pyenv-virtualenv.git /usr/local/var/pyenv/plugins/pyenv-virtualenv')
         run('export PYENV_ROOT="/usr/local/var/pyenv/" && eval "$(pyenv init -)"')
-        run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % self.system_python_version)
+
+        if isinstance(versions, list):
+            for v in versions:
+                run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % v)
+        elif isinstance(versions, str):
+            run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % versions)
+        else:
+            run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % self.system_python_version)
 
         command_list = [
             """grep "PYENV_ROOT" /etc/profile || echo 'export PYENV_ROOT="/usr/local/var/pyenv/"' >> /etc/profile""",
@@ -172,8 +195,7 @@ class InstallComponent(Component):
             return
 
         def on_centos():
-            mirror_put(root, '/etc/yum.repos.d', validate=False)
-            run('yum install -y node npm')
+            run('yum install -y nodejs npm')
             pass
 
         def on_mac():
@@ -212,7 +234,7 @@ class InstallComponent(Component):
         """
 
         package_root, config_root, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env)
+        bind_hosts(fabric_root, options.env, options.parallel)
 
         # try upload repo config if it can recognize
         using_config = os.path.join(config_root, options.env)
@@ -229,11 +251,13 @@ class InstallComponent(Component):
 
         execute_list = []
 
-        if not options.skip_pyenv:
-            execute_list.append(lambda: self.install_pyenv())
+        execute_list.append(lambda: self.before_install(using_config))
 
         if not options.skip_pkg:
             execute_list.append(lambda: self.install_package(using_config, packages_config))
+
+        if not options.skip_pyenv:
+            execute_list.append(lambda: self.install_pyenv(packages_config.get('pyenv')))
 
         if not options.skip_node:
             execute_list.append(lambda: self.install_node(using_config, packages_config))
@@ -258,6 +282,7 @@ class InstallComponent(Component):
             (('--skip-pyenv',), dict(action='store_true', help='skip install pyenv', )),
             (('--skip-node',), dict(action='store_true', help='skip install node', )),
             (('--skip-user',), dict(action='store_true', help='skip install user', )),
+            (('--parallel', '-P'), dict(action='store_true', help='default to parallel execution method', )),
         ]
         pass
 

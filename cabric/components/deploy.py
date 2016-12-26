@@ -8,6 +8,7 @@ import requests
 from Crypto.PublicKey import RSA
 from cliez.component import Component
 from fabric.context_managers import settings
+from fabric.operations import put as fabric_put
 from git import config as pygit
 
 from cabric.utils import get_roots, bind_hosts, \
@@ -184,9 +185,10 @@ class DeployComponent(Component):
             remote_key_root = os.path.dirname(remote_key)
 
             run('test -e {0} || mkdir -p {0}'.format(remote_key_root), remote_user)
-            run('chmod 700 -Rf {}'.format(remote_key_root), remote_user)
+            with settings(warn_only=True):
+                run('chmod 700 -Rf {}'.format(remote_key_root), remote_user)
 
-            put(private_key, remote_key)
+            fabric_put(private_key, remote_key)
             run('chmod 600 -f {}'.format(remote_key))
             run('chown {1} -f {0}'.format(remote_key, remote_user))
             pass
@@ -268,7 +270,8 @@ class DeployComponent(Component):
         # collectstatic by user
         # fabric_local('python manage.py collectstatic --noinput')
 
-        run('test -e {0}/static || mkdir -p {0}/static'.format(nginx_home), nginx)
+        with settings(warn_only=True):
+            run('test -e {0}/static || mkdir -p {0}/static'.format(nginx_home), nginx)
 
         static_root = os.path.join(working_root, 'static')
         assets_root = os.path.join(working_root, 'assets')

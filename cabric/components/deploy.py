@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
-import requests
 import json
+import os
 from getpass import getpass
+
+import requests
+from Crypto.PublicKey import RSA
 from cliez.component import Component
+from fabric.context_managers import settings
+from git import config as pygit
+
 from cabric.utils import get_roots, bind_hosts, \
     execute, get_repo, put, run, \
-    get_home, get_platform, get_git_host, known_host, cd, run_block
-
-from fabric.context_managers import settings
-from fabric.operations import local as fabric_local
-from Crypto.PublicKey import RSA
-from git import config as pygit
+    get_home, get_git_host, known_host, cd
 
 try:
     input = raw_input
@@ -119,6 +118,11 @@ class DeployComponent(Component):
                 response = requests.get('https://api.github.com/repos/{}/keys'.format(github), auth=temp_config)
                 if response.status_code != 200:
                     self.warn("use `%s' method login to github is failed,try next way." % v.__name__.replace('use_', '').replace('_', '-'))
+                    if self.options.verbose == 3:
+                        self.warn("github-api request: %s" % 'https://api.github.com/repos/{}/keys'.format(github))
+                        self.warn("github-api auth: %s" % ' '.join(temp_config))
+                        self.warn("github-api return: %s" % response.text)
+                        pass
                     continue
 
                 auth_config = temp_config

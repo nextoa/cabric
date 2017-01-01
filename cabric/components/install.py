@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
-
 import json
+import os
+
 from cliez.component import Component
+from fabric.context_managers import settings
+
 from cabric.utils import get_roots, mirror_put, run, \
     bind_hosts, execute, get_platform, run_block, \
     exist_group, exist_user
-
-from fabric.context_managers import settings
 
 try:
     from shlex import quote as shell_quote
@@ -57,6 +56,7 @@ class InstallComponent(Component):
                 home = user.get('home', '/home/{}'.format(username))
                 shell = user.get('shell', '`which bash`')
                 system_flag = user.get('system', False)
+                perm = user.get('perm')
 
                 if system_flag:
                     shell = '/sbin/nologin'
@@ -80,6 +80,11 @@ class InstallComponent(Component):
 
                 run('useradd {1} -d {2} {4} -s {3} {0}'.format(username, group_str,
                                                                home, shell, system_str))
+
+                # todo:
+                # .. if perm cause error, user will not delete
+                if perm:
+                    run('chmod {1} {0}'.format(home, perm))
 
                 pass
 

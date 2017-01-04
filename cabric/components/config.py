@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import os
 import json
+import os
+
 from cliez.component import Component
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, run_block, put
+
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put
 
 try:
     from shlex import quote as shell_quote
@@ -42,7 +44,6 @@ class ConfigComponent(Component):
         pass
 
     def upload_crontab(self, config, env_option, crontab_root):
-
         user = config.get('user')
         crontab_file = config.get('crontab', env_option + '.conf')
 
@@ -60,6 +61,87 @@ class ConfigComponent(Component):
         else:
             self.warn("crontab file `%s' not found. skip to install it" % crontab_path)
 
+        pass
+
+    def upload_crontabs(self, crons_config, env_option, crontab_root):
+        """
+        because command list is execute after lambda define.
+
+        if we add upload_crontab directly, the value of crontab_config will always be last item.
+
+        :param crons_config:
+        :param env_option:
+        :param crontab_root:
+        :return:
+        """
+
+        for crontab_config in crons_config:
+            self.upload_crontab(crontab_config, env_option, crontab_root)
+
+        pass
+
+    def set_hosts(self, records):
+
+        def set_host(ip, host):
+            print(ip, host)
+            pass
+
+        [set_host(v[0], v[1]) for v in records]
+        pass
+
+    def set_dns_dnspod(self, domain, ip, type, host='@', line='default', weight=None, order=None, ttl=600, active=True, **kwargs):
+        """
+        :param domain:  domain name
+        :param ip:  ip address
+        :param type:
+        :param host: default is @
+        :param line:
+        :param weight:
+        :param order:
+        :param ttl: default is 600s
+        :param active: default is True
+        :return:
+        """
+
+        print(kwargs)
+        pass
+
+    def set_dns_list(self, dns_list):
+
+        for dns in dns_list:
+            isp = dns.get('isp')
+
+            if isp == '/etc/hosts':
+                self.set_hosts(dns.get('records'))
+            elif isp == 'dnspod.cn':
+                domain = dns.get('domain')
+                if domain:
+                    for record in dns.get('records', []):
+                        self.set_dns_dnspod(domain, **record)
+                        pass
+                    pass
+            else:
+                self.error("illegal dns config:%s" % dns)
+                pass
+            pass
+
+        pass
+
+    def set_timezone(self, timezone):
+        """
+        should limit user input
+
+        ..todo:
+            danger if we don't limit timezone.
+            something like this  `Asian/Shanghai && rm -rf /`
+
+        timedatectl list-timezones
+        timedatectl
+
+        :param timezone:
+        :return:
+        """
+        run('timedatectl set-timezone %s' % timezone)
         pass
 
     def run(self, options):
@@ -88,10 +170,24 @@ class ConfigComponent(Component):
             env_config = json.load(open(os.path.join(using_config, 'env.json'), 'r'))
         except ValueError:
             self.error("Invalid json syntax:%s" % os.path.join(using_config, 'env.json'))
+            pass
+
+        command_list = []
+
+        timezone = env_config.get('timezone')
+
+        if not options.skip_timezone and timezone:
+            command_list.append(lambda: self.set_timezone(timezone))
+            pass
+
+        dns_list = env_config.get('dns-list')
+
+        if not options.skip_dns and dns_list:
+            command_list.append(lambda: self.set_dns_list(dns_list))
+            pass
 
         services = env_config.get('services', [])
 
-        command_list = []
         if not options.skip_enable_services and services:
             command_list.append(lambda: self.enable_services(services))
 
@@ -105,8 +201,8 @@ class ConfigComponent(Component):
 
         crons_config = env_config.get('crons', [])
         if not options.skip_crontab and crons_config:
-            for crontab_config in crons_config:
-                command_list.append(lambda: self.upload_crontab(crontab_config, options.env, options.dir))
+            command_list.append(lambda: self.upload_crontabs(crons_config, options.env, options.dir))
+            pass
 
         execute(command_list)
         pass
@@ -120,6 +216,8 @@ class ConfigComponent(Component):
             (('--skip-enable-services',), dict(action='store_true', help='skip enable system services', )),
             (('--skip-upload',), dict(action='store_true', help='skip upload config files', )),
             (('--skip-crontab',), dict(action='store_true', help='skip upload crontab', )),
+            (('--skip-timezone',), dict(action='store_true', help='skip set timezone', )),
+            (('--skip-dns',), dict(action='store_true', help='skip config dns', )),
             (('--reload',), dict(nargs='+', help='set reload service', )),
             (('--restart',), dict(nargs='+', help='set restart service', )),
         ]

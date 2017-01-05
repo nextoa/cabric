@@ -137,7 +137,7 @@ class InstallComponent(Component):
             run('yum install -y git')
             run("yum install -y gcc gcc-c++ make autoconf certbot"
                 " libffi-devel ncurses-devel expat-devel"
-                " zlib-devel zlib bzip2-devel bzip2-libs libzip-devel"
+                " zlib-devel zlib bzip2 bzip2-devel bzip2-libs libzip-devel"
                 " mariadb-devel mariadb-libs sqlite-devel lib-sqlite3-devel"
                 " libxml2 libxml2-devel libxslt libxslt-devel"
                 " libcurl-devel"
@@ -160,7 +160,7 @@ class InstallComponent(Component):
         if isinstance(versions, list):
             for v in versions:
                 run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % v)
-        elif isinstance(versions, str):
+        elif type(versions).__name__ in ['str', 'unicode']:
             run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % versions)
         else:
             run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % self.system_python_version)
@@ -179,6 +179,29 @@ class InstallComponent(Component):
             run(cmd)
             pass
 
+        pass
+
+    def install_pypi(self, pypi_configs):
+        """
+        :param pip_configs:
+        :return:
+        """
+
+        def install(pypi_config):
+
+            python_version = pypi_config.get('version')
+
+            if python_version:
+                self.install_pyenv(python_version)
+
+            for pkg in pypi_config.get('packages'):
+                run('export PYENV_ROOT="/usr/local/var/pyenv/" && export PYENV_VERSION=%s && pip install %s' % (python_version if python_version else self.system_python_version,
+                                                                                                                pkg))
+                pass
+
+            pass
+
+        [install(pypi_config) for pypi_config in pypi_configs]
         pass
 
     def install_node(self, root, pkgs_config):
@@ -264,6 +287,9 @@ class InstallComponent(Component):
         if not options.skip_pyenv:
             execute_list.append(lambda: self.install_pyenv(packages_config.get('pyenv')))
 
+        if not options.skip_pypi:
+            execute_list.append(lambda: self.install_pypi(packages_config.get('pypi', [])))
+
         if not options.skip_node:
             execute_list.append(lambda: self.install_node(using_config, packages_config))
 
@@ -287,6 +313,7 @@ class InstallComponent(Component):
             (('--skip-pyenv',), dict(action='store_true', help='skip install pyenv', )),
             (('--skip-node',), dict(action='store_true', help='skip install node', )),
             (('--skip-user',), dict(action='store_true', help='skip install user', )),
+            (('--skip-pypi',), dict(action='store_true', help='skip install pip package', )),
             (('--parallel', '-P'), dict(action='store_true', help='default to parallel execution method', )),
         ]
         pass

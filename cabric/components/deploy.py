@@ -213,9 +213,7 @@ class DeployComponent(Component):
         ]
 
         for f in requirement_files:
-            if os.path.exists(f):
-                run('pip install -r %s' % f)
-                pass
+            run("test -f {0} && pip install -r {0} || echo '{0} not exist,skip install...'".format(f))
             pass
 
         pass
@@ -249,6 +247,9 @@ class DeployComponent(Component):
 
             - static    django resource directory
             - assets    webpack resource directory
+
+        ..todo::
+            use remote path to validate install
 
         :return:
         """

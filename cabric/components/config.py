@@ -5,7 +5,8 @@ import os
 
 from cliez.component import Component
 
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put
+from cabric.dns.dnspod import DNSPod
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings
 
 try:
     from shlex import quote as shell_quote
@@ -81,29 +82,46 @@ class ConfigComponent(Component):
         pass
 
     def set_hosts(self, records):
-
-        def set_host(ip, host):
-            print(ip, host)
-            pass
-
-        [set_host(v[0], v[1]) for v in records]
-        pass
-
-    def set_dns_dnspod(self, domain, ip, type, host='@', line='default', weight=None, order=None, ttl=600, active=True, **kwargs):
         """
-        :param domain:  domain name
-        :param ip:  ip address
-        :param type:
-        :param host: default is @
-        :param line:
-        :param weight:
-        :param order:
-        :param ttl: default is 600s
-        :param active: default is True
+        ..experiment::
+
+                use env-config to handle hosts file seems a bad idea.
+
+                we already user upload hosts file, it's simple to use,
+                user only need to care don't overwrite their hosts
+
+                and if we want to support something like:
+
+                    * delete hosts
+                    * update ip
+
+                we need do lot of work to support this.
+
+        :param records:
         :return:
         """
 
-        print(kwargs)
+        def set_host(ip, host):
+            """
+            if you want to use this feature for old file, use 4 space.
+
+            limit:
+                only support one2one relation
+
+            :param ip:
+            :param host:
+            :return:
+            """
+            with fabric_settings(warn_only=True):
+                match = '%s    %s' % (ip, host)
+                if run('grep "%s" /etc/hosts' % match).failed:
+                    run('echo "%s" >> /etc/hosts' % match)
+                    # elif run('grep "%s" /etc/hosts' % host):
+                    # sed -i -e "s//g" ???
+                    #     pass
+            pass
+
+        [set_host(v[0], v[1]) for v in records]
         pass
 
     def set_dns_list(self, dns_list):
@@ -116,8 +134,10 @@ class ConfigComponent(Component):
             elif isp == 'dnspod.cn':
                 domain = dns.get('domain')
                 if domain:
+                    dns_client = DNSPod()
+                    dns_client.bind_domain(domain)
                     for record in dns.get('records', []):
-                        self.set_dns_dnspod(domain, **record)
+                        dns_client.bind_record(**record)
                         pass
                     pass
             else:

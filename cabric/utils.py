@@ -4,19 +4,23 @@
 import os
 import sys
 
-from fabric.state import env_options, env
-
-from fabric.operations import run as fabric_run
-from fabric.operations import local as fabric_local
 from fabric.context_managers import cd as fabric_cd
 from fabric.context_managers import lcd as fabric_lcd
-
+from fabric.context_managers import settings as fabric_settings
 from fabric.network import disconnect_all
+from fabric.operations import local as fabric_local
+from fabric.operations import run as fabric_run
+from fabric.state import env_options, env
 from fabric.state import output
 from fabric.tasks import execute as fab_execute
-from fabric.context_managers import settings as fabric_settings
 
 from cabric.bridge import parse_options, update_output_levels, load_settings
+
+
+# try:
+#     from shlex import quote as cmd_quote
+# except ImportError:
+#     from pipes import quote as cmd_quote
 
 
 def _is_network_error_ignored():
@@ -66,8 +70,10 @@ def put(local_path, remote_path):
     """
     if env.hosts:
         if os.path.isdir(local_path):
-            fabric_local("prsync {2} {0}/* {1}".format(local_path, remote_path,
-                                                       ' '.join(["-H %s" % v for v in env.hosts])))
+            local_path = local_path.rstrip('/') + '/'
+            remote_path = remote_path.rstrip('/') + '/'
+            fabric_local("prsync -r {2} {0} {1}".format(local_path, remote_path,
+                                                        ' '.join(["-H %s" % v for v in env.hosts])))
         else:
             fabric_local("prsync {2} {0} {1}".format(local_path, remote_path,
                                                      ' '.join(["-H %s" % v for v in env.hosts])))
@@ -134,11 +140,12 @@ def parse_hosts(file):
     return machines
 
 
-def bind_hosts(fabric_root, select_env):
+def bind_hosts(fabric_root, select_env, parallel=False):
     """
     bind hosts from file
     :param fabric_root:
     :param select_env:
+    :param parallel:
     :return:
     """
 
@@ -147,7 +154,9 @@ def bind_hosts(fabric_root, select_env):
     if not os.path.exists(machine_config):
         raise OSError("%s not exist or permission denied." % machine_config)
 
-    parser, options, arguments = parse_options()
+    inner_options = ['-P'] if parallel else []
+
+    parser, options, arguments = parse_options(inner_options)
 
     # Handle regular args vs -- args
     arguments = parser.largs
@@ -190,7 +199,7 @@ def run(cmd, user=None, capture=None, *args, **kwargs):
     """
     if env.hosts:
         if user:
-            return fabric_run('su - %s -c "%s"' % (user, cmd))
+            return fabric_run("su - %s -c '%s'" % (user, cmd))
         else:
             return fabric_run(cmd, *args, **kwargs)
     else:

@@ -122,30 +122,33 @@ class InstallComponent(Component):
         run_block(centos=on_centos, mac=on_mac)
         pass
 
-    def install_pyenv(self, versions=None):
+    def install_pyenv(self, versions=None, skip_pkg=False):
         """
         We will install pyenv by default. and with normal use lib
 
         Because pyenv is awesome!!!
 
         :param root:
+        :param skip_pkg: skip install depends package, default is True
+
         :return:
         """
         remote_os = get_platform()
 
         if remote_os == 'centos':
-            run('yum install -y git')
-            run("yum install -y gcc gcc-c++ make autoconf certbot"
-                " libffi-devel ncurses-devel expat-devel"
-                " zlib-devel zlib bzip2 bzip2-devel bzip2-libs libzip-devel"
-                " mariadb-devel mariadb-libs sqlite-devel lib-sqlite3-devel"
-                " libxml2 libxml2-devel libxslt libxslt-devel"
-                " libcurl-devel"
-                " pcre_devel pcre"
-                " libmcrypt libmcrypt-devel openssl-devel openssl-lib"
-                " libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel "
-                " libtiff-devel lcms2-devel libwebp-devel tcl-devel tk-devel"
-                )
+            if not skip_pkg:
+                run('yum install -y git')
+                run("yum install -y gcc gcc-c++ make autoconf certbot"
+                    " libffi-devel ncurses-devel expat-devel"
+                    " zlib-devel zlib bzip2 bzip2-devel bzip2-libs libzip-devel"
+                    " mariadb-devel mariadb-libs sqlite-devel lib-sqlite3-devel"
+                    " libxml2 libxml2-devel libxslt libxslt-devel"
+                    " libcurl-devel"
+                    " pcre_devel pcre"
+                    " libmcrypt libmcrypt-devel openssl-devel openssl-lib"
+                    " libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel "
+                    " libtiff-devel lcms2-devel libwebp-devel tcl-devel tk-devel"
+                    )
             run('export PYENV_ROOT=/usr/local/var/pyenv && curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash')
             run('ln -sfv /usr/local/var/pyenv/bin/pyenv /usr/local/bin/pyenv')
             pass
@@ -285,7 +288,7 @@ class InstallComponent(Component):
             execute_list.append(lambda: self.install_package(using_config, packages_config))
 
         if not options.skip_pyenv:
-            execute_list.append(lambda: self.install_pyenv(packages_config.get('pyenv')))
+            execute_list.append(lambda: self.install_pyenv(packages_config.get('pyenv'), options.skip_pkg))
 
         if not options.skip_pypi:
             execute_list.append(lambda: self.install_pypi(packages_config.get('pypi', [])))

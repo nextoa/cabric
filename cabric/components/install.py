@@ -129,7 +129,7 @@ class InstallComponent(Component):
         Because pyenv is awesome!!!
 
         :param root:
-        :param skip_pkg: skip install depends package, default is True
+        :param skip_pkg: skip install depends package, default is False
 
         :return:
         """
@@ -184,9 +184,10 @@ class InstallComponent(Component):
 
         pass
 
-    def install_pypi(self, pypi_configs):
+    def install_pypi(self, pypi_configs, skip_pkg=False):
         """
         :param pip_configs:
+        :param skip_pkg: skip install depends package, default is False
         :return:
         """
 
@@ -195,7 +196,7 @@ class InstallComponent(Component):
             python_version = pypi_config.get('version')
 
             if python_version:
-                self.install_pyenv(python_version)
+                self.install_pyenv(python_version, skip_pkg)
 
             for pkg in pypi_config.get('packages'):
                 run('export PYENV_ROOT="/usr/local/var/pyenv/" && export PYENV_VERSION=%s && pip install %s' % (python_version if python_version else self.system_python_version,
@@ -207,7 +208,7 @@ class InstallComponent(Component):
         [install(pypi_config) for pypi_config in pypi_configs]
         pass
 
-    def install_node(self, root, pkgs_config):
+    def install_node(self, root, pkgs_config, skip_pkg=False):
         """
         global node package denends
 
@@ -217,7 +218,7 @@ class InstallComponent(Component):
 
         :param root: pkgs_config root directory path
         :param pkgs_config: package.json pkgs_config
-
+        :param skip_pkg: skip install depends package, default is False
         :return:
         """
 
@@ -226,11 +227,14 @@ class InstallComponent(Component):
             return
 
         def on_centos():
-            run('yum install -y nodejs npm')
+            if not skip_pkg:
+                run('yum install -y epel-release')
+                run('yum install -y nodejs npm')
             pass
 
         def on_mac():
-            run('brew install node')
+            if skip_pkg:
+                run('brew install node')
             pass
 
         def on_all():
@@ -291,10 +295,10 @@ class InstallComponent(Component):
             execute_list.append(lambda: self.install_pyenv(packages_config.get('pyenv'), options.skip_pkg))
 
         if not options.skip_pypi:
-            execute_list.append(lambda: self.install_pypi(packages_config.get('pypi', [])))
+            execute_list.append(lambda: self.install_pypi(packages_config.get('pypi', []), options.skip_pkg))
 
         if not options.skip_node:
-            execute_list.append(lambda: self.install_node(using_config, packages_config))
+            execute_list.append(lambda: self.install_node(using_config, packages_config, options.skip_pkg))
 
         if not options.skip_user:
             execute_list.append(lambda: self.install_user(env_config.get('users', [])))

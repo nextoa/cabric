@@ -22,7 +22,7 @@ from fabric import state
 from fabric.state import env_options
 
 
-def parse_options():
+def parse_options(args=[]):
     """
     Handle command-line options with optparse.OptionParser.
 
@@ -33,8 +33,8 @@ def parse_options():
     #
 
     parser = OptionParser(
-            usage=("fab [options] <command>"
-                   "[:arg1,arg2=val2,host=foo,hosts='h1;h2',...] ..."))
+        usage=("cabric bridge [options] <command>"
+               "[:arg1,arg2=val2,host=foo,hosts='h1;h2',...] ..."))
 
     #
     # Define options that don't become `env` vars (typically ones which cause
@@ -115,7 +115,7 @@ def parse_options():
 
     # Return three-tuple of parser + the output from parse_args (opt obj, args)
     # Hack:make fab not accept any argument.
-    opts, args = parser.parse_args(args=[])
+    opts, args = parser.parse_args(args=args)
     return parser, opts, args
 
 

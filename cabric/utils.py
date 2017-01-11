@@ -119,7 +119,7 @@ def mirror_put(local_root, remote_path, validate=True):
 def parse_hosts(file):
     """
     :param file:
-    :return:
+    :return: machines and names pairs
     """
 
     file = os.path.expanduser(file)
@@ -129,15 +129,22 @@ def parse_hosts(file):
 
     host_list = buffer.strip("\n").split("\n")
     machines = []
+    names = []
     for v in host_list[:]:
         addr = v.strip()
-        if addr.find('#') == 0:
+        if not addr or addr.find('#') == 0:
             continue
 
-        # support inline comment
-        machines.append(addr.split("#")[0].strip())
+        if addr.find('##') > 0:
+            pairs = addr.split("#")
+            machines.append(pairs[0].strip())
+            names.append(pairs[-1].strip())
+            pass
+        else:
+            machines.append(addr.split("#")[0].strip())
+            names.append(None)
 
-    return machines
+    return machines, names
 
 
 def bind_hosts(fabric_root, select_env, parallel=False):
@@ -152,7 +159,10 @@ def bind_hosts(fabric_root, select_env, parallel=False):
     machine_config = os.path.join(fabric_root, select_env + '.conf')
 
     if not os.path.exists(machine_config):
-        raise OSError("%s not exist or permission denied." % machine_config)
+        raise OSError("%s not exist." % machine_config)
+
+    if not os.access(machine_config, os.R_OK):
+        raise OSError("access %s permission denied." % machine_config)
 
     inner_options = ['-P'] if parallel else []
 
@@ -165,7 +175,7 @@ def bind_hosts(fabric_root, select_env, parallel=False):
     for option in env_options:
         env[option.dest] = getattr(options, option.dest)
 
-    env.hosts = parse_hosts(machine_config)
+    env.hosts, env.host_names = parse_hosts(machine_config)
     env.use_ssh_config = True
     env.roledefs[select_env] = env.hosts
 
@@ -176,6 +186,17 @@ def bind_hosts(fabric_root, select_env, parallel=False):
     # Handle output control level show/hide
     update_output_levels(show=options.show, hide=options.hide)
     env.update(load_settings(env.rcfile))
+
+    for v in env.hosts:
+        flag_postion = v.find('@')
+
+        if flag_postion > -1:
+            host = v[flag_postion + 1:]
+        else:
+            host = v
+            pass
+        known_host(host, local_mode=True, clean=False)
+        pass
 
     return machine_config
 
@@ -335,17 +356,21 @@ def exist_group(group):
     pass
 
 
-def known_host(address, user):
+def known_host(address, user=None, local_mode=False, clean=True):
     """
     set ssh fingerprint
     :param address:domain or ip
     :param user:remote user name
+    :param local_mode: set known_host for localhost,default is False
+    :param clean: clean exist record,default is True
     """
 
-    user_path = get_home(user)
+    user_path = '~' if local_mode else get_home(user)
     command0 = 'grep %s %s/.ssh/known_hosts' % (address, user_path)
     command1 = 'ssh-keyscan %s >> %s/.ssh/known_hosts' % (address, user_path)
     command2 = 'sed -i -e "s/%s//g" %s/.ssh/known_hosts' % (address, user_path)
+
+    commander = fabric_local if local_mode else run
 
     if user:
         command0 = 'su - %s -c "%s"' % (user, command0)
@@ -354,11 +379,14 @@ def known_host(address, user):
         pass
 
     with fabric_settings(warn_only=True):
-        if run(command0).failed:
-            run(command1)
+        if commander(command0).failed:
+            commander(command1)
         else:
-            # clean old record
-            run(command2)
-            run(command1)
-
+            if clean:
+                # clean old record
+                commander(command2)
+                commander(command1)
+                pass
+            pass
+        pass
     pass

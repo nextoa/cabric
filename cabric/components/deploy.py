@@ -274,7 +274,7 @@ class DeployComponent(Component):
         try:
             nginx_home = get_home('nginx')
         except ValueError:
-            self.warn("remote server only support nginx and must use nginx user start")
+            self.warn("remote server only support nginx and must use nginx user start,skip deploy static resources...")
             return
 
         nginx_static_root = os.path.join(nginx_home, 'static')

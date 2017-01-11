@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
-from cabric.utils import parse_hosts
-from fabric.decorators import task
+
 from fabric.context_managers import env
+from fabric.decorators import task
+
+from cabric.utils import parse_hosts
 
 
 @task
@@ -23,5 +25,5 @@ def ez(curr):
     curr = 'online' if curr == 'ol' else curr
     env_file = os.path.join(current_path, curr + '.conf')
     env.use_ssh_config = True
-    env.hosts = parse_hosts(env_file)
+    env.hosts, env_host_names = parse_hosts(env_file)
     pass

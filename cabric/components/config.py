@@ -6,7 +6,7 @@ import os
 from cliez.component import Component
 
 from cabric.dns.dnspod import DNSPod
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings, env
 
 try:
     from shlex import quote as shell_quote
@@ -78,6 +78,26 @@ class ConfigComponent(Component):
 
         for crontab_config in crons_config:
             self.upload_crontab(crontab_config, env_option, crontab_root)
+
+        pass
+
+    def set_hostname(self):
+        """
+        set machine hostname
+        :return:
+        """
+        try:
+            host_index = env.hosts.index(env.host_string)
+
+            if env.host_names[host_index]:
+                run("hostnamectl set-hostname %s" % env.host_names[host_index])
+                run("hostnamectl set-hostname %s --pretty" % env.host_names[host_index])
+                run("hostnamectl set-hostname %s --static" % env.host_names[host_index])
+                run("systemctl restart systemd-hostnamed")
+                pass
+        except IndexError:
+            self.warn("can't find current hostname config:%s" % env.host_string)
+            pass
 
         pass
 
@@ -194,6 +214,10 @@ class ConfigComponent(Component):
 
         command_list = []
 
+        if not options.skip_hostname:
+            command_list.append(lambda: self.set_hostname())
+            pass
+
         timezone = env_config.get('timezone')
 
         if not options.skip_timezone and timezone:
@@ -237,6 +261,7 @@ class ConfigComponent(Component):
             (('--skip-upload',), dict(action='store_true', help='skip upload config files', )),
             (('--skip-crontab',), dict(action='store_true', help='skip upload crontab', )),
             (('--skip-timezone',), dict(action='store_true', help='skip set timezone', )),
+            (('--skip-hostname',), dict(action='store_true', help='skip set hostname', )),
             (('--skip-dns',), dict(action='store_true', help='skip config dns', )),
             (('--reload',), dict(nargs='+', help='set reload service', )),
             (('--restart',), dict(nargs='+', help='set restart service', )),

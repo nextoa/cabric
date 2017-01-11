@@ -282,7 +282,7 @@ def get_platform():
 def get_home(user):
     with fabric_settings(warn_only=True):
         if run('cat /etc/passwd | grep "^%s:"' % user).failed:
-            raise ValueError("User:%s not exits" % user)
+            raise ValueError("User:%s not exists" % user)
         else:
             user_path = run("cat /etc/passwd | grep '^%s:' | awk -F ':' '{print $6}'" % user)
             return user_path

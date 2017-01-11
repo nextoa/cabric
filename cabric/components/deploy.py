@@ -195,7 +195,16 @@ class DeployComponent(Component):
 
         pass
 
-    def install_requirements(self, user, project_name):
+    def get_project_python(self, user, project_name):
+        project_path = self.get_remote_project_path(user, project_name)
+        return run("cat %s/.python-version" % project_path)
+
+    def install_project_python(self, user, project_name):
+        local_version = self.get_project_python(user, project_name)
+        run('pyenv install -s %s' % local_version)
+        pass
+
+    def install_requirements(self, user, project_name, pip='pip'):
         """
         when requirements file exits. install it.
 
@@ -205,6 +214,7 @@ class DeployComponent(Component):
         """
 
         project_path = self.get_remote_project_path(user, project_name)
+        python_version = self.get_project_python(user, project_name)
 
         requirement_files = [
             os.path.join(project_path, 'requirements.txt'),
@@ -213,7 +223,7 @@ class DeployComponent(Component):
         ]
 
         for f in requirement_files:
-            run("test -f {0} && pip install -r {0} || echo '{0} not exist,skip install...'".format(f))
+            run("test -f {0} && $PYTHON_ENV/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
             pass
 
         pass
@@ -261,9 +271,9 @@ class DeployComponent(Component):
             self.warn("not django project,skip upload resources")
             return
 
-        nginx_home = get_home('nginx')
-
-        if not nginx_home:
+        try:
+            nginx_home = get_home('nginx')
+        except ValueError:
             self.warn("remote server only support nginx and must use nginx user start")
             return
 
@@ -355,6 +365,15 @@ class DeployComponent(Component):
         return '%s/.ssh/id_rsa' % get_home(user)
 
     def get_remote_project_path(self, user, project_name):
+        """
+        ..note::
+            it must be called in lambda
+
+        :param user:
+        :param project_name:
+        :return:
+        """
+
         return os.path.join(get_home(user), project_name)
 
     def run(self, options):
@@ -421,6 +440,7 @@ class DeployComponent(Component):
             command_list.append(lambda: self.upgrade(user, project_name, repo, branch, commit=options.commit))
 
         if not options.skip_requirements:
+            command_list.append(lambda: self.install_project_python(user, project_name))
             command_list.append(lambda: self.install_requirements(user, project_name))
 
         if not options.skip_compile_templates:

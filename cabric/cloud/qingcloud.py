@@ -51,11 +51,108 @@ class QingCloud(object):
         :param name:
         :return:
         """
-        if hasattr(self.connector, name) and callable(getattr(self.connector, name)):
-            def wrapper(*args, **kwargs):
-                return getattr(self.connector, name)(*args, **kwargs)
 
+        def wrapper(*args, **kwargs):
+            return getattr(self.connector, name)(*args, **kwargs)
+
+        if hasattr(self.connector, name) and callable(getattr(self.connector, name)):
             return wrapper
+
         raise AttributeError(name)
+
+    _create_rules = [
+        # device_type,describe api,create api,modify api
+        ('loadbalancer', '',),
+        ('loadbalancer-policy', '',),
+    ]
+
+    def create(self, device_type, name, arg_list=[], arg_dict={}, overwrite=False):
+        """
+        create device
+
+        :param device_type:
+        :param name:
+        :param overwrite:
+        :return:
+        """
+
+        for rule in self._create_rules:
+
+            if device_type == rule[0]:
+                method = getattr(self.client, rule[1])
+
+                pass
+
+            pass
+
+        pass
+
+    def get_loadbalancer_policy(self, name):
+        """
+        try get loadbalancer policy device by name.
+        :param policy_name:
+        :return: policy dict, if not exist, raise ValueError
+        """
+
+        policies = self.connector.describe_loadbalancer_policies()
+        pos_name_set = [(k, v['loadbalancer_policy_name']) for k, v in enumerate(policies['loadbalancer_policy_set'])]
+        pos_set, name_set = zip(*pos_name_set)
+
+        try:
+            pos = pos_set[name_set.index(name)]
+            policy = policies['loadbalancer_policy_set'][pos]
+        except (ValueError, IndexError):
+            raise ValueError("%s not exist" % name)
+
+        return policy
+
+    def get_or_create_loadbalancer_policy(self, policy_name, *args, **kwargs):
+        """
+
+        :param policy_name:
+        :param overwrite:
+        :return:
+        """
+
+        try:
+            policy = self.get_loadbalancer_policy(policy_name)
+        except ValueError:
+            # policy_resonse = self.connector.create_loadbalancer_policy(policy_name, *args, **kwargs)
+            # policy = self.connector.describe_loadbalancer_policies([policy_resonse['loadbalancer_policy_id']])
+
+            self.connector.create_loadbalancer_policy(policy_name, *args, **kwargs)
+            policy = self.get_loadbalancer_policy(policy_name)
+            pass
+        return policy
+
+    def get_loadbalancer_policy_rule(self, policy_id, name):
+        """
+        try get loadbalancer policy rule by name.
+        :param policy_id: policy id
+        :param name: rule name
+        :return: dict, if not exist, raise ValueError
+        """
+        rules = self.connector.describe_loadbalancer_policy_rules(loadbalancer_policy=policy_id)
+
+        pos_name_set = [(k, v['loadbalancer_policy_rule_name']) for k, v in enumerate(rules['loadbalancer_policy_rule_set'])]
+        pos_set, name_set = zip(*pos_name_set)
+
+        try:
+            pos = pos_set[name_set.index(name)]
+            rule_id = rules['loadbalancer_policy_rule_set'][pos]['loadbalancer_policy_rule_name']
+        except (ValueError, IndexError):
+            raise ValueError("%s not exist" % name)
+
+        return rule_id
+
+    def get_or_add_loadbalancer_policy_rules(self, policy_id, rule, *args, **kwargs):
+        try:
+            rule = self.get_loadbalancer_policy_rule(policy_id, rule['loadbalancer_policy_rule_name'])
+        except ValueError:
+            self.connector.add_loadbalancer_policy_rules(policy_id, [rule], *args, **kwargs)
+            rule = self.get_loadbalancer_policy_rule(policy_id, rule['loadbalancer_policy_rule_name'])
+            pass
+
+        return rule
 
     pass

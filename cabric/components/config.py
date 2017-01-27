@@ -6,7 +6,7 @@ import os
 from cliez.component import Component
 
 from cabric.dns.dnspod import DNSPod
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings, env
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings, env, get_home
 
 try:
     from shlex import quote as shell_quote
@@ -167,6 +167,76 @@ class ConfigComponent(Component):
 
         pass
 
+    def set_ssl_config(self, ssl_config, env_name):
+
+        # verify machine which to use
+        encrypt_position = ssl_config.get('encrypt-position', 0)
+        try:
+            use_host = env.hosts[encrypt_position]
+            if use_host != env.host_string:
+                return
+        except IndexError:
+            self.error("`ssl.encrypt-position' value is invalid.")
+
+        # verify domains
+        domains = ssl_config.get('domains')
+        if not domains and not isinstance(domains, list):
+            self.error("`ssl.domains' must be config.")
+
+        nginx_root = get_home('nginx')
+        if nginx_root:
+            # run("certbot certonly --webroot -w {0} {1}".format(
+            #     nginx_root,
+            #     ' '.join(['-d %s' % v for v in domains])
+            # ))
+            pass
+        else:
+            self.warn("no nginx found.skip config ssl...")
+            return
+
+        # set dh_param
+        dh_param = ssl_config.get('dhparam')
+        if dh_param:
+            dh_param_file = dh_param['path']
+            dh_param_length = dh_param.get('length', 4096)
+
+            run("test -f {0} || openssl dhparam -out {0} {1}".format(dh_param_file, dh_param_length))
+            pass
+
+        load_balancer = ssl_config.get('load-balancer')
+
+        if load_balancer:
+            lb_isp = load_balancer.get('isp')
+
+            if lb_isp.lower() == 'qingcloud.com':
+                from cabric.cloud.qingcloud import QingCloud
+                client = QingCloud()
+                client.connect(load_balancer['zone'])
+                client.connector.debug = True
+
+                policy_name = 'letsencrypt-' + env_name
+                policy = client.get_or_create_loadbalancer_policy(policy_name)
+
+                rules = [{
+                             'loadbalancer_policy_rule_name': domain,
+                             'rule_type': 'url',
+                             'val': '^/.well-known'
+                         } for domain in ssl_config['domains']]
+
+                for rule in rules:
+                    client.get_or_add_loadbalancer_policy_rules(policy['loadbalancer_policy_id'], rule)
+
+                client.apply_loadbalancer_policy(policy['loadbalancer_policy_id'])
+                pass
+            elif lb_isp is None:
+                self.warn("load balancer isp not specified.skip config load balancer")
+                pass
+            else:
+                self.warn("unknown isp for load balancer %s,skip config load balancer" % lb_isp)
+                pass
+            pass
+        pass
+
     def set_timezone(self, timezone):
         """
         should limit user input
@@ -248,6 +318,12 @@ class ConfigComponent(Component):
             command_list.append(lambda: self.upload_crontabs(crons_config, options.env, options.dir))
             pass
 
+        ssl_config = env_config.get('ssl', {})
+
+        if options.enable_ssl and ssl_config:
+            command_list.append(lambda: self.set_ssl_config(ssl_config, options.env))
+            pass
+
         execute(command_list)
         pass
 
@@ -263,6 +339,7 @@ class ConfigComponent(Component):
             (('--skip-timezone',), dict(action='store_true', help='skip set timezone', )),
             (('--skip-hostname',), dict(action='store_true', help='skip set hostname', )),
             (('--skip-dns',), dict(action='store_true', help='skip config dns', )),
+            (('--enable-ssl',), dict(action='store_true', help='enable config ssl', )),
             (('--reload',), dict(nargs='+', help='set reload service', )),
             (('--restart',), dict(nargs='+', help='set restart service', )),
         ]

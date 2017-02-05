@@ -139,11 +139,11 @@ class QingCloud(object):
 
         try:
             pos = pos_set[name_set.index(name)]
-            rule_id = rules['loadbalancer_policy_rule_set'][pos]['loadbalancer_policy_rule_name']
+            rule = rules['loadbalancer_policy_rule_set'][pos]
         except (ValueError, IndexError):
             raise ValueError("%s not exist" % name)
 
-        return rule_id
+        return rule
 
     def get_or_add_loadbalancer_policy_rules(self, policy_id, rule, *args, **kwargs):
         try:
@@ -154,5 +154,34 @@ class QingCloud(object):
             pass
 
         return rule
+
+    def get_loadbalancer_backend(self, listener_id, name):
+        """
+        try get load balancer backend
+        :param policy_name:
+        :return: policy dict, if not exist, raise ValueError
+        """
+
+        backends = self.connector.describe_loadbalancer_backends(loadbalancer_listener=listener_id)
+        pos_name_set = [(k, v['loadbalancer_backend_name']) for k, v in enumerate(backends['loadbalancer_backend_set'])]
+        pos_set, name_set = zip(*pos_name_set)
+
+        try:
+            pos = pos_set[name_set.index(name)]
+            backend = backends['loadbalancer_backend_set'][pos]
+        except (ValueError, IndexError):
+            raise ValueError("%s not exist" % name)
+
+        return backend
+
+    def get_or_add_load_balancer_backends(self, loadbalancer_listener, backend, *args, **kwargs):
+        try:
+            backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+        except ValueError:
+            self.connector.add_backends_to_listener(loadbalancer_listener, [backend], *args, **kwargs)
+            backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+            pass
+
+        return backend
 
     pass

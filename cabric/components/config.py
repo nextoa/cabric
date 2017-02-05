@@ -101,6 +101,19 @@ class ConfigComponent(Component):
 
         pass
 
+    def letsencrypt_server(self, domains):
+        # generate key
+        nginx_root = get_home('nginx')
+        if nginx_root:
+            run("certbot certonly --webroot -w {0} {1}".format(
+                nginx_root,
+                ' '.join(['-d %s' % v for v in domains])
+            ))
+            pass
+        else:
+            raise ValueError("no nginx found.skip config ssl...")
+        pass
+
     def set_hosts(self, records):
         """
         ..experiment::
@@ -168,6 +181,11 @@ class ConfigComponent(Component):
         pass
 
     def set_ssl_config(self, ssl_config, env_name):
+        """ Not support parallel workflow
+        :param ssl_config:
+        :param env_name:
+        :return:
+        """
 
         # verify machine which to use
         encrypt_position = ssl_config.get('encrypt-position', 0)
@@ -183,17 +201,6 @@ class ConfigComponent(Component):
         if not domains and not isinstance(domains, list):
             self.error("`ssl.domains' must be config.")
 
-        nginx_root = get_home('nginx')
-        if nginx_root:
-            # run("certbot certonly --webroot -w {0} {1}".format(
-            #     nginx_root,
-            #     ' '.join(['-d %s' % v for v in domains])
-            # ))
-            pass
-        else:
-            self.warn("no nginx found.skip config ssl...")
-            return
-
         # set dh_param
         dh_param = ssl_config.get('dhparam')
         if dh_param:
@@ -203,8 +210,8 @@ class ConfigComponent(Component):
             run("test -f {0} || openssl dhparam -out {0} {1}".format(dh_param_file, dh_param_length))
             pass
 
+        # try to manage load balancer
         load_balancer = ssl_config.get('load-balancer')
-
         if load_balancer:
             lb_isp = load_balancer.get('isp')
 
@@ -212,8 +219,9 @@ class ConfigComponent(Component):
                 from cabric.cloud.qingcloud import QingCloud
                 client = QingCloud()
                 client.connect(load_balancer['zone'])
-                client.connector.debug = True
+                client.connector.debug = self.options.debug
 
+                # try to set forward policy
                 policy_name = 'letsencrypt-' + env_name
                 policy = client.get_or_create_loadbalancer_policy(policy_name)
 
@@ -227,6 +235,19 @@ class ConfigComponent(Component):
                     client.get_or_add_loadbalancer_policy_rules(policy['loadbalancer_policy_id'], rule)
 
                 client.apply_loadbalancer_policy(policy['loadbalancer_policy_id'])
+
+                http_listener = load_balancer.get('http-listener')
+
+                # try to set backend
+                backend = load_balancer.get('backend')
+                backend.update({
+                    'loadbalancer_backend_name': policy['loadbalancer_policy_name'],
+                    'loadbalancer_policy_id': policy['loadbalancer_policy_id']
+                })
+                if http_listener and backend:
+                    client.get_or_add_load_balancer_backends(http_listener, backend)
+                    pass
+
                 pass
             elif lb_isp is None:
                 self.warn("load balancer isp not specified.skip config load balancer")
@@ -234,6 +255,11 @@ class ConfigComponent(Component):
             else:
                 self.warn("unknown isp for load balancer %s,skip config load balancer" % lb_isp)
                 pass
+
+            try:
+                self.letsencrypt_server(domains)
+            except ValueError as e:
+                self.warn(e)
             pass
         pass
 

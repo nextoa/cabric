@@ -278,11 +278,12 @@ class DeployComponent(Component):
             return
 
         nginx_static_root = os.path.join(nginx_home, 'static')
-        # collectstatic by user
+
+        # collect static files by user
         # fabric_local('python manage.py collectstatic --noinput')
 
         with settings(warn_only=True):
-            run('test -e {0}/static || mkdir -p {0}/static'.format(nginx_home), nginx)
+            run('test -e {0} || mkdir -p {0}'.format(nginx_static_root))
 
         static_root = os.path.join(working_root, 'static')
         assets_root = os.path.join(working_root, 'assets')

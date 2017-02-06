@@ -280,6 +280,22 @@ class ConfigComponent(Component):
         run('timedatectl set-timezone %s' % timezone)
         pass
 
+    def hack_nginx(self, services):
+        """
+        hack nginx default config
+
+        ..note::
+
+            this is a plan feature
+
+        :return:
+        """
+
+        if 'nginx' not in services:
+            return
+
+        pass
+
     def run(self, options):
         """
         plan feature
@@ -328,6 +344,8 @@ class ConfigComponent(Component):
 
         services = env_config.get('services', [])
 
+        command_list.append(lambda: self.hack_nginx(services))
+
         if not options.skip_enable_services and services:
             command_list.append(lambda: self.enable_services(services))
 
@@ -346,7 +364,7 @@ class ConfigComponent(Component):
 
         ssl_config = env_config.get('ssl', {})
 
-        if options.enable_ssl and ssl_config:
+        if options.enable_certbot and ssl_config:
             command_list.append(lambda: self.set_ssl_config(ssl_config, options.env))
             pass
 
@@ -365,7 +383,7 @@ class ConfigComponent(Component):
             (('--skip-timezone',), dict(action='store_true', help='skip set timezone', )),
             (('--skip-hostname',), dict(action='store_true', help='skip set hostname', )),
             (('--skip-dns',), dict(action='store_true', help='skip config dns', )),
-            (('--enable-ssl',), dict(action='store_true', help='enable config ssl', )),
+            (('--enable-certbot',), dict(action='store_true', help='enable config ssl certificate', )),
             (('--reload',), dict(nargs='+', help='set reload service', )),
             (('--restart',), dict(nargs='+', help='set restart service', )),
         ]

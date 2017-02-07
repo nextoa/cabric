@@ -20,10 +20,9 @@ class ConfigComponent(Component):
         :param list services: service list
         :return:
         """
-
         if get_platform() == 'centos':
             # run('systemctl disable %s' % ' '.join(services))
-            run('systemctl enable %s' % ' '.join(services))
+            [run('systemctl enable %s' % v) for v in services]
         else:
             self.warn("not support platform.no services enabled.")
         pass

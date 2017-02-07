@@ -106,6 +106,7 @@ class InstallComponent(Component):
                 return
 
             mirror_put(root, '/etc/yum.repos.d', validate=False)
+            pkg.insert(0, 'epl-release')
             run('yum install -y %s' % ' '.join(pkg))
             pass
 

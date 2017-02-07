@@ -217,13 +217,24 @@ class DeployComponent(Component):
         python_version = self.get_project_python(user, project_name)
 
         requirement_files = [
-            os.path.join(project_path, 'requirements.txt'),
-            os.path.join(project_path, 'requirements-public.txt'),
-            os.path.join(project_path, 'requirements-private.txt'),
+            os.path.join(project_path, 'requirements-static.txt'),
+            os.path.join(project_path, 'requirements', 'zip.txt'),
+            os.path.join(project_path, 'requirements', 'private-static.txt'),
+            os.path.join(project_path, 'requirements', 'test-static.txt'),
         ]
 
         for f in requirement_files:
-            run("test -f {0} && $PYTHON_ENV/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
+            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
+            pass
+
+        requirement_files = [
+            os.path.join(project_path, 'requirements.txt'),
+            os.path.join(project_path, 'requirements', 'private.txt'),
+            os.path.join(project_path, 'requirements', 'test.txt'),
+        ]
+
+        for f in requirement_files:
+            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
             pass
 
         pass
@@ -247,7 +258,7 @@ class DeployComponent(Component):
         run('pug -E html -b {0} {0}'.format(project_path))
         pass
 
-    def upload_resources(self):
+    def upload_resources(self, working_root=None, static_prefix=None):
         """
         upload static resoures file is exists.
 
@@ -264,7 +275,7 @@ class DeployComponent(Component):
         :return:
         """
 
-        working_root = os.getcwd()
+        working_root = working_root or os.getcwd()
         django_manage = os.path.join(working_root, 'manage.py')
 
         if not os.path.exists(django_manage):
@@ -277,7 +288,7 @@ class DeployComponent(Component):
             self.warn("remote server only support nginx and must use nginx user start,skip deploy static resources...")
             return
 
-        nginx_static_root = os.path.join(nginx_home, 'static')
+        nginx_static_root = os.path.join(nginx_home, static_prefix, 'static')
 
         # collect static files by user
         # fabric_local('python manage.py collectstatic --noinput')
@@ -285,16 +296,33 @@ class DeployComponent(Component):
         with settings(warn_only=True):
             run('test -e {0} || mkdir -p {0}'.format(nginx_static_root))
 
-        static_root = os.path.join(working_root, 'static')
-        assets_root = os.path.join(working_root, 'assets')
+        static_root_list = [
+            os.path.join(working_root, 'static'),
+            os.path.join(working_root, 'assets')
+        ]
 
-        if os.path.exists(static_root):
-            put(static_root, nginx_static_root)
+        for v in static_root_list:
+            if os.path.exists(v):
+                put(v, nginx_static_root)
+                pass
             pass
 
-        if os.path.exists(assets_root):
-            put(assets_root, nginx_static_root)
-            pass
+        pass
+
+    def upload_javascripts(self, remote_user, project_name,
+                           working_root=None):
+
+        remote_path = self.get_remote_project_path(remote_user, project_name)
+        working_root = working_root or os.getcwd()
+
+        webpack_stats_file = os.path.join(working_root, 'javascripts', 'webpack-stats.json')
+        remote_javascripts_dir = os.path.join(remote_path, 'javascripts')
+
+        with settings(warn_only=True):
+            if not run("test -d %s" % remote_javascripts_dir).failed:
+                if os.path.exists(webpack_stats_file):
+                    put(webpack_stats_file, remote_javascripts_dir)
+                pass
 
         pass
 
@@ -448,7 +476,8 @@ class DeployComponent(Component):
             command_list.append(lambda: self.compile_templates(user, project_name))
 
         if not options.skip_upload_resources:
-            command_list.append(lambda: self.upload_resources())
+            command_list.append(lambda: self.upload_resources(static_prefix=config.get('static-prefix')))
+            command_list.append(lambda: self.upload_javascripts(user, project_name))
 
         execute(command_list)
         pass

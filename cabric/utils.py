@@ -38,6 +38,8 @@ def get_roots(project):
     :return: tuple package_root,stage_root,fabric_root
     """
 
+    project = os.path.expanduser(project)
+
     root = os.path.join(project, 'config')
 
     if not os.path.exists(root):

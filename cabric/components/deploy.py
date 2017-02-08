@@ -187,11 +187,14 @@ class DeployComponent(Component):
 
     def get_project_python(self, user, project_name):
         project_path = self.get_remote_project_path(user, project_name)
-        return run("cat %s/.python-version" % project_path)
+        with settings(warn_only=True):
+            version = run("test -f {0} && cat {0}/.python-version".format(project_path))
+        return version
 
     def install_project_python(self, user, project_name):
-        local_version = self.get_project_python(user, project_name)
-        run('pyenv install -s %s' % local_version)
+        remote_version = self.get_project_python(user, project_name)
+        if remote_version:
+            run('pyenv install -s %s' % version)
         pass
 
     def install_requirements(self, user, project_name, pip='pip'):
@@ -211,6 +214,8 @@ class DeployComponent(Component):
             os.path.join(project_path, 'requirements', 'zip.txt'),
             os.path.join(project_path, 'requirements', 'private-static.txt'),
             os.path.join(project_path, 'requirements', 'test-static.txt'),
+            os.path.join(project_path, 'requirements.txt'),
+            os.path.join(project_path, 'requirements', 'test.txt'),
         ]
 
         for f in requirement_files:
@@ -218,13 +223,11 @@ class DeployComponent(Component):
             pass
 
         requirement_files = [
-            os.path.join(project_path, 'requirements.txt'),
             os.path.join(project_path, 'requirements', 'private.txt'),
-            os.path.join(project_path, 'requirements', 'test.txt'),
         ]
 
         for f in requirement_files:
-            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
+            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -U -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
             pass
 
         pass
@@ -245,10 +248,10 @@ class DeployComponent(Component):
         :return:
         """
         project_path = self.get_remote_project_path(user, project_name)
-        run('pug -E html -b {0} {0}'.format(project_path))
+        run('which pug && pug -E html -b {0} {0} || echo "skip parser jade file"'.format(project_path))
         pass
 
-    def upload_resources(self, working_root=None, static_prefix=None):
+    def upload_resources(self, user, project_name, working_root=None, static_prefix=None):
         """
         upload static resoures file is exists.
 
@@ -265,12 +268,20 @@ class DeployComponent(Component):
         :return:
         """
 
+        remote_root = self.get_remote_project_path(user, project_name)
+
         working_root = working_root or os.getcwd()
         django_manage = os.path.join(working_root, 'manage.py')
 
         if not os.path.exists(django_manage):
             self.warn("not django project,skip upload resources")
             return
+
+        with settings(warn_only=True):
+            if run("test -f %s/manage.py" % remote_root).failed:
+                self.warn("deploy project is not django project,skip upload resources")
+                return
+            pass
 
         try:
             nginx_home = get_home('nginx')
@@ -419,7 +430,7 @@ class DeployComponent(Component):
         """
 
         package_root, _, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env)
+        bind_hosts(fabric_root, options.env, options.parallel)
 
         using_config = os.path.join(package_root, options.env)
         project_root = os.path.dirname(package_root)
@@ -469,7 +480,7 @@ class DeployComponent(Component):
             command_list.append(lambda: self.compile_templates(user, project_name))
 
         if not options.skip_upload_resources:
-            command_list.append(lambda: self.upload_resources(static_prefix=config.get('static-prefix')))
+            command_list.append(lambda: self.upload_resources(user, project_name, static_prefix=config.get('static-prefix')))
             command_list.append(lambda: self.upload_javascripts(user, project_name))
 
         execute(command_list)
@@ -482,6 +493,7 @@ class DeployComponent(Component):
         """
         return [
             (('commit',), dict(nargs='?', help='set which commit to deploy,default is latest version', )),
+            (('--parallel', '-P'), dict(action='store_true', help='default to parallel execution method', )),
             (('--with-deploy-key',), dict(action='store_true', help='upload deploy key', )),
             (('--force-renew',), dict(action='store_true', help='only works when user set github value', )),
             (('--skip-source-code',), dict(action='store_true', help='skip upgrade source code', )),

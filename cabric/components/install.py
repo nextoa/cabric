@@ -65,6 +65,8 @@ class InstallComponent(Component):
                     self.error("invalid user config")
 
                 if exist_user(username):
+                    if perm:
+                        run('chmod {1} {0}'.format(home, perm))
                     self.warn("user `%s' exist.skip to create." % username)
                     continue
 

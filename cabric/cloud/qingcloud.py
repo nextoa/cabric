@@ -184,4 +184,15 @@ class QingCloud(object):
 
         return backend
 
+
+    # def get_or_create_server_certicifate(self, loadbalancer_listener, backend, *args, **kwargs):
+    #     try:
+    #         backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+    #     except ValueError:
+    #         self.connector.add_backends_to_listener(loadbalancer_listener, [backend], *args, **kwargs)
+    #         backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+    #         pass
+    #
+    #     return backend
+
     pass

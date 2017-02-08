@@ -288,6 +288,7 @@ class DeployComponent(Component):
             self.warn("remote server only support nginx and must use nginx user start,skip deploy static resources...")
             return
 
+        static_prefix = static_prefix or ''
         nginx_static_root = os.path.join(nginx_home, static_prefix, 'static')
 
         # collect static files by user

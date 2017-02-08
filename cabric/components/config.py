@@ -51,7 +51,7 @@ class ConfigComponent(Component):
             self.warn("no user found,skip deploy crontab file `%s'" % config.get(crontab_file))
             return
 
-        crontab_path = os.path.join(crontab_root, 'config', 'crontab', crontab_file)
+        crontab_path = os.path.expanduser(os.path.join(crontab_root, 'config', 'crontab', crontab_file))
 
         if os.path.exists(crontab_path):
             put(crontab_path, '/tmp/cabric_crontab')
@@ -104,13 +104,14 @@ class ConfigComponent(Component):
         # generate key
         nginx_root = get_home('nginx')
         if nginx_root:
+            run("systemctl reload nginx")  # make sure load new config
             run("certbot certonly --webroot -w {0} {1}".format(
                 nginx_root,
                 ' '.join(['-d %s' % v for v in domains])
             ))
             pass
         else:
-            raise ValueError("no nginx found.skip config ssl...")
+            raise ValueError("no nginx found.skip config certificate...")
         pass
 
     def set_hosts(self, records):
@@ -224,6 +225,7 @@ class ConfigComponent(Component):
                 policy_name = 'letsencrypt-' + env_name
                 policy = client.get_or_create_loadbalancer_policy(policy_name)
 
+                # try to set forward rule
                 rules = [{
                              'loadbalancer_policy_rule_name': domain,
                              'rule_type': 'url',
@@ -238,6 +240,8 @@ class ConfigComponent(Component):
                 http_listener = load_balancer.get('http-listener')
 
                 # try to set backend
+                # ..note::
+                #   please make sure you backend works right.
                 backend = load_balancer.get('backend')
                 backend.update({
                     'loadbalancer_backend_name': policy['loadbalancer_policy_name'],
@@ -247,6 +251,18 @@ class ConfigComponent(Component):
                     client.get_or_add_load_balancer_backends(http_listener, backend)
                     pass
 
+                try:
+                    self.letsencrypt_server(domains)
+                except ValueError as e:
+                    self.warn(e)
+
+                # get certificate
+                certificate_remote_dir = "/etc/letsencrypt/live/" + domains[-1]
+                fullchain = run('cat %s' % os.path.join(certificate_remote_dir, 'fullchain.pem'))
+                private_key = run('cat %s' % os.path.join(certificate_remote_dir, 'privkey.pem'))
+
+                print(fullchain)
+                print(private_key)
                 pass
             elif lb_isp is None:
                 self.warn("load balancer isp not specified.skip config load balancer")
@@ -254,11 +270,6 @@ class ConfigComponent(Component):
             else:
                 self.warn("unknown isp for load balancer %s,skip config load balancer" % lb_isp)
                 pass
-
-            try:
-                self.letsencrypt_server(domains)
-            except ValueError as e:
-                self.warn(e)
             pass
         pass
 

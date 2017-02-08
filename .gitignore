@@ -3,6 +3,8 @@ _gh_pages
 _site
 .ruby-version
 
+webapp-odd
+
 # Numerous always-ignore extensions
 *.diff
 *.err

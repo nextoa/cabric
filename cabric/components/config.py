@@ -6,7 +6,7 @@ import os
 from cliez.component import Component
 
 from cabric.dns.dnspod import DNSPod
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings, env, get_home
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings, env, get_home, current_machine
 
 try:
     from shlex import quote as shell_quote
@@ -46,6 +46,7 @@ class ConfigComponent(Component):
     def upload_crontab(self, config, env_option, crontab_root):
         user = config.get('user')
         crontab_file = config.get('crontab', env_option + '.conf')
+        position = config.get('position')
 
         if not user:
             self.warn("no user found,skip deploy crontab file `%s'" % config.get(crontab_file))
@@ -54,9 +55,14 @@ class ConfigComponent(Component):
         crontab_path = os.path.expanduser(os.path.join(crontab_root, 'config', 'crontab', crontab_file))
 
         if os.path.exists(crontab_path):
-            put(crontab_path, '/tmp/cabric_crontab')
-            run('crontab < /tmp/cabric_crontab', user)
-            run('rm -f /tmp/cabric_crontab')
+            if position is None or current_machine(position):
+                put(crontab_path, '/tmp/cabric_crontab')
+                run('crontab < /tmp/cabric_crontab', user)
+                run('rm -f /tmp/cabric_crontab')
+                pass
+            else:
+                self.warn("crontab doesn't need to deploy this machine:%s." % env.host_string)
+                pass
             pass
         else:
             self.warn("crontab file `%s' not found. skip to install it" % crontab_path)

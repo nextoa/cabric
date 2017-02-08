@@ -396,7 +396,7 @@ def known_host(address, user=None, local_mode=False, clean=True):
 
 def current_machine(position):
     try:
-        if env.host == env.hosts[position]:
+        if env.host_string == env.hosts[position]:
             return True
     except IndexError:
         pass

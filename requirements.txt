@@ -4,3 +4,4 @@ cliez
 pycrypto
 gitpython
 mock
+pyminifier

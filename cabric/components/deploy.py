@@ -22,7 +22,8 @@ except NameError:
 
 
 class DeployComponent(Component):
-    def create_github_key(self, private_key, github, remote_user, key_length=8192):
+    def create_github_key(self, private_key, github, remote_user,
+                          key_length=8192):
 
         # login
         def use_personal_token():
@@ -35,7 +36,8 @@ class DeployComponent(Component):
             if os.path.exists(git_config_path):
                 git_config = pygit.GitConfigParser(git_config_path)
                 git_config.read()
-                access_token = git_config.get_value('github', 'token', default='')
+                access_token = git_config.get_value('github', 'token',
+                                                    default='')
                 username = git_config.get_value('github', 'user', default='')
                 pass
 
@@ -58,11 +60,17 @@ class DeployComponent(Component):
 
         for v in authorized_methods:
             temp_config = v()
-            response = requests.get('https://api.github.com/repos/{}/keys'.format(github), auth=temp_config)
+            response = requests.get(
+                'https://api.github.com/repos/{}/keys'.format(github),
+                auth=temp_config)
             if response.status_code != 200:
-                self.warn("use `%s' method login to github is failed,try next way." % v.__name__.replace('use_', '').replace('_', '-'))
-                if self.options.verbose == 3:
-                    self.warn("github-api request: %s" % 'https://api.github.com/repos/{}/keys'.format(github))
+                self.warn(
+                    "use `%s' method login to github is failed,try next way." % v.__name__.replace(
+                        'use_', '').replace('_', '-'))
+                if self.options.debug:
+                    self.warn(
+                        "github-api request: %s" % 'https://api.github.com/repos/{}/keys'.format(
+                            github))
                     self.warn("github-api auth: %s" % ' '.join(temp_config))
                     self.warn("github-api return: %s" % response.text)
                     pass
@@ -84,13 +92,18 @@ class DeployComponent(Component):
 
         # clean old key if exists
         for v in uploaded_keys:
-            response = requests.delete('https://api.github.com/repos/{}/keys/{}'.format(github, v.get('id')), auth=auth_config)
+            response = requests.delete(
+                'https://api.github.com/repos/{}/keys/{}'.format(github,
+                                                                 v.get('id')),
+                auth=auth_config)
             if response.status_code != 204:
-                self.error("delete old deploy key failed,please try it later.server response:\n%s" % response.text)
+                self.error(
+                    "delete old deploy key failed,please try it later.server response:\n%s" % response.text)
                 pass
 
         # generate new key
-        self.print_message("Generating deploy key... this will cost about 1 minute...")
+        self.print_message(
+            "Generating deploy key... this will cost about 1 minute...")
         key = RSA.generate(key_length)
 
         private_key_dir = os.path.dirname(private_key)
@@ -109,14 +122,17 @@ class DeployComponent(Component):
             fp.write(key.exportKey('OpenSSH'))
             pass
 
-        response = requests.post('https://api.github.com/repos/{}/keys'.format(github), data=json.dumps({
-            'title': key_title,
-            'key': pubkey.exportKey('OpenSSH'),
-            'read_only': True,
-        }), auth=auth_config)
+        response = requests.post(
+            'https://api.github.com/repos/{}/keys'.format(github),
+            data=json.dumps({
+                'title': key_title,
+                'key': pubkey.exportKey('OpenSSH'),
+                'read_only': True,
+            }), auth=auth_config)
 
         if response.status_code != 201:
-            self.error("create key failed.server response:\n%s" % response.text)
+            self.error(
+                "create key failed.server response:\n%s" % response.text)
             pass
 
         pass
@@ -167,14 +183,16 @@ class DeployComponent(Component):
         """
 
         if not os.path.exists(private_key):
-            self.error("deploy key `%s' is not exists,please set it." % private_key)
+            self.error(
+                "deploy key `%s' is not exists,please set it." % private_key)
 
         if os.path.exists(private_key):
             self.print_message("upload deploy key...")
             remote_key = self.get_remote_key(remote_user, project_name)
             remote_key_root = os.path.dirname(remote_key)
 
-            run('test -e {0} || mkdir -p {0}'.format(remote_key_root), remote_user)
+            run('test -e {0} || mkdir -p {0}'.format(remote_key_root),
+                remote_user)
             with settings(warn_only=True):
                 run('chmod 700 -Rf {}'.format(remote_key_root), remote_user)
 
@@ -188,13 +206,17 @@ class DeployComponent(Component):
     def get_project_python(self, user, project_name):
         project_path = self.get_remote_project_path(user, project_name)
         with settings(warn_only=True):
-            version = run("test -f {0} && cat {0}/.python-version".format(project_path))
-        return version
+            version = run(
+                "test -f {0}/.python-version && cat {0}/.python-version".format(
+                    project_path))
+            version = version.strip("\n")
+            return version
+        pass
 
     def install_project_python(self, user, project_name):
         remote_version = self.get_project_python(user, project_name)
         if remote_version:
-            run('pyenv install -s %s' % version)
+            run('pyenv install -s %s' % remote_version)
         pass
 
     def install_requirements(self, user, project_name, pip='pip'):
@@ -210,24 +232,45 @@ class DeployComponent(Component):
         python_version = self.get_project_python(user, project_name)
 
         requirement_files = [
-            os.path.join(project_path, 'requirements-static.txt'),
-            os.path.join(project_path, 'requirements', 'zip.txt'),
-            os.path.join(project_path, 'requirements', 'private-static.txt'),
-            os.path.join(project_path, 'requirements', 'test-static.txt'),
             os.path.join(project_path, 'requirements.txt'),
             os.path.join(project_path, 'requirements', 'test.txt'),
-        ]
-
-        for f in requirement_files:
-            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
-            pass
-
-        requirement_files = [
             os.path.join(project_path, 'requirements', 'private.txt'),
         ]
 
         for f in requirement_files:
-            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -U -r {0} || echo '{0} not exist,skip install...'".format(f, python_version))
+            run(
+                "test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -U -r {0} || echo '{0} not exist,skip install...'".format(
+                    f, python_version))
+            pass
+
+        requirement_files = [
+            os.path.join(project_path, 'requirements-static.txt'),
+            os.path.join(project_path, 'requirements', 'zip.txt'),
+            os.path.join(project_path, 'requirements', 'private-static.txt'),
+            os.path.join(project_path, 'requirements', 'test-static.txt'),
+        ]
+
+        for f in requirement_files:
+            run(
+                "test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(
+                    f, python_version))
+            pass
+
+        pass
+
+    def migrate_db(self, user, project_name):
+        """
+        try migrate database
+
+        :param user: remote user
+        :param project_name: project name
+        :return:
+        """
+        project_path = self.get_remote_project_path(user, project_name)
+
+        with cd(project_path):
+            run(
+                'test -f ./manage.py && python manage.py migrate || echo "skip migrate database"')
             pass
 
         pass
@@ -248,10 +291,13 @@ class DeployComponent(Component):
         :return:
         """
         project_path = self.get_remote_project_path(user, project_name)
-        run('which pug && pug -E html -b {0} {0} || echo "skip parser jade file"'.format(project_path))
+        run(
+            'which pug && pug -E html -b {0} {0} || echo "skip parser jade file"'.format(
+                project_path))
         pass
 
-    def upload_resources(self, user, project_name, working_root=None, static_prefix=None):
+    def upload_resources(self, user, project_name, working_root=None,
+                         static_prefix=None):
         """
         upload static resoures file is exists.
 
@@ -279,14 +325,16 @@ class DeployComponent(Component):
 
         with settings(warn_only=True):
             if run("test -f %s/manage.py" % remote_root).failed:
-                self.warn("deploy project is not django project,skip upload resources")
+                self.warn(
+                    "deploy project is not django project,skip upload resources")
                 return
             pass
 
         try:
             nginx_home = get_home('nginx')
         except ValueError:
-            self.warn("remote server only support nginx and must use nginx user start,skip deploy static resources...")
+            self.warn(
+                "remote server only support nginx and must use nginx user start,skip deploy static resources...")
             return
 
         static_prefix = static_prefix or ''
@@ -317,12 +365,13 @@ class DeployComponent(Component):
         remote_path = self.get_remote_project_path(remote_user, project_name)
         working_root = working_root or os.getcwd()
 
-        webpack_stats_file = os.path.join(working_root, 'javascripts', 'webpack-stats.json')
+        webpack_stats_file = os.path.join(working_root, 'javascripts',
+                                          'webpack-stats.json')
         remote_javascripts_dir = os.path.join(remote_path, 'javascripts')
 
         with settings(warn_only=True):
-            if not run("test -d %s" % remote_javascripts_dir).failed:
-                if os.path.exists(webpack_stats_file):
+            if os.path.exists(webpack_stats_file):
+                if not run("test -d %s" % remote_javascripts_dir).failed:
                     put(webpack_stats_file, remote_javascripts_dir)
                 pass
 
@@ -361,17 +410,24 @@ class DeployComponent(Component):
         with settings(warn_only=True):
             if run("test -d %s/.git" % remote_path).failed:
                 parent_path = os.path.dirname(remote_path)
-                run('test -d {0} || mkdir {0}'.format(parent_path), remote_user)
+                run('test -d {0} || mkdir {0}'.format(parent_path),
+                    remote_user)
                 with cd(parent_path):
-                    run('git clone {} -b {} {}'.format(repo, branch, remote_path), remote_user)
-                    run("cd {} && git config core.fileMode false".format(remote_path), remote_user)
+                    run('git clone {} -b {} {}'.format(repo, branch,
+                                                       remote_path),
+                        remote_user)
+                    run("cd {} && git config core.fileMode false".format(
+                        remote_path), remote_user)
 
-        run("cd {} && git pull origin {}".format(remote_path, branch), remote_user)
-        run("cd {} && git pull origin {} --tags".format(remote_path, branch), remote_user)
+        run("cd {} && git pull origin {}".format(remote_path, branch),
+            remote_user)
+        run("cd {} && git pull origin {} --tags".format(remote_path, branch),
+            remote_user)
 
         if commit:
             # run("cd {} && git checkout -- .".format(remote_path), remote_user)  # make sure there is no merge commit on remote server
-            run("cd {} && git checkout {}".format(remote_path, commit), remote_user)
+            run("cd {} && git checkout {}".format(remote_path, commit),
+                remote_user)
 
         pass
 
@@ -429,6 +485,9 @@ class DeployComponent(Component):
         :return:
         """
 
+        if options.verbose == 3:
+            options.debug = True
+
         package_root, _, fabric_root = get_roots(options.dir)
         bind_hosts(fabric_root, options.env, options.parallel)
 
@@ -436,9 +495,11 @@ class DeployComponent(Component):
         project_root = os.path.dirname(package_root)
 
         try:
-            packages_config = json.load(open(os.path.join(using_config, 'env.json'), 'r'))
+            packages_config = json.load(
+                open(os.path.join(using_config, 'env.json'), 'r'))
         except ValueError:
-            self.error("Invalid json syntax:%s" % os.path.join(using_config, 'env.json'))
+            self.error("Invalid json syntax:%s" % os.path.join(using_config,
+                                                               'env.json'))
 
         config = packages_config.get('deploy', {})
 
@@ -455,33 +516,52 @@ class DeployComponent(Component):
 
         github = config.get('github')
 
-        project_name = github if github else os.path.basename(repo).replace('.git', '')
-        private_key = os.path.expanduser(config.get('private_key', '~/.ssh/.deploies/%s.rsa' % project_name))
+        project_name = github if github else os.path.basename(repo).replace(
+            '.git', '')
+        private_key = os.path.expanduser(config.get('private_key',
+                                                    '~/.ssh/.deploies/%s.rsa' % project_name))
 
         if project_root in private_key:
-            self.error("for safety reason,we don't allow private_key path in project's path")
+            self.error(
+                "for safety reason,we don't allow private_key path in project's path")
 
         command_list = []
 
         if options.with_deploy_key:
-            if options.force_renew or (not os.path.exists(private_key) and github):
+            if options.force_renew or (
+                        not os.path.exists(private_key) and github):
                 self.create_github_key(private_key, github, user)
 
-            command_list.append(lambda: self.upload_deploy_key(private_key, user, project_name))
+            command_list.append(
+                lambda: self.upload_deploy_key(private_key, user,
+                                               project_name))
 
         if not options.skip_source_code:
-            command_list.append(lambda: self.upgrade(user, project_name, repo, branch, commit=options.commit))
+            command_list.append(
+                lambda: self.upgrade(user, project_name, repo, branch,
+                                     commit=options.commit))
 
         if not options.skip_requirements:
-            command_list.append(lambda: self.install_project_python(user, project_name))
-            command_list.append(lambda: self.install_requirements(user, project_name))
+            command_list.append(
+                lambda: self.install_project_python(user, project_name))
+            command_list.append(
+                lambda: self.install_requirements(user, project_name))
 
         if not options.skip_compile_templates:
-            command_list.append(lambda: self.compile_templates(user, project_name))
+            command_list.append(
+                lambda: self.compile_templates(user, project_name))
+
+        if not options.skip_migrate:
+            command_list.append(
+                lambda: self.migrate_db(user, project_name))
 
         if not options.skip_upload_resources:
-            command_list.append(lambda: self.upload_resources(user, project_name, static_prefix=config.get('static-prefix')))
-            command_list.append(lambda: self.upload_javascripts(user, project_name))
+            command_list.append(
+                lambda: self.upload_resources(user, project_name,
+                                              static_prefix=config.get(
+                                                  'static-prefix')))
+            command_list.append(
+                lambda: self.upload_javascripts(user, project_name))
 
         execute(command_list)
         pass
@@ -492,14 +572,24 @@ class DeployComponent(Component):
         python web project deploy tool
         """
         return [
-            (('commit',), dict(nargs='?', help='set which commit to deploy,default is latest version', )),
-            (('--parallel', '-P'), dict(action='store_true', help='default to parallel execution method', )),
-            (('--with-deploy-key',), dict(action='store_true', help='upload deploy key', )),
-            (('--force-renew',), dict(action='store_true', help='only works when user set github value', )),
-            (('--skip-source-code',), dict(action='store_true', help='skip upgrade source code', )),
-            (('--skip-requirements',), dict(action='store_true', help='skip install requirements', )),
-            (('--skip-compile-templates',), dict(action='store_true', help='skip compile templates', )),
-            (('--skip-upload-resources',), dict(action='store_true', help='skip upload resources', )),
+            (('commit',), dict(nargs='?',
+                               help='set which commit to deploy,default is latest version', )),
+            (('--parallel', '-P'), dict(action='store_true',
+                                        help='default to parallel execution method', )),
+            (('--with-deploy-key',),
+             dict(action='store_true', help='upload deploy key', )),
+            (('--force-renew',), dict(action='store_true',
+                                      help='only works when user set github value', )),
+            (('--skip-source-code',),
+             dict(action='store_true', help='skip upgrade source code', )),
+            (('--skip-requirements',),
+             dict(action='store_true', help='skip install requirements', )),
+            (('--skip-compile-templates',),
+             dict(action='store_true', help='skip compile templates', )),
+            (('--skip-migrate',),
+             dict(action='store_true', help='skip migrate', )),
+            (('--skip-upload-resources',),
+             dict(action='store_true', help='skip upload resources', )),
         ]
         pass
 

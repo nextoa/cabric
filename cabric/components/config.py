@@ -110,7 +110,7 @@ class ConfigComponent(Component):
         # generate key
         nginx_root = get_home('nginx')
         if nginx_root:
-            run("systemctl reload nginx")  # make sure load new config
+            run("systemctl restart nginx")  # make sure load new config
             run("certbot certonly --webroot -w {0} {1}".format(
                 nginx_root,
                 ' '.join(['-d %s' % v for v in domains])
@@ -193,6 +193,7 @@ class ConfigComponent(Component):
         :return:
         """
 
+
         # verify machine which to use
         encrypt_position = ssl_config.get('encrypt-position', 0)
         try:
@@ -216,16 +217,36 @@ class ConfigComponent(Component):
             run("test -f {0} || openssl dhparam -out {0} {1}".format(dh_param_file, dh_param_length))
             pass
 
+        def create_certicifate():
+            try:
+                self.letsencrypt_server(domains)
+            except ValueError as e:
+                self.warn(e)
+
+                # get certificate
+            certificate_remote_dir = "/etc/letsencrypt/live/" + domains[0]
+            fullchain = run('cat %s' % os.path.join(certificate_remote_dir, 'fullchain.pem'))
+            private_key = run('cat %s' % os.path.join(certificate_remote_dir, 'privkey.pem'))
+
+            print(fullchain)
+            print(private_key)
+            pass
+
         # try to manage load balancer
         load_balancer = ssl_config.get('load-balancer')
         if load_balancer:
             lb_isp = load_balancer.get('isp')
+            upstream_mode = load_balancer.get('upstream-mode')
 
             if lb_isp.lower() == 'qingcloud.com':
                 from cabric.cloud.qingcloud import QingCloud
                 client = QingCloud()
                 client.connect(load_balancer['zone'])
                 client.connector.debug = self.options.debug
+
+                if upstream_mode:
+                    create_certicifate()
+                    return
 
                 # try to set forward policy
                 policy_name = 'letsencrypt-' + env_name
@@ -257,18 +278,7 @@ class ConfigComponent(Component):
                     client.get_or_add_load_balancer_backends(http_listener, backend)
                     pass
 
-                try:
-                    self.letsencrypt_server(domains)
-                except ValueError as e:
-                    self.warn(e)
-
-                # get certificate
-                certificate_remote_dir = "/etc/letsencrypt/live/" + domains[-1]
-                fullchain = run('cat %s' % os.path.join(certificate_remote_dir, 'fullchain.pem'))
-                private_key = run('cat %s' % os.path.join(certificate_remote_dir, 'privkey.pem'))
-
-                print(fullchain)
-                print(private_key)
+                create_certicifate()
                 pass
             elif lb_isp is None:
                 self.warn("load balancer isp not specified.skip config load balancer")
@@ -276,6 +286,9 @@ class ConfigComponent(Component):
             else:
                 self.warn("unknown isp for load balancer %s,skip config load balancer" % lb_isp)
                 pass
+            pass
+        else:
+            create_certicifate()
             pass
         pass
 

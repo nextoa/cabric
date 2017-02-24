@@ -164,9 +164,9 @@ class QingCloud(object):
 
         backends = self.connector.describe_loadbalancer_backends(loadbalancer_listener=listener_id)
         pos_name_set = [(k, v['loadbalancer_backend_name']) for k, v in enumerate(backends['loadbalancer_backend_set'])]
-        pos_set, name_set = zip(*pos_name_set)
 
         try:
+            pos_set, name_set = zip(*pos_name_set)
             pos = pos_set[name_set.index(name)]
             backend = backends['loadbalancer_backend_set'][pos]
         except (ValueError, IndexError):
@@ -183,7 +183,6 @@ class QingCloud(object):
             pass
 
         return backend
-
 
     # def get_or_create_server_certicifate(self, loadbalancer_listener, backend, *args, **kwargs):
     #     try:

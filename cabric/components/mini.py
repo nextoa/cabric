@@ -11,7 +11,6 @@ class MiniComponent(Component):
         return True if rtn == 0 else False
 
     def minifier(self, infile):
-
         outfile = self.options.outdir + infile.replace(self.options.indir, '')
         outdir = os.path.dirname(outfile)
         _, infile_extension = os.path.splitext(infile)
@@ -53,7 +52,20 @@ class MiniComponent(Component):
         if not self.check():
             self.error("please make sure you have installed pyminifier.")
 
+        options.indir = os.path.abspath(options.indir)
+
+        # build exclude dirs pattern
+        compare_dirs = []
+        for v in options.exclude_dir:
+            compare_dirs.append('/' + v)
+            compare_dirs.append('/' + v + '/')
+            pass
+
         for path, subdirs, files in os.walk(options.indir):
+            skip_path = [True for d in compare_dirs if d in path]
+            if skip_path:
+                continue
+
             for name in files:
                 self.minifier(os.path.join(path, name))
 
@@ -62,6 +74,8 @@ class MiniComponent(Component):
             if os.path.exists("setup.py"):
                 cmd = "python setup.py sdist upload -r %s" % \
                       self.options.with_release
+                if self.options.debug:
+                    self.print_message(cmd)
                 os.system(cmd)
                 pass
             else:
@@ -84,10 +98,13 @@ class MiniComponent(Component):
             (('--with-release',),
              dict(help='release package to pypi server', )),
             (('--extension',),
-             dict(nargs='+', default='.py',
+             dict(nargs='+', default=['.py'],
                   help='file extension', )),
+            (('--exclude-dir',),
+             dict(nargs='+', default=['.git', 'build', '.idea', 'dist'],
+                  help='directory to exclude', )),
             (('--prepend',),
-             dict(help='file extension', )),
+             dict(help='add license to minifier file', )),
             (('--dry-run',),
              dict(action='store_true',
                   help='show file list instead filter it', )),

@@ -33,11 +33,13 @@ class QingCloud(object):
         key = os.environ.get("QINGCLOUD_ACCESS_KEY")
         secret = os.environ.get("QINGCLOUD_ACCESS_SECRET")
 
-        self.logger.debug("api-auth with key: %s,%s", key, secret[0:2] + '*' * 10 + secret[-2:])
+        self.logger.debug("api-auth with key: %s,%s", key,
+                          secret[0:2] + '*' * 10 + secret[-2:])
 
         if None in [zone, key, secret]:
-            raise ValueError("Please set `QINGCLOUD_ACCESS_KEY',`QINGCLOUD_ACCESS_SECRET',"
-                             "and make sure `zone' has set")
+            raise ValueError(
+                "Please set `QINGCLOUD_ACCESS_KEY',`QINGCLOUD_ACCESS_SECRET',"
+                "and make sure `zone' has set")
 
         self.connector = qingcloud.iaas.connect_to_zone(
             zone,
@@ -55,7 +57,8 @@ class QingCloud(object):
         def wrapper(*args, **kwargs):
             return getattr(self.connector, name)(*args, **kwargs)
 
-        if hasattr(self.connector, name) and callable(getattr(self.connector, name)):
+        if hasattr(self.connector, name) and callable(
+                getattr(self.connector, name)):
             return wrapper
 
         raise AttributeError(name)
@@ -66,7 +69,8 @@ class QingCloud(object):
         ('loadbalancer-policy', '',),
     ]
 
-    def create(self, device_type, name, arg_list=[], arg_dict={}, overwrite=False):
+    def create(self, device_type, name, arg_list=[], arg_dict={},
+               overwrite=False):
         """
         create device
 
@@ -95,7 +99,8 @@ class QingCloud(object):
         """
 
         policies = self.connector.describe_loadbalancer_policies()
-        pos_name_set = [(k, v['loadbalancer_policy_name']) for k, v in enumerate(policies['loadbalancer_policy_set'])]
+        pos_name_set = [(k, v['loadbalancer_policy_name']) for k, v in
+                        enumerate(policies['loadbalancer_policy_set'])]
         pos_set, name_set = zip(*pos_name_set)
 
         try:
@@ -117,10 +122,8 @@ class QingCloud(object):
         try:
             policy = self.get_loadbalancer_policy(policy_name)
         except ValueError:
-            # policy_resonse = self.connector.create_loadbalancer_policy(policy_name, *args, **kwargs)
-            # policy = self.connector.describe_loadbalancer_policies([policy_resonse['loadbalancer_policy_id']])
-
-            self.connector.create_loadbalancer_policy(policy_name, *args, **kwargs)
+            self.connector.create_loadbalancer_policy(policy_name, *args,
+                                                      **kwargs)
             policy = self.get_loadbalancer_policy(policy_name)
             pass
         return policy
@@ -132,9 +135,11 @@ class QingCloud(object):
         :param name: rule name
         :return: dict, if not exist, raise ValueError
         """
-        rules = self.connector.describe_loadbalancer_policy_rules(loadbalancer_policy=policy_id)
+        rules = self.connector.describe_loadbalancer_policy_rules(
+            loadbalancer_policy=policy_id)
 
-        pos_name_set = [(k, v['loadbalancer_policy_rule_name']) for k, v in enumerate(rules['loadbalancer_policy_rule_set'])]
+        pos_name_set = [(k, v['loadbalancer_policy_rule_name']) for k, v in
+                        enumerate(rules['loadbalancer_policy_rule_set'])]
         pos_set, name_set = zip(*pos_name_set)
 
         try:
@@ -145,12 +150,16 @@ class QingCloud(object):
 
         return rule
 
-    def get_or_add_loadbalancer_policy_rules(self, policy_id, rule, *args, **kwargs):
+    def get_or_add_loadbalancer_policy_rules(self, policy_id, rule, *args,
+                                             **kwargs):
         try:
-            rule = self.get_loadbalancer_policy_rule(policy_id, rule['loadbalancer_policy_rule_name'])
+            rule = self.get_loadbalancer_policy_rule(policy_id, rule[
+                'loadbalancer_policy_rule_name'])
         except ValueError:
-            self.connector.add_loadbalancer_policy_rules(policy_id, [rule], *args, **kwargs)
-            rule = self.get_loadbalancer_policy_rule(policy_id, rule['loadbalancer_policy_rule_name'])
+            self.connector.add_loadbalancer_policy_rules(policy_id, [rule],
+                                                         *args, **kwargs)
+            rule = self.get_loadbalancer_policy_rule(policy_id, rule[
+                'loadbalancer_policy_rule_name'])
             pass
 
         return rule
@@ -162,8 +171,10 @@ class QingCloud(object):
         :return: policy dict, if not exist, raise ValueError
         """
 
-        backends = self.connector.describe_loadbalancer_backends(loadbalancer_listener=listener_id)
-        pos_name_set = [(k, v['loadbalancer_backend_name']) for k, v in enumerate(backends['loadbalancer_backend_set'])]
+        backends = self.connector.describe_loadbalancer_backends(
+            loadbalancer_listener=listener_id)
+        pos_name_set = [(k, v['loadbalancer_backend_name']) for k, v in
+                        enumerate(backends['loadbalancer_backend_set'])]
 
         try:
             pos_set, name_set = zip(*pos_name_set)
@@ -174,24 +185,42 @@ class QingCloud(object):
 
         return backend
 
-    def get_or_add_load_balancer_backends(self, loadbalancer_listener, backend, *args, **kwargs):
+    def get_or_add_load_balancer_backends(self, loadbalancer_listener, backend,
+                                          *args, **kwargs):
         try:
-            backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+            backend = self.get_loadbalancer_backend(
+                loadbalancer_listener,
+                backend[
+                    'loadbalancer_backend_name'])
         except ValueError:
-            self.connector.add_backends_to_listener(loadbalancer_listener, [backend], *args, **kwargs)
-            backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+            self.connector.add_backends_to_listener(
+                loadbalancer_listener,
+                [backend], *args, **kwargs)
+            backend = self.get_loadbalancer_backend(
+                loadbalancer_listener,
+                backend[
+                    'loadbalancer_backend_name'])
             pass
 
         return backend
 
-    # def get_or_create_server_certicifate(self, loadbalancer_listener, backend, *args, **kwargs):
+    # def get_or_create_server_certicifate(self, loadbalancer_listener,
+    #                                      backend,
+    #                                      *args, **kwargs):
     #     try:
-    #         backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+    #         backend = self.get_loadbalancer_backend(
+    #             loadbalancer_listener,
+    #             backend[
+    #                 'loadbalancer_backend_name'])
     #     except ValueError:
-    #         self.connector.add_backends_to_listener(loadbalancer_listener, [backend], *args, **kwargs)
-    #         backend = self.get_loadbalancer_backend(loadbalancer_listener, backend['loadbalancer_backend_name'])
+    #         self.connector.add_backends_to_listener(
+    #             loadbalancer_listener,
+    #             [backend], *args, **kwargs)
+    #         backend = self.get_loadbalancer_backend(
+    #             loadbalancer_listener,
+    #             backend[
+    #                 'loadbalancer_backend_name'])
     #         pass
     #
     #     return backend
-
     pass

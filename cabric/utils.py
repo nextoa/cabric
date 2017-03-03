@@ -74,11 +74,15 @@ def put(local_path, remote_path):
         if os.path.isdir(local_path):
             local_path = local_path.rstrip('/') + '/'
             remote_path = remote_path.rstrip('/') + '/'
-            fabric_local("prsync -r {2} {0} {1}".format(local_path, remote_path,
-                                                        ' '.join(["-H %s" % v for v in env.hosts])))
+            fabric_local(
+                "prsync -r {2} {0} {1}".format(local_path, remote_path,
+                                               ' '.join(["-H %s" % v for v in
+                                                         env.hosts])))
         else:
             fabric_local("prsync {2} {0} {1}".format(local_path, remote_path,
-                                                     ' '.join(["-H %s" % v for v in env.hosts])))
+                                                     ' '.join(
+                                                         ["-H %s" % v for v in
+                                                          env.hosts])))
 
     else:
         fabric_local("cp -rf %s %s" % (local_path, remote_path))
@@ -268,8 +272,11 @@ def execute(commands):
     try:
         commands_to_run = [(v, [], {}, [], [], []) for v in commands]
 
-        for name, args, kwargs, arg_hosts, arg_roles, arg_exclude_hosts in commands_to_run:
-            results.append(fab_execute(name, hosts=arg_hosts, roles=arg_roles, exclude_hosts=arg_exclude_hosts, *args, **kwargs))
+        for name, args, kwargs, arg_hosts, arg_roles, arg_exclude_hosts \
+                in commands_to_run:
+            results.append(fab_execute(name, hosts=arg_hosts, roles=arg_roles,
+                                       exclude_hosts=arg_exclude_hosts, *args,
+                                       **kwargs))
             pass
     except SystemExit:  # a number of internal functions might raise this one.
         raise
@@ -307,7 +314,9 @@ def get_home(user):
         if run('cat /etc/passwd | grep "^%s:"' % user).failed:
             raise ValueError("User:%s not exists" % user)
         else:
-            user_path = run("cat /etc/passwd | grep '^%s:' | awk -F ':' '{print $6}'" % user)
+            user_path = run("cat /etc/passwd |"
+                            " grep '^%s:' |"
+                            " awk -F ':' '{print $6}'" % user)
             return user_path
     pass
 

@@ -6,7 +6,8 @@ import os
 from cliez.component import Component
 
 from cabric.dns.dnspod import DNSPod
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, put, fabric_settings, env, get_home, current_machine
+from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, \
+    get_platform, put, fabric_settings, env, get_home, current_machine
 
 try:
     from shlex import quote as shell_quote
@@ -40,7 +41,8 @@ class ConfigComponent(Component):
             if services:
                 run('systemctl restart %s' % ' '.join(services))
             else:
-                self.warn("restart progress actived,but no restart service found.")
+                self.warn(
+                    "restart progress actived,but no restart service found.")
         pass
 
     def upload_crontab(self, config, env_option, crontab_root):
@@ -49,10 +51,13 @@ class ConfigComponent(Component):
         position = config.get('position')
 
         if not user:
-            self.warn("no user found,skip deploy crontab file `%s'" % config.get(crontab_file))
+            self.warn(
+                "no user found,skip deploy crontab file `%s'" % config.get(
+                    crontab_file))
             return
 
-        crontab_path = os.path.expanduser(os.path.join(crontab_root, 'config', 'crontab', crontab_file))
+        crontab_path = os.path.expanduser(
+            os.path.join(crontab_root, 'config', 'crontab', crontab_file))
 
         if os.path.exists(crontab_path):
             if position is None or current_machine(position):
@@ -61,11 +66,13 @@ class ConfigComponent(Component):
                 run('rm -f /tmp/cabric_crontab')
                 pass
             else:
-                self.warn("crontab doesn't need to deploy this machine:%s." % env.host_string)
+                self.warn("crontab doesn't need"
+                          " to deploy this machine:%s." % env.host_string)
                 pass
             pass
         else:
-            self.warn("crontab file `%s' not found. skip to install it" % crontab_path)
+            self.warn("crontab file `%s' not"
+                      " found. skip to install it" % crontab_path)
 
         pass
 
@@ -73,7 +80,8 @@ class ConfigComponent(Component):
         """
         because command list is execute after lambda define.
 
-        if we add upload_crontab directly, the value of crontab_config will always be last item.
+        if we add upload_crontab directly,
+         the value of crontab_config will always be last item.
 
         :param crons_config:
         :param env_option:
@@ -96,12 +104,15 @@ class ConfigComponent(Component):
 
             if env.host_names[host_index]:
                 run("hostnamectl set-hostname %s" % env.host_names[host_index])
-                run("hostnamectl set-hostname %s --pretty" % env.host_names[host_index])
-                run("hostnamectl set-hostname %s --static" % env.host_names[host_index])
+                run("hostnamectl set-hostname %s --pretty" % env.host_names[
+                    host_index])
+                run("hostnamectl set-hostname %s --static" % env.host_names[
+                    host_index])
                 run("systemctl restart systemd-hostnamed")
                 pass
         except IndexError:
-            self.warn("can't find current hostname config:%s" % env.host_string)
+            self.warn(
+                "can't find current hostname config:%s" % env.host_string)
             pass
 
         pass
@@ -193,7 +204,6 @@ class ConfigComponent(Component):
         :return:
         """
 
-
         # verify machine which to use
         encrypt_position = ssl_config.get('encrypt-position', 0)
         try:
@@ -214,7 +224,8 @@ class ConfigComponent(Component):
             dh_param_file = dh_param['path']
             dh_param_length = dh_param.get('length', 4096)
 
-            run("test -f {0} || openssl dhparam -out {0} {1}".format(dh_param_file, dh_param_length))
+            run("test -f {0} || openssl dhparam -out {0} {1}".format(
+                dh_param_file, dh_param_length))
             pass
 
         def create_certicifate():
@@ -225,8 +236,10 @@ class ConfigComponent(Component):
 
                 # get certificate
             certificate_remote_dir = "/etc/letsencrypt/live/" + domains[0]
-            fullchain = run('cat %s' % os.path.join(certificate_remote_dir, 'fullchain.pem'))
-            private_key = run('cat %s' % os.path.join(certificate_remote_dir, 'privkey.pem'))
+            fullchain = run('cat %s' % os.path.join(certificate_remote_dir,
+                                                    'fullchain.pem'))
+            private_key = run(
+                'cat %s' % os.path.join(certificate_remote_dir, 'privkey.pem'))
 
             print(fullchain)
             print(private_key)
@@ -260,9 +273,11 @@ class ConfigComponent(Component):
                          } for domain in ssl_config['domains']]
 
                 for rule in rules:
-                    client.get_or_add_loadbalancer_policy_rules(policy['loadbalancer_policy_id'], rule)
+                    client.get_or_add_loadbalancer_policy_rules(
+                        policy['loadbalancer_policy_id'], rule)
 
-                client.apply_loadbalancer_policy(policy['loadbalancer_policy_id'])
+                client.apply_loadbalancer_policy(
+                    policy['loadbalancer_policy_id'])
 
                 http_listener = load_balancer.get('http-listener')
 
@@ -271,20 +286,24 @@ class ConfigComponent(Component):
                 #   please make sure you backend works right.
                 backend = load_balancer.get('backend')
                 backend.update({
-                    'loadbalancer_backend_name': policy['loadbalancer_policy_name'],
+                    'loadbalancer_backend_name': policy[
+                        'loadbalancer_policy_name'],
                     'loadbalancer_policy_id': policy['loadbalancer_policy_id']
                 })
                 if http_listener and backend:
-                    client.get_or_add_load_balancer_backends(http_listener, backend)
+                    client.get_or_add_load_balancer_backends(http_listener,
+                                                             backend)
                     pass
 
                 create_certicifate()
                 pass
             elif lb_isp is None:
-                self.warn("load balancer isp not specified.skip config load balancer")
+                self.warn("load balancer isp not specified."
+                          "skip config load balancer")
                 pass
             else:
-                self.warn("unknown isp for load balancer %s,skip config load balancer" % lb_isp)
+                self.warn("unknown isp for load balancer %s,"
+                          "skip config load balancer" % lb_isp)
                 pass
             pass
         else:
@@ -348,9 +367,11 @@ class ConfigComponent(Component):
             mirror_put(stage_config, '/')
 
         try:
-            env_config = json.load(open(os.path.join(using_config, 'env.json'), 'r'))
+            env_config = json.load(
+                open(os.path.join(using_config, 'env.json'), 'r'))
         except ValueError:
-            self.error("Invalid json syntax:%s" % os.path.join(using_config, 'env.json'))
+            self.error("Invalid json syntax:%s" % os.path.join(using_config,
+                                                               'env.json'))
             pass
 
         command_list = []
@@ -383,18 +404,22 @@ class ConfigComponent(Component):
             pass
 
         if options.restart:
-            command_list.append(lambda: self.restart(options.restart, services))
+            command_list.append(
+                lambda: self.restart(options.restart, services))
             pass
 
         crons_config = env_config.get('crons', [])
         if not options.skip_crontab and crons_config:
-            command_list.append(lambda: self.upload_crontabs(crons_config, options.env, options.dir))
+            command_list.append(
+                lambda: self.upload_crontabs(crons_config, options.env,
+                                             options.dir))
             pass
 
         ssl_config = env_config.get('ssl', {})
 
         if options.enable_certbot and ssl_config:
-            command_list.append(lambda: self.set_ssl_config(ssl_config, options.env))
+            command_list.append(
+                lambda: self.set_ssl_config(ssl_config, options.env))
             pass
 
         execute(command_list)
@@ -406,13 +431,21 @@ class ConfigComponent(Component):
         sub parser document
         """
         return [
-            (('--skip-enable-services',), dict(action='store_true', help='skip enable system services', )),
-            (('--skip-upload',), dict(action='store_true', help='skip upload config files', )),
-            (('--skip-crontab',), dict(action='store_true', help='skip upload crontab', )),
-            (('--skip-timezone',), dict(action='store_true', help='skip set timezone', )),
-            (('--skip-hostname',), dict(action='store_true', help='skip set hostname', )),
-            (('--skip-dns',), dict(action='store_true', help='skip config dns', )),
-            (('--enable-certbot',), dict(action='store_true', help='enable config ssl certificate', )),
+            (('--skip-enable-services',),
+             dict(action='store_true', help='skip enable system services', )),
+            (('--skip-upload',),
+             dict(action='store_true', help='skip upload config files', )),
+            (('--skip-crontab',),
+             dict(action='store_true', help='skip upload crontab', )),
+            (('--skip-timezone',),
+             dict(action='store_true', help='skip set timezone', )),
+            (('--skip-hostname',),
+             dict(action='store_true', help='skip set hostname', )),
+            (('--skip-dns',),
+             dict(action='store_true', help='skip config dns', )),
+            (('--enable-certbot',), dict(action='store_true',
+                                         help='enable config ssl certificate',
+                                         )),
             (('--reload',), dict(nargs='+', help='set reload service', )),
             (('--restart',), dict(nargs='+', help='set restart service', )),
         ]

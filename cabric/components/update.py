@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
-import json
 from cliez.component import Component
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, get_platform, run_block
 
 
 class UpdateComponent(Component):
@@ -26,7 +22,8 @@ class UpdateComponent(Component):
         sub parser document
         """
         return [
-            (('--node', '-p'), dict(nargs='+', help='install sub node settings', )),
+            (('--node', '-p'),
+             dict(nargs='+', help='install sub node settings', )),
         ]
         pass
 

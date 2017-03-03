@@ -45,21 +45,26 @@ class DnspodTestCase(unittest.TestCase):
 
         self.drop_config = [
             dict(value='1.1.1.1', record_type='A', sub_domain='unittest-01'),
-            dict(value='1.1.1.2', record_type='A', sub_domain='unittest-01', active=False)
+            dict(value='1.1.1.2', record_type='A', sub_domain='unittest-01',
+                 active=False)
         ]
 
-        [self.assertNotEqual(None, self.client.bind_record(v)) for v in self.drop_config]
+        [self.assertNotEqual(None, self.client.bind_record(v)) for v in
+         self.drop_config]
         pass
 
     def test_bind_record02(self):
         self.test_bind_domain()
 
         self.drop_config = [
-            dict(value='1.1.1.1', record_type='A', sub_domain='unittest-02', record_line='电信'),
-            dict(value='1.1.1.2', record_type='A', sub_domain='unittest-02', record_line='移动')
+            dict(value='1.1.1.1', record_type='A', sub_domain='unittest-02',
+                 record_line='电信'),
+            dict(value='1.1.1.2', record_type='A', sub_domain='unittest-02',
+                 record_line='移动')
         ]
 
-        [self.assertNotEqual(None, self.client.bind_record(v)) for v in self.drop_config]
+        [self.assertNotEqual(None, self.client.bind_record(v)) for v in
+         self.drop_config]
         pass
 
     def test_bind_record03(self):
@@ -67,11 +72,15 @@ class DnspodTestCase(unittest.TestCase):
 
         self.drop_config = [
             dict(value='1.1.1.1', record_type='A', sub_domain='unittest-01'),
-            dict(value='1.1.1.2', record_type='A', sub_domain='unittest-01', active=False)
+            dict(value='1.1.1.2', record_type='A', sub_domain='unittest-01',
+                 active=False)
         ]
 
-        [self.assertNotEqual("1", self.client.bind_record(v)['status']['code']) for v in self.drop_config]
-        [self.assertNotEqual("104", self.client.bind_record(v)['status']['code']) for v in self.drop_config]
+        [self.assertNotEqual("1", self.client.bind_record(v)['status']['code'])
+         for v in self.drop_config]
+        [self.assertNotEqual("104",
+                             self.client.bind_record(v)['status']['code']) for
+         v in self.drop_config]
         pass
 
     def test_get_record_id(self, test_data=None):
@@ -98,7 +107,8 @@ class DnspodTestCase(unittest.TestCase):
         }
 
         record_id = self.test_get_record_id()
-        self.assertNotEqual(None, self.client.modify_record(record_id, test_data))
+        self.assertNotEqual(None,
+                            self.client.modify_record(record_id, test_data))
         pass
 
     pass

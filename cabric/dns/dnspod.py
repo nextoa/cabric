@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class DNSPod(object):
-    def __init__(self, root='https://dnsapi.cn', api_format='json', domain=None):
+    def __init__(self, root='https://dnsapi.cn', api_format='json',
+                 domain=None):
         super(DNSPod, self).__init__()
         self.logger = logger
         self.root = root
@@ -39,7 +40,13 @@ class DNSPod(object):
                 self.logger.debug("request success,json data:%s" % rtn)
                 return rtn
             else:
-                log_msg = ("request fail.\n\turl:\t\t\t%s\n\trequest:\t\t%s\n\tresponse:\t\t%s" % (response.url, response.request.body, response.text))
+                log_msg = (
+                    "request fail.\n"
+                    "\turl:\t\t\t%s\n"
+                    "\trequest:\t\t%s\n"
+                    "\tresponse:\t\t%s" % (response.url,
+                                           response.request.body,
+                                           response.text))
 
                 if rtn['status']['code'] in excepted_code:
                     logger_handler = self.logger.warning
@@ -52,7 +59,9 @@ class DNSPod(object):
                 return rtn
 
         except Exception as e:
-            self.logger.error("parse json fail, url:%s, rtn:%s, exception:%s" % (response.url, response.text, e))
+            self.logger.error(
+                "parse json fail, url:%s, rtn:%s, exception:%s" % (
+                    response.url, response.text, e))
             return
         pass
 
@@ -124,7 +133,8 @@ class DNSPod(object):
         :return: record, if not exist return None
         """
         if not self.domain:
-            raise ValueError("please set `self.domain' or use `bind_domain' to rebind domain")
+            raise ValueError("please set `self.domain' or"
+                             " use `bind_domain' to rebind domain")
 
         rtn = self.request('/Record.List', {
             "domain": self.domain,
@@ -137,7 +147,8 @@ class DNSPod(object):
 
                 compared = [
                     True if record['value'] == query['value'] else False,
-                    True if record['line'].encode('utf-8') == query['record_line'] else False,
+                    True if record['line'].encode('utf-8') == query[
+                        'record_line'] else False,
                     True if record['type'] == query['record_type'] else False
                 ]
 
@@ -169,7 +180,9 @@ class DNSPod(object):
         """
 
         if not self.domain:
-            raise ValueError("please set `self.domain' or use `bind_domain' to rebind domain")
+            raise ValueError(
+                "please set `self.domain' or use `bind_domain' to"
+                " rebind domain")
 
         return self.request('/Domain.Remove', {
             "domain": self.domain,
@@ -184,7 +197,9 @@ class DNSPod(object):
         """
 
         if not self.domain:
-            raise ValueError("please set `self.domain' or use `bind_domain' to rebind domain")
+            raise ValueError(
+                "please set `self.domain' or use `bind_domain' to"
+                " rebind domain")
 
         record_id = self.get_record_id(api_data)
 
@@ -205,7 +220,9 @@ class DNSPod(object):
         """
 
         if not self.domain:
-            raise ValueError("please set `self.domain' or use `bind_domain' to rebind domain")
+            raise ValueError(
+                "please set `self.domain' or use `bind_domain' to"
+                " rebind domain")
 
         api_data.update({
             "domain": self.domain,
@@ -214,7 +231,9 @@ class DNSPod(object):
 
         return self.request('/Record.Modify', api_data)
 
-    def bind_record(self, value, record_type, sub_domain='@', record_line='默认', weight=None, mx_order=5, ttl=600, active=True, overwrite=True, **kwargs):
+    def bind_record(self, value, record_type, sub_domain='@', record_line='默认',
+                    weight=None, mx_order=5, ttl=600, active=True,
+                    overwrite=True, **kwargs):
         """
         :param value:
         :param record_type:
@@ -230,7 +249,8 @@ class DNSPod(object):
         """
 
         if not self.domain:
-            raise ValueError("please set `self.domain' or use `bind_domain' to rebind domain")
+            raise ValueError("please set `self.domain' or use `bind_domain' to"
+                             " rebind domain")
 
         data = {
             "domain": self.domain,

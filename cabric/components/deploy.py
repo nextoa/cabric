@@ -64,13 +64,15 @@ class DeployComponent(Component):
                 'https://api.github.com/repos/{}/keys'.format(github),
                 auth=temp_config)
             if response.status_code != 200:
-                self.warn(
-                    "use `%s' method login to github is failed,try next way." % v.__name__.replace(
-                        'use_', '').replace('_', '-'))
+                self.warn("use `%s' method login to github is failed,"
+                          "try next way." % v.__name__.replace('use_',
+                                                               '').replace('_',
+                                                                           '-')
+                          )
                 if self.options.debug:
-                    self.warn(
-                        "github-api request: %s" % 'https://api.github.com/repos/{}/keys'.format(
-                            github))
+                    self.warn("github-api"
+                              " request: %s" % 'https://api.github.com'
+                                               '/repos/{}/keys'.format(github))
                     self.warn("github-api auth: %s" % ' '.join(temp_config))
                     self.warn("github-api return: %s" % response.text)
                     pass
@@ -92,13 +94,14 @@ class DeployComponent(Component):
 
         # clean old key if exists
         for v in uploaded_keys:
-            response = requests.delete(
-                'https://api.github.com/repos/{}/keys/{}'.format(github,
-                                                                 v.get('id')),
-                auth=auth_config)
+            response = requests.delete('https://api.github.com'
+                                       '/repos/{}/keys/{}'.format(github,
+                                                                  v.get('id')),
+                                       auth=auth_config)
             if response.status_code != 204:
-                self.error(
-                    "delete old deploy key failed,please try it later.server response:\n%s" % response.text)
+                self.error("delete old deploy key failed,"
+                           "please try it later."
+                           "server response:\n%s" % response.text)
                 pass
 
         # generate new key
@@ -146,13 +149,17 @@ class DeployComponent(Component):
         :param string remote_user: remote user name to deploy
         :param string project_name: a project name
         :param string github: github repo name
-        :param bool force_renew: try to replace deploy key when use auto-generate
-        :param int key_length: must a legal ssh key length value. default is 8192
+        :param bool force_renew: try to replace deploy
+                    key when use auto-generate
+        :param int key_length: must a legal ssh key length value.
+                    default is 8192
 
 
         ..note::
 
-            if you use github and want to use auto generate private-key feature.
+            if you use github and want to
+             use auto generate private-key feature.
+
             there is two ways can do this:
 
                 - you must set access token in your ~/.gitconfig file
@@ -160,11 +167,12 @@ class DeployComponent(Component):
                     input your username and password.
 
             currently, we use `<remote_user>@cabric` as our deploy key name.
-            so if you upload your key use to other purpose, don't use `@cabric` as key suffix.
+            so if you upload your key use to other purpose,
+             don't use `@cabric` as key suffix.
 
 
-
-            if github deploy key already exist and you want to replace deploy key. you must set `--fresh-new' option.
+            if github deploy key already exist and
+            you want to replace deploy key. you must set `--fresh-new' option.
 
 
             cabric allow each machine deploy multiple github project,
@@ -206,9 +214,8 @@ class DeployComponent(Component):
     def get_project_python(self, user, project_name):
         project_path = self.get_remote_project_path(user, project_name)
         with settings(warn_only=True):
-            version = run(
-                "test -f {0}/.python-version && cat {0}/.python-version".format(
-                    project_path))
+            version = run("test -f {0}/.python-version &&"
+                          " cat {0}/.python-version".format(project_path))
             version = version.strip("\n")
             return version
         pass
@@ -238,9 +245,10 @@ class DeployComponent(Component):
         ]
 
         for f in requirement_files:
-            run(
-                "test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -U -r {0} || echo '{0} not exist,skip install...'".format(
-                    f, python_version))
+            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip"
+                " install -U -r {0} || "
+                "echo '{0} not exist,skip install...'".format(f,
+                                                              python_version))
             pass
 
         requirement_files = [
@@ -251,9 +259,10 @@ class DeployComponent(Component):
         ]
 
         for f in requirement_files:
-            run(
-                "test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip install -r {0} || echo '{0} not exist,skip install...'".format(
-                    f, python_version))
+            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip"
+                " install -r {0} || "
+                "echo '{0} not exist,skip install...'".format(f,
+                                                              python_version))
             pass
 
         pass
@@ -269,8 +278,8 @@ class DeployComponent(Component):
         project_path = self.get_remote_project_path(user, project_name)
 
         with cd(project_path):
-            run(
-                'test -f ./manage.py && python manage.py migrate || echo "skip migrate database"')
+            run('test -f ./manage.py && python manage.py migrate'
+                ' || echo "skip migrate database"')
             pass
 
         pass
@@ -291,9 +300,8 @@ class DeployComponent(Component):
         :return:
         """
         project_path = self.get_remote_project_path(user, project_name)
-        run(
-            'which pug && pug -E html -b {0} {0} || echo "skip parser jade file"'.format(
-                project_path))
+        run('which pug && pug -E html -b {0} {0} '
+            '|| echo "skip parser jade file"'.format(project_path))
         pass
 
     def upload_resources(self, user, project_name, working_root=None,
@@ -325,16 +333,17 @@ class DeployComponent(Component):
 
         with settings(warn_only=True):
             if run("test -f %s/manage.py" % remote_root).failed:
-                self.warn(
-                    "deploy project is not django project,skip upload resources")
+                self.warn("deploy project is not django project,"
+                          "skip upload resources")
                 return
             pass
 
         try:
             nginx_home = get_home('nginx')
         except ValueError:
-            self.warn(
-                "remote server only support nginx and must use nginx user start,skip deploy static resources...")
+            self.warn("remote server only support nginx "
+                      "and must use nginx user start,"
+                      "skip deploy static resources...")
             return
 
         static_prefix = static_prefix or ''
@@ -388,11 +397,15 @@ class DeployComponent(Component):
         :param branch:which branch to deploy
 
         ..note::
-            currently,if remote machine already cloned from repo,branch can't be change.
-            if you really need to change branch. you have to remove remote project directory,
+            currently,if remote machine already cloned from repo,
+            branch can't be change.
+
+            if you really need to change branch.
+            you have to remove remote project directory,
             do upgrade again.
 
-        :param commit:which commit to deploy,default use latest commit,support tags
+        :param commit:which commit to deploy,default use latest commit,
+            support tags
 
         ..note::
             commit or tag must be valid in branch
@@ -425,7 +438,9 @@ class DeployComponent(Component):
             remote_user)
 
         if commit:
-            # run("cd {} && git checkout -- .".format(remote_path), remote_user)  # make sure there is no merge commit on remote server
+            # make sure there is no merge commit on remote server
+            # run("cd {} && git checkout -- .".format(remote_path),
+            #     remote_user)
             run("cd {} && git checkout {}".format(remote_path, commit),
                 remote_user)
 
@@ -464,22 +479,22 @@ class DeployComponent(Component):
         return os.path.join(get_home(user), project_name)
 
     def run(self, options):
-        """
-        workflow
-            * basic check
+        """ workflow
+        * basic check
 
-                - user value must be set
-                - currently, repo only support git
-                - for safety reason,we don't allow private_key path occur in project path
+            - user value must be set
+            - currently, repo only support git
+            - for safety reason,we don't allow private_key path
+              occur in project path
 
-            * upload deploy-key when not exist.
-            * git clone with project-deploy-key.
-            * install requirements.txt package if exist
-            * install nodejs local-package if exist
-            * parse template file
-            * git pull or checkout commit
-            * add crontab if user set
-            * finish
+        * upload deploy-key when not exist.
+        * git clone with project-deploy-key.
+        * install requirements.txt package if exist
+        * install nodejs local-package if exist
+        * parse template file
+        * git pull or checkout commit
+        * add crontab if user set
+        * finish
 
         :param options:
         :return:
@@ -519,11 +534,12 @@ class DeployComponent(Component):
         project_name = github if github else os.path.basename(repo).replace(
             '.git', '')
         private_key = os.path.expanduser(config.get('private_key',
-                                                    '~/.ssh/.deploies/%s.rsa' % project_name))
+                                                    '~/.ssh/.deploies/'
+                                                    '%s.rsa' % project_name))
 
         if project_root in private_key:
-            self.error(
-                "for safety reason,we don't allow private_key path in project's path")
+            self.error("for safety reason,"
+                       "we don't allow private_key path in project's path")
 
         command_list = []
 
@@ -573,13 +589,16 @@ class DeployComponent(Component):
         """
         return [
             (('commit',), dict(nargs='?',
-                               help='set which commit to deploy,default is latest version', )),
+                               help='set which commit to deploy,'
+                                    'default is latest version', )),
             (('--parallel', '-P'), dict(action='store_true',
-                                        help='default to parallel execution method', )),
+                                        help='default to parallel '
+                                             'execution method', )),
             (('--with-deploy-key',),
              dict(action='store_true', help='upload deploy key', )),
             (('--force-renew',), dict(action='store_true',
-                                      help='only works when user set github value', )),
+                                      help='only works when user '
+                                           'set github value', )),
             (('--skip-source-code',),
              dict(action='store_true', help='skip upgrade source code', )),
             (('--skip-requirements',),

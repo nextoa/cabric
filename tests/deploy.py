@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import argparse
 import os
 import unittest
-import argparse
+
 import mock
-import shutil
 from cliez import parser
 
 try:
@@ -18,8 +18,10 @@ except NameError:
 class DeployComponentTests(unittest.TestCase):
     def clean_keys(self):
         keys = {
-            'beta_private': os.path.expanduser('~/.ssh/.deploies/nextoa/cabric.rsa'),
-            'beta_pub': os.path.expanduser('~/.ssh/.deploies/nextoa/cabric.rsa'),
+            'beta_private': os.path.expanduser(
+                '~/.ssh/.deploies/nextoa/cabric.rsa'),
+            'beta_pub': os.path.expanduser(
+                '~/.ssh/.deploies/nextoa/cabric.rsa'),
             'beta2_private': os.path.expanduser('~/.ssh/.deploies/cabric.rsa'),
             'beta2_pub': os.path.expanduser('~/.ssh/.deploies/cabric.rsa'),
         }
@@ -33,7 +35,6 @@ class DeployComponentTests(unittest.TestCase):
         pass
 
     def setUp(self):
-        from cabric import main
         self.clean_keys()
         pass
 
@@ -45,14 +46,19 @@ class DeployComponentTests(unittest.TestCase):
         with self.assertRaises(OSError):
             parser.parse(argparse.ArgumentParser(), argv=['command', 'deploy',
                                                           '--debug',
-                                                          '--env', 'invalid-env',
-                                                          '--dir', __file__.rsplit('/', 2)[0]])
+                                                          '--env',
+                                                          'invalid-env',
+                                                          '--dir',
+                                                          __file__.rsplit('/',
+                                                                          2)[
+                                                              0]])
         pass
 
     def test_only_upload_key(self):
         """
         ..note::
-            for safety reason, we only use github token test github work progress.
+            for safety reason, we only use github token
+             test github work progress.
             so make sure your token is valid.
 
         ..todo::
@@ -62,15 +68,19 @@ class DeployComponentTests(unittest.TestCase):
         """
 
         with mock.patch(mock_input, side_effect=["\n", "\n"]):
-            parser.parse(argparse.ArgumentParser(), argv=['command', 'deploy',
-                                                          '--debug',
-                                                          '--env', 'beta',
-                                                          '--with-deploy-key',
-                                                          '--fresh-new',
-                                                          '--skip-requirements',
-                                                          '--skip-compile-templates',
-                                                          '--skip-upload-resources',
-                                                          '--dir', __file__.rsplit('/', 2)[0]])
+            parser.parse(argparse.ArgumentParser(),
+                         argv=['command', 'deploy',
+                               '--debug',
+                               '--env', 'beta',
+                               '--with-deploy-key',
+                               '--fresh-new',
+                               '--skip-requirements',
+                               '--skip-compile-templates',
+                               '--skip-upload-resources',
+                               '--dir',
+                               __file__.rsplit('/',
+                                               2)[
+                                   0]])
             pass
 
         pass
@@ -78,7 +88,8 @@ class DeployComponentTests(unittest.TestCase):
     def test_only_static(self):
         """
         ..note::
-            for safety reason, we only use github token test github work progress.
+            for safety reason, we only use github token
+             test github work progress.
             so make sure your token is valid.
 
         ..todo::
@@ -89,13 +100,16 @@ class DeployComponentTests(unittest.TestCase):
 
         # os.chdir(os.path.join(__file__.rsplit('/', 3)[0], 'dream'))
 
-        parser.parse(argparse.ArgumentParser(), argv=['command', 'deploy',
-                                                      '--debug',
-                                                      '--env', 'beta',
-                                                      '--skip-source-code',
-                                                      '--skip-requirements',
-                                                      '--skip-compile-templates',
-                                                      '--dir', __file__.rsplit('/', 2)[0]])
+        parser.parse(argparse.ArgumentParser(),
+                     argv=['command', 'deploy',
+                           '--debug',
+                           '--env', 'beta',
+                           '--skip-source-code',
+                           '--skip-requirements',
+                           '--skip-compile-templates',
+                           '--dir',
+                           __file__.rsplit('/', 2)[
+                               0]])
 
         pass
 

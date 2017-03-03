@@ -46,7 +46,8 @@ class InstallComponent(Component):
                 * force set shell to /sbin/nologin when system flag is set
                 * cause error when config.name not exists
             * skip create when user exists
-            * create group explicitly when user specify and not same config.name
+            * create group explicitly
+                when user specify and not same config.name
 
             :return:
             """
@@ -80,8 +81,10 @@ class InstallComponent(Component):
                         pass
                     group_str = '-g {}'.format(groupname)
 
-                run('useradd {1} -d {2} {4} -s {3} {0}'.format(username, group_str,
-                                                               home, shell, system_str))
+                run('useradd {1} -d {2} {4} -s {3} {0}'.format(username,
+                                                               group_str,
+                                                               home, shell,
+                                                               system_str))
 
                 # todo:
                 # .. if perm cause error, user will not delete
@@ -143,42 +146,63 @@ class InstallComponent(Component):
                 run('yum install -y git')
                 run("yum install -y gcc gcc-c++ make autoconf certbot"
                     " libffi-devel ncurses-devel expat-devel"
-                    " zlib-devel zlib bzip2 bzip2-devel bzip2-libs libzip-devel"
-                    " mariadb-devel mariadb-libs sqlite-devel lib-sqlite3-devel"
+                    " zlib-devel zlib libzip-devel"
+                    " bzip2 bzip2-devel bzip2-libs"
+                    " mariadb-devel mariadb-libs"
+                    " sqlite-devel lib-sqlite3-devel"
                     " libxml2 libxml2-devel libxslt libxslt-devel"
                     " libcurl-devel"
                     " pcre_devel pcre"
                     " libmcrypt libmcrypt-devel openssl-devel openssl-lib"
-                    " libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel "
-                    " libtiff-devel lcms2-devel libwebp-devel tcl-devel tk-devel"
+                    " libjpeg libjpeg-devel libpng libpng-devel"
+                    " freetype freetype-devel "
+                    " libtiff-devel lcms2-devel libwebp-devel"
+                    " tcl-devel tk-devel"
                     )
-            run('export PYENV_ROOT=/usr/local/var/pyenv && curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash')
+            run('export PYENV_ROOT=/usr/local/var/pyenv && '
+                'curl -L https://raw.githubusercontent.com'
+                '/yyuu/pyenv-installer/master/bin/pyenv-installer | bash')
             run('ln -sfv /usr/local/var/pyenv/bin/pyenv /usr/local/bin/pyenv')
+
             pass
         elif remote_os == 'mac':
             with settings(warn_only=True):
                 run('brew install git pyenv')
             pass
 
-        run('test -d /usr/local/var/pyenv/plugins/pyenv-virtualenv || git clone https://github.com/yyuu/pyenv-virtualenv.git /usr/local/var/pyenv/plugins/pyenv-virtualenv')
-        run('export PYENV_ROOT="/usr/local/var/pyenv/" && eval "$(pyenv init -)"')
+        run('test -d /usr/local/var/pyenv/plugins/pyenv-virtualenv ||'
+            ' git clone https://github.com/yyuu/pyenv-virtualenv.git'
+            ' /usr/local/var/pyenv/plugins/pyenv-virtualenv')
+
+        run('export PYENV_ROOT="/usr/local/var/pyenv/" &&'
+            ' eval "$(pyenv init -)"')
 
         if isinstance(versions, list):
             for v in versions:
-                run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % v)
+                run('export PYENV_ROOT="/usr/local/var/pyenv/" &&'
+                    ' pyenv install -s %s' % v)
         elif type(versions).__name__ in ['str', 'unicode']:
-            run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % versions)
+            run('export PYENV_ROOT="/usr/local/var/pyenv/" &&'
+                ' pyenv install -s %s' % versions)
         else:
-            run('export PYENV_ROOT="/usr/local/var/pyenv/" && pyenv install -s %s' % self.system_python_version)
+            run('export PYENV_ROOT="/usr/local/var/pyenv/" && '
+                'pyenv install -s %s' % self.system_python_version)
 
         command_list = [
-            """grep "PYENV_ROOT" /etc/profile || echo 'export PYENV_ROOT="/usr/local/var/pyenv/"' >> /etc/profile""",
-            """grep "pyenv init" /etc/profile || echo 'eval "$(pyenv init -)"' >> /etc/profile""",
-            """grep "pyenv virtualenv" /etc/profile || echo 'eval "$(pyenv virtualenv-init -)"' >> /etc/profile""",
+            """grep "PYENV_ROOT" /etc/profile || \
+            echo 'export PYENV_ROOT="/usr/local/var/pyenv/"' \
+            >> /etc/profile""",
+            """grep "pyenv init" /etc/profile || \
+            echo 'eval "$(pyenv init -)"' >> \
+            /etc/profile""",
+            """grep "pyenv virtualenv" /etc/profile || \
+            echo 'eval "$(pyenv virtualenv-init -)"' \
+            >> /etc/profile""",
         ]
 
         if remote_os == 'mac':
-            command_list = ["sudo sh -c '%s'" % shell_quote(v) for v in command_list]
+            command_list = ["sudo sh -c '%s'" % shell_quote(v) for v in
+                            command_list]
             pass
 
         for cmd in command_list:
@@ -201,9 +225,13 @@ class InstallComponent(Component):
             if python_version:
                 self.install_pyenv(python_version, skip_pkg)
 
+            used_version = python_version \
+                if python_version else self.system_python_version
+
             for pkg in pypi_config.get('packages'):
-                run('export PYENV_ROOT="/usr/local/var/pyenv/" && export PYENV_VERSION=%s && pip install %s' % (python_version if python_version else self.system_python_version,
-                                                                                                                pkg))
+                run('export PYENV_ROOT="/usr/local/var/pyenv/" && '
+                    'export PYENV_VERSION=%s && '
+                    'pip install %s' % (used_version, pkg))
                 pass
 
             pass
@@ -278,33 +306,50 @@ class InstallComponent(Component):
         using_config = os.path.join(config_root, options.env)
 
         try:
-            packages_config = json.load(open(os.path.join(package_root, options.env, 'packages.json'), 'r'))
+            packages_config = json.load(
+                open(os.path.join(package_root, options.env, 'packages.json'),
+                     'r'))
         except ValueError:
-            self.error("Invalid json syntax:%s" % os.path.join(package_root, options.env, 'packages.json'))
+            self.error("Invalid json"
+                       " syntax:%s" % os.path.join(package_root,
+                                                   options.env,
+                                                   'packages.json'))
 
         try:
-            env_config = json.load(open(os.path.join(package_root, options.env, 'env.json'), 'r'))
+            env_config = json.load(
+                open(os.path.join(package_root, options.env, 'env.json'), 'r'))
         except ValueError:
-            self.error("Invalid json syntax:%s" % os.path.join(package_root, options.env, 'env.json'))
+            self.error("Invalid json"
+                       " syntax:%s" % os.path.join(package_root,
+                                                   options.env,
+                                                   'env.json'))
 
         execute_list = []
 
         execute_list.append(lambda: self.before_install(using_config))
 
         if not options.skip_pkg:
-            execute_list.append(lambda: self.install_package(using_config, packages_config))
+            execute_list.append(
+                lambda: self.install_package(using_config, packages_config))
 
         if not options.skip_pyenv:
-            execute_list.append(lambda: self.install_pyenv(packages_config.get('pyenv'), options.skip_pkg))
+            execute_list.append(
+                lambda: self.install_pyenv(packages_config.get('pyenv'),
+                                           options.skip_pkg))
 
         if not options.skip_pypi:
-            execute_list.append(lambda: self.install_pypi(packages_config.get('pypi', []), options.skip_pkg))
+            execute_list.append(
+                lambda: self.install_pypi(packages_config.get('pypi', []),
+                                          options.skip_pkg))
 
         if not options.skip_node:
-            execute_list.append(lambda: self.install_node(using_config, packages_config, options.skip_pkg))
+            execute_list.append(
+                lambda: self.install_node(using_config, packages_config,
+                                          options.skip_pkg))
 
         if not options.skip_user:
-            execute_list.append(lambda: self.install_user(env_config.get('users', [])))
+            execute_list.append(
+                lambda: self.install_user(env_config.get('users', [])))
 
         if execute_list:
             execute(execute_list)
@@ -319,12 +364,19 @@ class InstallComponent(Component):
         sub parser document
         """
         return [
-            (('--skip-pkg',), dict(action='store_true', help='skip install pkg', )),
-            (('--skip-pyenv',), dict(action='store_true', help='skip install pyenv', )),
-            (('--skip-node',), dict(action='store_true', help='skip install node', )),
-            (('--skip-user',), dict(action='store_true', help='skip install user', )),
-            (('--skip-pypi',), dict(action='store_true', help='skip install pip package', )),
-            (('--parallel', '-P'), dict(action='store_true', help='default to parallel execution method', )),
+            (('--skip-pkg',),
+             dict(action='store_true', help='skip install pkg', )),
+            (('--skip-pyenv',),
+             dict(action='store_true', help='skip install pyenv', )),
+            (('--skip-node',),
+             dict(action='store_true', help='skip install node', )),
+            (('--skip-user',),
+             dict(action='store_true', help='skip install user', )),
+            (('--skip-pypi',),
+             dict(action='store_true', help='skip install pip package', )),
+            (('--parallel', '-P'), dict(action='store_true',
+                                        help='default to parallel execution'
+                                             ' method', )),
         ]
         pass
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import py_compile
+import sys
 
 from cliez.component import Component
 

@@ -29,7 +29,8 @@ class QingCloudTestCase(unittest.TestCase):
 
     def test_connector(self):
         """
-        Don't forget set os.env['QINGCLOUD_ACCESS_KEY'] and os.env['QINGCLOUD_ACCESS_SECRET']
+        Don't forget set os.env['QINGCLOUD_ACCESS_KEY']
+         and os.env['QINGCLOUD_ACCESS_SECRET']
         :return:
         """
         self.client.connect('pek-2')
@@ -38,7 +39,8 @@ class QingCloudTestCase(unittest.TestCase):
 
     def test_api(self):
         """
-        Don't forget set os.env['QINGCLOUD_ACCESS_KEY'] and os.env['QINGCLOUD_ACCESS_SECRET']
+        Don't forget set os.env['QINGCLOUD_ACCESS_KEY'] and
+         os.env['QINGCLOUD_ACCESS_SECRET']
         :return:
         """
 

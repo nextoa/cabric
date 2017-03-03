@@ -9,14 +9,15 @@ some error like:
 
 ..code-block::
 
-    Usage: fab [options] <command>[:arg1,arg2=val2,host=foo,hosts='h1;h2',...] ...
+    Usage: fab [options] <command>
+    [:arg1,arg2=val2,host=foo,hosts='h1;h2',...] ...
 
     main.py: error: no such option: --skip-enable-services
 
 """
 
-from optparse import OptionParser
 import os
+from optparse import OptionParser
 
 from fabric import state
 from fabric.state import env_options
@@ -54,7 +55,8 @@ def parse_options(args=[]):
                       choices=LIST_FORMAT_OPTIONS,
                       default='normal',
                       metavar='FORMAT',
-                      help="formats --list, choices: %s" % ", ".join(LIST_FORMAT_OPTIONS)
+                      help="formats --list, choices: %s" % ", ".join(
+                          LIST_FORMAT_OPTIONS)
                       )
 
     parser.add_option('-I', '--initial-password-prompt',
@@ -82,7 +84,8 @@ def parse_options(args=[]):
                       metavar="KEY=VALUE,...",
                       dest='env_settings',
                       default="",
-                      help="comma separated KEY=VALUE pairs to set Fab env vars"
+                      help="comma separated KEY=VALUE pairs"
+                           " to set Fab env vars"
                       )
 
     # Like --list, but text processing friendly
@@ -143,7 +146,7 @@ def load_settings(path):
     Usage docs are in sites/docs/usage/fab.rst, in "Settings files."
     """
     if os.path.exists(path):
-        comments = lambda s: s and not s.startswith("#")
+        comments = (lambda s: s) and not s.startswith("#")
         settings = filter(comments, open(path, 'r'))
         return dict((k.strip(), v.strip()) for k, _, v in
                     [s.partition('=') for s in settings])

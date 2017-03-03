@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 from cliez.components.create import CreateComponent
 
 
@@ -24,8 +25,8 @@ class TouchComponent(CreateComponent):
 
         if user define `--local` option. search local path first.
 
-        if user define `--bitbucket`, search bitbucket first,then search github.
-
+        if user define `--bitbucket`, search bitbucket first,
+        then search github.
 
         ..note::
 
@@ -35,12 +36,16 @@ class TouchComponent(CreateComponent):
         return [
             (('repo',), dict(help='repo path.')),
             (('name',), dict(nargs='?', default='', help='project name.')),
-            (('--local',), dict(action='store_true', help='try load repo local path.')),
-            (('--bitbucket',), dict(action='store_true', help='search bitbucket first.')),
+            (('--local',),
+             dict(action='store_true', help='try load repo local path.')),
+            (('--bitbucket',),
+             dict(action='store_true', help='search bitbucket first.')),
 
-            (('--dir',), dict(nargs='?', default=os.getcwd(), help='set working directory')),
+            (('--dir',), dict(nargs='?', default=os.getcwd(),
+                              help='set working directory')),
             (('--debug',), dict(action='store_true', help='open debug mode')),
-            (('--dry-run',), dict(action='store_true', help='print command instead execute it')),
+            (('--dry-run',), dict(action='store_true',
+                                  help='print command instead execute it')),
             (('--verbose', '-v'), dict(action='count')),
         ]
 

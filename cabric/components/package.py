@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 from cliez.component import Component
 
 
@@ -30,9 +31,12 @@ class PackageComponent(Component):
         sub parser document
         """
         return [
-            (('--register', '-r'), dict(action='store_true', help='register package to repo.')),
-            (('--source', '-s'), dict(default='cabric', help='try load private repo.', )),
-            (('--public',), dict(action='store_true', help='upload to pypi repo.')),
+            (('--register', '-r'),
+             dict(action='store_true', help='register package to repo.')),
+            (('--source', '-s'),
+             dict(default='cabric', help='try load private repo.', )),
+            (('--public',),
+             dict(action='store_true', help='upload to pypi repo.')),
         ]
         pass
 

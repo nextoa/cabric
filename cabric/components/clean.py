@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 from cliez.component import Component
 
 
@@ -25,7 +26,8 @@ class CleanComponent(Component):
                     os.rmdir(v[0])
                     self.logger.debug("delete directory:%s" % v[0])
                 except OSError:
-                    self.warn_message("can't delete %s cache directory." % v[0])
+                    self.warn_message(
+                        "can't delete %s cache directory." % v[0])
                     pass
                 pass
             pass

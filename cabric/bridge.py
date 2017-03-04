@@ -146,8 +146,8 @@ def load_settings(path):
     Usage docs are in sites/docs/usage/fab.rst, in "Settings files."
     """
     if os.path.exists(path):
-        comments = (lambda s: s) and not s.startswith("#")
-        settings = filter(comments, open(path, 'r'))
+        settings = filter(lambda s: s and not s.startswith("#"),
+                          open(path, 'r'))
         return dict((k.strip(), v.strip()) for k, _, v in
                     [s.partition('=') for s in settings])
     # Handle nonexistent or empty settings file

@@ -246,7 +246,7 @@ class DeployComponent(Component):
 
         for f in requirement_files:
             run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip"
-                " install -U -r {0} || "
+                " install -U  --upgrade-strategy only-if-needed -r {0} || "
                 "echo '{0} not exist,skip install...'".format(f,
                                                               python_version))
             pass

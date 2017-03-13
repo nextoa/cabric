@@ -34,6 +34,18 @@ class ConfigComponent(Component):
             run('systemctl reload %s' % ' '.join(services))
         pass
 
+    def start(self, services, all_services):
+        if all_services and services:
+            s = [v for v in services if v in all_services]
+            run('systemctl start %s' % ' '.join(s))
+        pass
+
+    def stop(self, services, all_services):
+        if all_services and services:
+            s = [v for v in services if v in all_services]
+            run('systemctl stop %s' % ' '.join(s))
+        pass
+
     def restart(self, restarts, all_services):
 
         if all_services and restarts:
@@ -408,6 +420,16 @@ class ConfigComponent(Component):
                 lambda: self.restart(options.restart, services))
             pass
 
+        if options.start:
+            command_list.append(
+                lambda: self.start(options.start, services))
+            pass
+
+        if options.stop:
+            command_list.append(
+                lambda: self.stop(options.stop, services))
+            pass
+
         crons_config = env_config.get('crons', [])
         if not options.skip_crontab and crons_config:
             command_list.append(
@@ -448,6 +470,8 @@ class ConfigComponent(Component):
                                          )),
             (('--reload',), dict(nargs='+', help='set reload service', )),
             (('--restart',), dict(nargs='+', help='set restart service', )),
+            (('--start',), dict(nargs='+', help='set start service', )),
+            (('--stop',), dict(nargs='+', help='set stop service', )),
         ]
 
     pass

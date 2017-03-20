@@ -2,94 +2,95 @@ Cabric
 ==================
 
 
-A deploy tool for Centos, based on Fabric.
-
-Important Note
----------------------
-
-this project was designed for Centos6,it's a little old.
-
-I am planning a more elegant solution for Centos In my spare time.
+Cabric,a deploy tool for CentOS,based on Fabric.
 
 
-CentOS released 7.x
-
-Fabric added task feature
-
-I believe we can do more with a better way.
-
-
+|build-status| |license| |pyimp|
 
 
 Quick Start
-----------------------------
-`Chinese Version <https://github.com/nextoa/cabric/blob/master/docs/quick-start.rst>`_
+--------------------------
+
+#. Installation
+
+    .. code-block:: bash
+
+        pip install cabric
 
 
-FAQ
-----------------------------
-`Chinese Version <https://github.com/nextoa/cabric/blob/master/docs/faq.rst>`_
+#. Initial
+
+    .. code-block:: bash
+
+        cd /tmp
+        cab touch nextoa/cabric-kickstart cabric-demo
 
 
-Install
+
+#. Edit hosts
+
+     .. code-block:: bash
+
+        cd /tmp/cabric-demo
+        sed -i -e "s/example.com/<YOUR SERVER IP>/g" config/fabric/beta.conf
+
+#. Run
+
+    .. code-block:: bash
+
+        cab install --env=beta    # install depends packages
+        cab config --env=beta --restart=nginx   # config server and restart nginx services
+
+
+#. Work With Fabric Task
+
+    .. code-block:: bash
+
+        fab ez:beta hello_world
+
+
+
+Features
 ---------------------------
-.. code-block::
+.. code-block:: bash
 
-    sudo pip install cabric
-
-
-
-
-Create New Project
----------------------------
-.. code-block::
-
-    cabric init
-
-
-
+    cab check                    # [plan-feature] check current environment
+    cab touch                    # touch a project from template repository.
+    cab install                  # install depends on target server.
+    cab config                   # config target server.
+    cab deploy                   # deploy project.
+    cab compile                  # compile python project.
+    cab clean                    # clean python compiled files.
+    cab mini                     # minify python project.
+    cab render                   # render project which create by `cab touch`
+    cab update                   # [plan-feature] upgrade target server.
+    cab package                  # a short way for python package.
 
 
 
-Release Note
-----------------------------
-
-* 0.2.x
-    * support mongodb 3.x repo
-    * support cloud feature
-        * currently,we only support `qingcloud <https://www.qingcloud.com>`_
-        * support create router
-        * support create pubkey
-        * support create lan
-        * support create internet
-        * support create instance
-        * support create part-time instance
+.. code end.
 
 
-* 0.1.x
+.. |build-status| image:: https://secure.travis-ci.org/wangwenpei/cabric.png?branch=master
+    :alt: Build status
+    :target: https://travis-ci.org/wangwenpei/cabric
 
-    * support create tornado app easily,depends on `bree <https://github.com/nextoa/bree>`_
-    * support mongo shard feature
-    * support local web operation,like django's  manage.py collectstatic
-    * support supervisor
-    * support statsd
-    * support send release-note use mail
-    * support smtp server
-    * support php
-    * support more config type
-    * improve install python lxml
-    * support tengine
-    * support nginx
-    * support python3,pypy
-    * support python complex package.e.g:pillow
-    * support redis
-    * support mongodb
-    * support mysql
-    * core feature
-        * add user
-        * git clone/git pull code
-        * upload private | public key
-        * ...
+.. |coverage| image:: https://codecov.io/github/wangwenpei/cabric/coverage.svg?branch=master
+    :target: https://codecov.io/github/wangwenpei/cabric?branch=master
 
+.. |license| image:: https://img.shields.io/pypi/l/cabric.svg
+    :alt: MIT License
+    :target: https://opensource.org/licenses/MIT
 
+.. |wheel| image:: https://img.shields.io/pypi/wheel/cabric.svg
+    :alt: Cabric can be installed via wheel
+    :target: http://pypi.python.org/pypi/cabric/
+
+.. |pyversion| image:: https://img.shields.io/pypi/pyversions/cabric.svg
+    :alt: Supported Python versions.
+    :target: http://pypi.python.org/pypi/cabric/
+
+.. |pyimp| image:: https://img.shields.io/pypi/implementation/cabric.svg
+    :alt: Support Python implementations.
+    :target: http://pypi.python.org/pypi/cabric/
 

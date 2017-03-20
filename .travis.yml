@@ -1,0 +1,17 @@
+# planning
+# together cabric and travis is a complex work.
+language: python
+python:
+  - "2.7"
+# command to install dependencies
+install:
+  - "pip install -r requirements.txt"
+  - "pip install codecov"
+# command to run tests
+script:
+  - "ssh-keyscan github.com >> ~/.ssh/known_hosts"
+  - "ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts"
+  - "python setup.py test"
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

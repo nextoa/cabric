@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 from fabric.api import *
+from fabric.main import list_commands
 from fabric.utils import _AttributeDict
-
-import time
-
 
 ez_env = _AttributeDict({
     'debug': None,
@@ -122,17 +121,14 @@ def debug(flag=None):
     return ez_env.debug
 
 
-
-from fabric.main import list_commands, _task_names, _normal_list, _nested_list
-
-
 def help():
     # print("called!")
 
     commands = list_commands(None, "nested")
 
     support_type = ['cmd', 'cloud', 'classic', 'config', 'io', 'py', 'git']
-    ignore = ['Dumper', 'Loader', 'bind_cloud', 'bind_hosts', 'dump', 'dump_codes']
+    ignore = ['Dumper', 'Loader', 'bind_cloud', 'bind_hosts', 'dump',
+              'dump_codes']
     origin = ['Available commands:']
 
     print(commands)
@@ -170,14 +166,7 @@ def help():
         # if format_ == "nested":
         # header += NESTED_REMINDER
         # result.append(header + ":\n")
-        # c = _normal_list() if format_ == "normal" else _nested_list(state.commands)
+        # c = _normal_list() \
+        #    if format_ == "normal" else _nested_list(state.commands)
         # result.extend(c)
         # return result
-
-
-
-
-
-
-
-

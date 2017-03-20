@@ -3,6 +3,8 @@ _gh_pages
 _site
 .ruby-version
 
+webapp-odd
+
 # Numerous always-ignore extensions
 *.diff
 *.err
@@ -59,8 +61,6 @@ trash
 */trash
 sketch
 ./fabfile.py
-config/cabric/
-config/fabez/
 demo/qingcloud
 webapp
 demo

@@ -1,3 +1,7 @@
 requests
-github3.py
-bree
+fabric
+cliez
+pycrypto
+gitpython
+mock
+pyminifier

@@ -1,0 +1,3 @@
+guzzle_sphinx_theme #guzzles皮肤
+recommonmark  #支持sphinx使用markdown
+Pygments   #高亮模块

@@ -70,6 +70,8 @@ def put(local_path, remote_path):
     :param remote_path:
     :return:
     """
+    local_path = os.path.expanduser(local_path)
+
     if env.hosts:
         if os.path.isdir(local_path):
             local_path = local_path.rstrip('/') + '/'

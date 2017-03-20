@@ -1,63 +1,83 @@
 Cabric
 ==================
 
-.. image:: https://pypip.in/v/cabric/badge.svg
-:target: https://pypi.python.org/pypi/cabric/
-.. image:: https://pypip.in/d/cabric/badge.svg
-:target: https://pypi.python.org/pypi/cabric/
-.. image:: https://pypip.in/license/cabric/badge.svg
-:target: https://pypi.python.org/pypi/cabric/
+Cabric,a deploy tool for CentOS,based on Fabric.
 
-Cabric,Fabric companion.
+|build-status| |license| |pyimp|
 
 
-新候选词:
------------------------
-deploy tool for centos 已经不能满足我们的概念了.
+Quick Start
+--------------------------
 
-经过这段时间的积累,我们融入了很多不错的想法,并且已经试验验证了可行性.但是这些概念远远超过了deploy的概念.
+#. Installation
 
-但是我又很喜欢cabric这个命名.
-所有我们只能升级这个概念了.
+    .. sourcecode::
+        pip install cabric
 
 
-一些备选词:
+#. Initial
 
-- chart n. 图表；航海图
-- chess n. 棋
-- coat n. 外套；涂层；表皮；皮毛 vt. 给……穿外套；涂上
-- collar n. 衣领； 硬领
-- comb n. 梳子 v. 梳
-- companion n. 同伴；同事
-- calm a. 镇静的； 沉着的 v. 镇静； 沉着
+    .. sourcecode::
+        cd /tmp && mkdir /tmp/cabric-demo
+
+
+#. Edit hosts
+
+     .. sourcecode::
+        cd /tmp && mkdir /tmp/cabric-demo
+
+#. Run
+
+     .. sourcecode::
+
+        cd /tmp && mkdir /tmp/cabric-demo
+
+
+#. Work With Fabric Task
+
+     .. sourcecode::
+        fab ez:beta hello_world
 
 
 
 Feature
 ---------------------------
-.. code-block::
+.. sourcecode:: shell
 
-    cab check                    #检查当前环境是否支持cabric的运行
-    cab prepare                  #安装缺失的依赖,并检测python的环境
-    cab init                     #根据配置,初始化云资源
-    cab init-project             #根据配置,初始化项目配置
-
-    cab ez:<ENV> install         #根据环境,安装依赖包
-    cab ez:<ENV> config          #根据环境,更新配置
-    cab ez:<ENV> deploy          #根据环境,部署代码
-
-    cab compile                  #针对python的编译策略
-    cab ez:<ENV> release         #根据环境,发布包(只针对python,发布公网包,发布私有包,发布spider)
-    cab clean                    #清理编译文件等
-
-
-原生fabric的一些不太喜欢的地方
----------------------------
-
-每个入口的env都是独立的,这会带来一个讨厌的问题环境变量无法共享
+    cab check                    # [plan-feature] check current environment
+    cab touch                    # touch a project from template repository.
+    cab install                  # install depends on target server.
+    cab config                   # config target server.
+    cab deploy                   # deploy project.
+    cab compile                  # compile python project.
+    cab clean                    # clean python compiled files.
+    cab mini                     # minify python project.
+    cab render                   # render project which create by `cab touch`
+    cab update                   # [plan-feature] upgrade target server.
+    cab package                  # a short way for python package.
 
 
 
+.. |build-status| image:: https://secure.travis-ci.org/wangwenpei/cabric.png?branch=master
+    :alt: Build status
+    :target: https://travis-ci.org/wangwenpei/cabric
 
+.. |coverage| image:: https://codecov.io/github/wangwenpei/cabric/coverage.svg?branch=master
+    :target: https://codecov.io/github/wangwenpei/cabric?branch=master
 
+.. |license| image:: https://img.shields.io/pypi/l/cabric.svg
+    :alt: MIT License
+    :target: https://opensource.org/licenses/MIT
+
+.. |wheel| image:: https://img.shields.io/pypi/wheel/cabric.svg
+    :alt: Cabric can be installed via wheel
+    :target: http://pypi.python.org/pypi/cabric/
+
+.. |pyversion| image:: https://img.shields.io/pypi/pyversions/cabric.svg
+    :alt: Supported Python versions.
+    :target: http://pypi.python.org/pypi/cabric/
+
+.. |pyimp| image:: https://img.shields.io/pypi/implementation/cabric.svg
+    :alt: Support Python implementations.
+    :target: http://pypi.python.org/pypi/cabric/
 

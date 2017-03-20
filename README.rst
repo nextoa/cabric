@@ -11,38 +11,46 @@ Quick Start
 
 #. Installation
 
-    .. sourcecode::
+    .. code-block:: bash
+
         pip install cabric
 
 
 #. Initial
 
-    .. sourcecode::
-        cd /tmp && mkdir /tmp/cabric-demo
+    .. code-block:: bash
+
+        cd /tmp
+        cab touch nextoa/cabric-kickstart cabric-demo
+
 
 
 #. Edit hosts
 
-     .. sourcecode::
-        cd /tmp && mkdir /tmp/cabric-demo
+     .. code-block:: bash
+
+        cd /tmp/cabric-demo
+        sed -i -e "s/example.com/<YOUR SERVER IP>/g" config/fabric/beta.conf
 
 #. Run
 
-     .. sourcecode::
+    .. code-block:: bash
 
-        cd /tmp && mkdir /tmp/cabric-demo
+        cab install --env=beta    # install depends packages
+        cab config --env=beta --restart=nginx   # config server and restart nginx services
 
 
 #. Work With Fabric Task
 
-     .. sourcecode::
+    .. code-block:: bash
+
         fab ez:beta hello_world
 
 
 
-Feature
+Features
 ---------------------------
-.. sourcecode:: shell
+.. code-block:: bash
 
     cab check                    # [plan-feature] check current environment
     cab touch                    # touch a project from template repository.
@@ -56,6 +64,9 @@ Feature
     cab update                   # [plan-feature] upgrade target server.
     cab package                  # a short way for python package.
 
+
+
+.. code end.
 
 
 .. |build-status| image:: https://secure.travis-ci.org/wangwenpei/cabric.png?branch=master

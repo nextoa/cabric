@@ -2,6 +2,7 @@
 
 import os
 import sys
+
 sys.path.insert(0, __file__.rsplit('/', 2)[0])
 
 from cabric import version
@@ -14,6 +15,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinxcontrib.programoutput',
 ]
 
 templates_path = ['_templates']
@@ -26,7 +28,7 @@ source_encoding = 'utf-8-sig'
 master_doc = 'index'
 
 project = 'Dream'
-copyright = '2017, WANG WENPEI'
+copyright = u'2017, WANG WENPEI'
 author = 'WANG WENPEI'
 show_authors = True
 
@@ -61,4 +63,5 @@ if user_theme == 'guzzle':
     html_theme_options = {
         # Set the name of the project to appear in the sidebar
         "project_nav_name": "Cabric",
+        "google_analytics_account": "e6fb1684262fb4a16e67cbce449314d4"
     }

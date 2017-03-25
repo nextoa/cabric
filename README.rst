@@ -65,6 +65,7 @@ Features
     cab render                   # render project which create by `cab touch`
     cab update                   # [plan-feature] upgrade target server.
     cab package                  # a short way for python package.
+    cab hardline                 # batch way to execute fabric & cabric command
 
 
 

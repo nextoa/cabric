@@ -1,0 +1,11 @@
+{
+  "normal": {
+    "title": "常用部署",
+    "workflow": [
+      "cab install --env=not-exist",
+      "dangerous command",
+      "cab danger || will ignore",
+      "fab danger && will ignore"
+    ]
+  }
+}

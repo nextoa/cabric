@@ -106,6 +106,13 @@ class InstallComponent(Component):
         """
 
         def on_centos():
+            rpm_keys = pkgs_config.get('rpm-keys', [])
+            if rpm_keys:
+                for v in rpm_keys:
+                    run("rpm --import %s" % v)
+                    pass
+                pass
+
             pkg = pkgs_config.get('yum')
             if not pkg:
                 return

@@ -4,7 +4,7 @@ import json
 import os
 
 from cliez.component import Component
-from fabric.context_managers import settings
+from fabric.context_managers import settings, cd
 
 from cabric.utils import get_roots, mirror_put, run, \
     bind_hosts, execute, get_platform, run_block, \
@@ -99,6 +99,10 @@ class InstallComponent(Component):
     def install_package(self, root, pkgs_config):
         """
         install system package
+        workflow:
+            - try add gpg key
+            - yum install
+            - yum localinstall
 
         :param root: pkgs_config root directory path
         :param pkgs_config: package.json pkgs_config
@@ -114,12 +118,18 @@ class InstallComponent(Component):
                 pass
 
             pkg = pkgs_config.get('yum')
-            if not pkg:
-                return
+            if pkg:
+                mirror_put(root, '/etc/yum.repos.d', validate=False)
+                run('yum install -y epel-release')
+                run('yum install -y %s' % ' '.join(pkg))
 
-            mirror_put(root, '/etc/yum.repos.d', validate=False)
-            run('yum install -y epel-release')
-            run('yum install -y %s' % ' '.join(pkg))
+            pkg_local = pkgs_config.get('yum-local', [])
+            for p in pkg_local:
+                with cd("/tmp"):
+                    run("curl -L -O %s" % p)
+                    run('yum localinstall -y %s' % os.path.basename(p))
+                    pass
+                pass
             pass
 
         def on_mac():

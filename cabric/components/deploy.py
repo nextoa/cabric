@@ -73,6 +73,8 @@ class DeployComponent(Component):
                     self.warn("github-api"
                               " request: %s" % 'https://api.github.com'
                                                '/repos/{}/keys'.format(github))
+                    self.warn(
+                        "github-api status-code: %d" % response.status_code)
                     self.warn("github-api auth: %s" % ' '.join(temp_config))
                     self.warn("github-api return: %s" % response.text)
                     pass
@@ -81,11 +83,10 @@ class DeployComponent(Component):
             auth_config = temp_config
             keys = response.json
             key_title = remote_user + '@cabric'
-
             break
 
         if not auth_config:
-            self.error("login github failed.")
+            self.error("login github failed or project not exists.")
 
         try:
             uploaded_keys = [v for v in keys if v.get('title') == key_title]
@@ -548,7 +549,7 @@ class DeployComponent(Component):
 
         if options.with_deploy_key:
             if options.force_renew or (
-                        not os.path.exists(private_key) and github):
+                    not os.path.exists(private_key) and github):
                 self.create_github_key(private_key, github, user)
 
             command_list.append(

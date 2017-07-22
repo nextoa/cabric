@@ -576,12 +576,17 @@ class DeployComponent(Component):
                 lambda: self.migrate_db(user, project_name))
 
         if not options.skip_upload_resources:
+            resource_dir = os.path.expanduser(options.resource_dir)
+
             command_list.append(
                 lambda: self.upload_resources(user, project_name,
+                                              working_root=resource_dir,
                                               static_prefix=config.get(
                                                   'static-prefix')))
             command_list.append(
-                lambda: self.upload_javascripts(user, project_name))
+                lambda: self.upload_javascripts(user, project_name,
+                                                working_root=resource_dir,
+                                                ))
 
         execute(command_list)
         pass
@@ -613,6 +618,9 @@ class DeployComponent(Component):
              dict(action='store_true', help='skip migrate', )),
             (('--skip-upload-resources',),
              dict(action='store_true', help='skip upload resources', )),
+            (('--resource-dir',),
+             dict(nargs='?', default=os.getcwd(),
+                  help='set resource upload directory')),
         ]
         pass
 

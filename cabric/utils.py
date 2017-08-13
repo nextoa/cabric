@@ -303,6 +303,8 @@ def get_platform():
     if remote_os == 'darwin':
         return 'mac'
     elif remote_os == 'linux':
+        return 'centos'
+        # not all os has this file
         distribute = run("gawk -F= '/^NAME/{print $2}' /etc/os-release")
         if 'centos' in distribute.lower():
             return 'centos'

@@ -271,7 +271,7 @@ class DeployComponent(Component):
 
         pass
 
-    def migrate_db(self, user, project_name):
+    def migrate_db(self, user, project_name, django_settings='web.online'):
         """
         try migrate database
 
@@ -282,8 +282,8 @@ class DeployComponent(Component):
         project_path = self.get_remote_project_path(user, project_name)
 
         with cd(project_path):
-            run('test -f ./manage.py && python manage.py migrate'
-                ' || echo "skip migrate database"')
+            run('test -f ./manage.py && python manage.py migrate --settings=%s'
+                ' || echo "skip migrate database"' % django_settings)
             pass
 
         pass
@@ -573,7 +573,8 @@ class DeployComponent(Component):
 
         if not options.skip_migrate:
             command_list.append(
-                lambda: self.migrate_db(user, project_name))
+                lambda: self.migrate_db(user, project_name,
+                                        config.get('settings', 'web.online')))
 
         if not options.skip_upload_resources:
             resource_dir = os.path.expanduser(options.resource_dir)

@@ -6,8 +6,10 @@ import os
 from cliez.component import Component
 
 from cabric.dns.dnspod import DNSPod
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, \
-    get_platform, put, fabric_settings, env, get_home, current_machine
+from cabric.utils import (get_roots, run, bind_hosts, execute,
+                          get_platform, put, fabric_settings, env, get_home,
+                          current_machine,
+                          mirror_put)
 
 try:
     from shlex import quote as shell_quote
@@ -55,6 +57,31 @@ class ConfigComponent(Component):
             else:
                 self.warn(
                     "restart progress actived,but no restart service found.")
+        pass
+
+    def upload_config_file(self, config_root, working_env, stages=[]):
+        """
+        support upload other config or project cabric files
+        :param config_root:
+        :param working_env:
+        :param stages:
+        :return:
+        """
+
+        stages.append(working_env)
+
+        upload_roots = map(
+            lambda x: os.path.join(os.path.expanduser(
+                x.get('root')),
+                'config',
+                'stages',
+                x.get('name',
+                      'default')) if isinstance(x,
+                                                dict) else os.path.join(
+                config_root, x),
+            stages)
+
+        [mirror_put(local_root, '/') for local_root in upload_roots]
         pass
 
     def upload_crontab(self, config, env_option, crontab_root):
@@ -279,10 +306,10 @@ class ConfigComponent(Component):
 
                 # try to set forward rule
                 rules = [{
-                             'loadbalancer_policy_rule_name': domain,
-                             'rule_type': 'url',
-                             'val': '^/.well-known'
-                         } for domain in ssl_config['domains']]
+                    'loadbalancer_policy_rule_name': domain,
+                    'rule_type': 'url',
+                    'val': '^/.well-known'
+                } for domain in ssl_config['domains']]
 
                 for rule in rules:
                     client.get_or_add_loadbalancer_policy_rules(
@@ -373,10 +400,6 @@ class ConfigComponent(Component):
 
         # try upload repo config if it can recognize
         using_config = os.path.join(package_root, options.env)
-        stage_config = os.path.join(config_root, options.env)
-
-        if not options.skip_upload:
-            mirror_put(stage_config, '/')
 
         try:
             env_config = json.load(
@@ -384,6 +407,11 @@ class ConfigComponent(Component):
         except ValueError:
             self.error("Invalid json syntax:%s" % os.path.join(using_config,
                                                                'env.json'))
+            pass
+
+        if not options.skip_upload:
+            self.upload_config_file(config_root, options.env,
+                                    env_config.get('stages', []))
             pass
 
         command_list = []

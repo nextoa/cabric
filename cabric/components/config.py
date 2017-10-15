@@ -386,8 +386,6 @@ class ConfigComponent(Component):
 
         # try upload repo config if it can recognize
         using_config = os.path.join(package_root, options.env)
-        stage_config = os.path.join(config_root, options.env)
-
         command_list = []
 
         try:

@@ -1,21 +1,18 @@
-The MIT License (MIT)
+版权所有 (c) 2017 王文沛
 
-Copyright (c) 2014-2017 NextOA.com
+当前Cabric版本为Cabric社区版的私有版本，除非获得作者的授权，该版本禁止用于任何用途。
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+之所以有这样一个私有版本的产生，是因为作者在之前遭遇了一家骗子公司，打着期权的幌子，蒙骗本人降薪入职。
+在入职一年半后越发感觉事情不对劲要求对方兑现期权，对方除了索要了我的户籍地址，还在离职协议上动手脚。
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+看到自己的心血用在这种公司上，我是很气愤的。但是我只能无奈，因为项目是以MIT发布的。
+再加上同时爆出来许多个剽窃的案例。
+
+- 00后CEO赴俄的那个抄袭事件，还在commit里公开辱骂原作者，无法想象
+- 开源中国抄走国内一家公司的jenkins开源插件，然后换成自己的署名再开源
+- ....
+
+
+算了，以后就做开源的用户吧。大的开源项目，如果有commit确实要提，那就提。
+自己的项目，闭源思考。除非，开源利益大于闭源利益，否则不考虑。

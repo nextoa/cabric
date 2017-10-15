@@ -81,8 +81,8 @@ class ConfigComponent(Component):
                 config_root, x),
             stages)
 
-        [mirror_put(local_root, '/') for local_root in upload_roots]
-        pass
+        return [lambda: mirror_put(local_root, '/') for local_root in
+                upload_roots]
 
     def upload_crontab(self, config, env_option, crontab_root):
         user = config.get('user')
@@ -397,7 +397,7 @@ class ConfigComponent(Component):
             pass
 
         if not options.skip_upload:
-            [command_list.append(lambda: v) for v in
+            [command_list.append(v) for v in
              self.upload_config_file(config_root,
                                      options.env,
                                      env_config.get('stages', []))]

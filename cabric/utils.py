@@ -185,7 +185,7 @@ def bind_hosts(fabric_root, select_env, parallel=False, machine_config=None):
     :param machine_config:
     :return:
     """
-
+    
     machine_config = machine_config or os.path.join(fabric_root,
                                                     select_env + '.conf')
 

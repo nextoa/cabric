@@ -317,7 +317,8 @@ class InstallComponent(Component):
         """
 
         package_root, config_root, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env, options.parallel)
+        bind_hosts(fabric_root, options.env, options.parallel,
+                   options.hosts_file)
 
         # try upload repo config if it can recognize
         using_config = os.path.join(config_root, options.env)

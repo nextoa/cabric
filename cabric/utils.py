@@ -185,11 +185,9 @@ def bind_hosts(fabric_root, select_env, parallel=False, machine_config=None):
     :param machine_config:
     :return:
     """
-    
+
     machine_config = machine_config or os.path.join(fabric_root,
                                                     select_env + '.conf')
-
-    machine_config = os.path.expanduser(machine_config)
 
     if not os.path.exists(machine_config):
         raise OSError("%s not exist." % machine_config)

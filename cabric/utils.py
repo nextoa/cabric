@@ -155,16 +155,20 @@ def parse_hosts(file):
     return machines, names
 
 
-def bind_hosts(fabric_root, select_env, parallel=False):
+def bind_hosts(fabric_root, select_env, parallel=False, machine_config=None):
     """
     bind hosts from file
     :param fabric_root:
     :param select_env:
     :param parallel:
+    :param machine_config:
     :return:
     """
 
-    machine_config = os.path.join(fabric_root, select_env + '.conf')
+    machine_config = machine_config or os.path.join(fabric_root,
+                                                    select_env + '.conf')
+
+    machine_config = os.path.expanduser(machine_config)
 
     if not os.path.exists(machine_config):
         raise OSError("%s not exist." % machine_config)
@@ -275,7 +279,7 @@ def execute(commands):
         commands_to_run = [(v, [], {}, [], [], []) for v in commands]
 
         for name, args, kwargs, arg_hosts, arg_roles, arg_exclude_hosts \
-                in commands_to_run:
+            in commands_to_run:
             results.append(fab_execute(name, hosts=arg_hosts, roles=arg_roles,
                                        exclude_hosts=arg_exclude_hosts, *args,
                                        **kwargs))

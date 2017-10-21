@@ -15,6 +15,7 @@ conf.GENERAL_ARGUMENTS = [
     (('--debug',), dict(action='store_true', help='open debug mode')),
     (('--verbose', '-v'), dict(action='count')),
     (('--env', '-s'), dict(nargs='?', default='beta', help='set environment')),
+    (('--hosts-file',), dict(help='chose another hosts file to load')),
 ]
 conf.EPILOG = 'You can submit issues at: https://www.github.com/nextoa/cabric'
 

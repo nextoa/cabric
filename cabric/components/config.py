@@ -396,7 +396,7 @@ class ConfigComponent(Component):
         """
 
         package_root, config_root, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env)
+        bind_hosts(fabric_root, options.env, False, options.hosts_file)
 
         # try upload repo config if it can recognize
         using_config = os.path.join(package_root, options.env)

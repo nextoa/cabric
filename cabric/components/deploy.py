@@ -512,7 +512,8 @@ class DeployComponent(Component):
             options.debug = True
 
         package_root, _, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env, options.parallel)
+        bind_hosts(fabric_root, options.env, options.parallel,
+                   options.hosts_file)
 
         using_config = os.path.join(package_root, options.env)
         project_root = os.path.dirname(package_root)

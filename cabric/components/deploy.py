@@ -567,7 +567,7 @@ class DeployComponent(Component):
             command_list.append(
                 lambda: self.install_requirements(user, project_name))
 
-        if not options.skip_compile_templates:
+        if options.enable_compile_templates:
             command_list.append(
                 lambda: self.compile_templates(user, project_name))
 
@@ -613,12 +613,12 @@ class DeployComponent(Component):
              dict(action='store_true', help='skip upgrade source code', )),
             (('--skip-requirements',),
              dict(action='store_true', help='skip install requirements', )),
-            (('--skip-compile-templates',),
-             dict(action='store_true', help='skip compile templates', )),
             (('--skip-migrate',),
              dict(action='store_true', help='skip migrate', )),
             (('--skip-upload-resources',),
              dict(action='store_true', help='skip upload resources', )),
+            (('--enable-compile-templates',),
+             dict(action='store_true', help='enable compile templates', )),
             (('--resource-dir',),
              dict(nargs='?', default=os.getcwd(),
                   help='set resource upload directory')),

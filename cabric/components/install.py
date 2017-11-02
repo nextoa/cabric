@@ -359,7 +359,7 @@ class InstallComponent(Component):
                 lambda: self.install_pypi(packages_config.get('pypi', []),
                                           options.skip_pkg))
 
-        if not options.skip_node:
+        if options.enable_node:
             execute_list.append(
                 lambda: self.install_node(using_config, packages_config,
                                           options.skip_pkg))
@@ -385,12 +385,12 @@ class InstallComponent(Component):
              dict(action='store_true', help='skip install pkg', )),
             (('--skip-pyenv',),
              dict(action='store_true', help='skip install pyenv', )),
-            (('--skip-node',),
-             dict(action='store_true', help='skip install node', )),
             (('--skip-user',),
              dict(action='store_true', help='skip install user', )),
             (('--skip-pypi',),
              dict(action='store_true', help='skip install pip package', )),
+            (('--enable-node',),
+             dict(action='store_true', help='enable install node', )),
             (('--parallel', '-P'), dict(action='store_true',
                                         help='default to parallel execution'
                                              ' method', )),

@@ -275,7 +275,7 @@ def execute(commands):
         commands_to_run = [(v, [], {}, [], [], []) for v in commands]
 
         for name, args, kwargs, arg_hosts, arg_roles, arg_exclude_hosts \
-                in commands_to_run:
+            in commands_to_run:
             results.append(fab_execute(name, hosts=arg_hosts, roles=arg_roles,
                                        exclude_hosts=arg_exclude_hosts, *args,
                                        **kwargs))
@@ -336,7 +336,9 @@ def get_git_host(address):
 
 
 def get_repo():
-    return fabric_local('git remote get-url origin --push', capture=True)
+    path = os.getcwd()
+    if os.path.exists(os.path.join(path, '.git')):
+        return fabric_local('git remote get-url origin --push', capture=True)
 
 
 def exist_user(user):

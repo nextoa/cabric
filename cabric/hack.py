@@ -9,10 +9,11 @@ from cabric.utils import parse_hosts
 
 
 @task
-def ez(curr):
+def ez(curr, current_path='./config/fabric'):
     """
 
     :param curr: which env to use
+    :param current_path: set load path
 
       ..note::
         if you use `ol` as value, cabric will translate `online`
@@ -20,8 +21,6 @@ def ez(curr):
 
     :return:
     """
-
-    current_path = './config/fabric'
     curr = 'online' if curr == 'ol' else curr
     env_file = os.path.join(current_path, curr + '.conf')
     env.use_ssh_config = True

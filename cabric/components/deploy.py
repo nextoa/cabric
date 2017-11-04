@@ -282,8 +282,12 @@ class DeployComponent(Component):
         project_path = self.get_remote_project_path(user, project_name)
 
         with cd(project_path):
-            run('test -f ./manage.py && python manage.py migrate --settings=%s'
-                ' || echo "skip migrate database"' % django_settings)
+            run(
+                'test -f ./manage.py && '
+                'python manage.py migrate --settings=%s'
+                ' || echo "skip migrate database"' % django_settings,
+                user=user
+            )
             pass
 
         pass

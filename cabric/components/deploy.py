@@ -280,6 +280,7 @@ class DeployComponent(Component):
         :return:
         """
         project_path = self.get_remote_project_path(user, project_name)
+        self.print_message("project root:%s " % project_path)
 
         with cd(project_path):
             run(

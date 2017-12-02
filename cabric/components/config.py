@@ -340,22 +340,6 @@ class ConfigComponent(Component):
         run('timedatectl set-timezone %s' % timezone)
         pass
 
-    def hack_nginx(self, services):
-        """
-        hack nginx default config
-
-        ..note::
-
-            this is a plan feature
-
-        :return:
-        """
-
-        if 'nginx' not in services:
-            return
-
-        pass
-
     def run(self, options):
         """
         plan feature
@@ -405,8 +389,6 @@ class ConfigComponent(Component):
             pass
 
         services = env_config.get('services', [])
-
-        command_list.append(lambda: self.hack_nginx(services))
 
         if not options.skip_enable_services and services:
             command_list.append(lambda: self.enable_services(services))

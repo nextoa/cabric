@@ -72,20 +72,42 @@ def put(local_path, remote_path):
     """
     local_path = os.path.expanduser(local_path)
 
-    if env.hosts:
+    if env.host_string:
+
+        rsync_bin = fabric_local('which rsync', capture=True)
+        rsync = os.path.basename(rsync_bin)
+
+        if not rsync:
+            raise IOError("rsync not exist.please install it.")
+
+        tpl = str('%(bin)s -e ssh%(port_str)s%(recursive_str)s '
+                  '-v %(local_path)s %(host)s:%(remote_path)s')
+        port = int(env.host_string[
+                   env.host_string.find(':') + 1:]) if env.host_string.find(
+            ':') > -1 else 22
+
+        host = env.host_string[
+               0:env.host_string.find(':')] if env.host_string.find(
+            ':') > -1 else env.host_string
+
+        port_str = ' %s' % port
+        recursive_str = ''
+
         if os.path.isdir(local_path):
             local_path = local_path.rstrip('/') + '/'
             remote_path = remote_path.rstrip('/') + '/'
-            fabric_local(
-                "prsync -r {2} {0} {1}".format(local_path, remote_path,
-                                               ' '.join(["-H %s" % v for v in
-                                                         env.hosts])))
-        else:
-            fabric_local("prsync {2} {0} {1}".format(local_path, remote_path,
-                                                     ' '.join(
-                                                         ["-H %s" % v for v in
-                                                          env.hosts])))
+            recursive_str = ' -r'
+            pass
 
+        cmd = tpl % {
+            'bin': rsync,
+            'local_path': local_path,
+            'remote_path': remote_path,
+            'recursive_str': recursive_str,
+            'port_str': port_str if port != 22 else '',
+            'host': host
+        }
+        fabric_local(cmd)
     else:
         fabric_local("cp -rf %s %s" % (local_path, remote_path))
 
@@ -383,7 +405,7 @@ def known_host(address, user=None, local_mode=False, clean=True):
     """
 
     user_path = '~' if local_mode else get_home(user)
-    command0 = 'grep %s %s/.ssh/known_hosts' % (address, user_path)
+    command0 = 'grep "%s " %s/.ssh/known_hosts' % (address, user_path)
     command1 = 'ssh-keyscan %s >> %s/.ssh/known_hosts' % (address, user_path)
     command2 = 'sed -i -e "s/%s//g" %s/.ssh/known_hosts' % (address, user_path)
 

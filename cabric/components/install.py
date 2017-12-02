@@ -23,6 +23,7 @@ class InstallComponent(Component):
     system_python_version = '2.7.11'
 
     def before_install(self, root):
+        run('yum install -y rsync')
         mirror_put(root, '/etc/hosts', validate=False)
         mirror_put(root, '/root/.bash_profile', validate=False)
         pass

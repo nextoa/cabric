@@ -20,8 +20,6 @@ class CheckComponent(Component):
 
         * only support centos or macosx
         * check pssh is installed
-        * check prsync is installed
-        * check brew is installed
 
         :param options:
         :return:

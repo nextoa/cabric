@@ -72,6 +72,23 @@ Features
 .. code end.
 
 
+FAQ
+---------------------------
+
+Q: When I use `cabric`, I got this error:
+.. code-bloc:: bash
+
+    rsync: connection unexpectedly closed (0 bytes received so far) [sender]
+    rsync error: error in rsync protocol data stream (code 12) at /BuildRoot/Library/Caches/com.apple.xbs/Sources/rsync/rsync-51/rsync/io.c(453) [sender=2.6.9]
+
+
+
+.. code end.
+
+A: your remote server may not install `rsync`. please install first. if you still seem this error, please upgrade rsync to newer version.
+
+
+
 For more document. please visit `Cabric cookbook <https://www.nextoa.com/cabric/>`_
 
 

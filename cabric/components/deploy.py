@@ -280,7 +280,6 @@ class DeployComponent(Component):
         :return:
         """
         project_path = self.get_remote_project_path(user, project_name)
-        self.print_message("project root:%s " % project_path)
 
         with cd(project_path):
             run(
@@ -337,7 +336,8 @@ class DeployComponent(Component):
         django_manage = os.path.join(working_root, 'manage.py')
 
         if not os.path.exists(django_manage):
-            self.warn("not django project,skip upload resources")
+            self.warn(
+                "local root is not a django project,skip upload resources")
             return
 
         with settings(warn_only=True):

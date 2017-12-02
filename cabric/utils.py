@@ -404,7 +404,7 @@ def known_host(address, user=None, local_mode=False, clean=True):
     """
 
     user_path = '~' if local_mode else get_home(user)
-    command0 = 'grep "%s " %s/.ssh/known_hosts' % (address, user_path)
+    command0 = "grep '%s ' %s/.ssh/known_hosts" % (address, user_path)
     command1 = 'ssh-keyscan %s >> %s/.ssh/known_hosts' % (address, user_path)
     command2 = 'sed -i -e "s/%s//g" %s/.ssh/known_hosts' % (address, user_path)
 

@@ -279,10 +279,10 @@ class ConfigComponent(Component):
 
                 # try to set forward rule
                 rules = [{
-                             'loadbalancer_policy_rule_name': domain,
-                             'rule_type': 'url',
-                             'val': '^/.well-known'
-                         } for domain in ssl_config['domains']]
+                    'loadbalancer_policy_rule_name': domain,
+                    'rule_type': 'url',
+                    'val': '^/.well-known'
+                } for domain in ssl_config['domains']]
 
                 for rule in rules:
                     client.get_or_add_loadbalancer_policy_rules(
@@ -342,25 +342,27 @@ class ConfigComponent(Component):
 
     def run(self, options):
         """
-        plan feature
+        ..note::
+            unstable feature.
 
-            use rsync instead fabric put.
-            but rsync will may cause permission errors.
-            we should fix this.
+            current we use rsync instead fabric put.
+            but rsync may cause permission errors.
 
         :param options:
         :return:
         """
 
         package_root, config_root, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env)
+        bind_hosts(fabric_root, options.env, options.parallel)
 
         # try upload repo config if it can recognize
         using_config = os.path.join(package_root, options.env)
         stage_config = os.path.join(config_root, options.env)
 
+        command_list = []
+
         if not options.skip_upload:
-            mirror_put(stage_config, '/')
+            command_list.append(lambda: mirror_put(stage_config, '/'))
 
         try:
             env_config = json.load(
@@ -369,8 +371,6 @@ class ConfigComponent(Component):
             self.error("Invalid json syntax:%s" % os.path.join(using_config,
                                                                'env.json'))
             pass
-
-        command_list = []
 
         if not options.skip_hostname:
             command_list.append(lambda: self.set_hostname())
@@ -454,6 +454,9 @@ class ConfigComponent(Component):
             (('--restart',), dict(nargs='+', help='set restart service', )),
             (('--start',), dict(nargs='+', help='set start service', )),
             (('--stop',), dict(nargs='+', help='set stop service', )),
+            (('--parallel', '-P'), dict(action='store_true',
+                                        help='default to parallel execution'
+                                             ' method', )),
         ]
 
     pass

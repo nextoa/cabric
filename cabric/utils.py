@@ -73,7 +73,6 @@ def put(local_path, remote_path):
     local_path = os.path.expanduser(local_path)
 
     if env.host_string:
-
         rsync_bin = fabric_local('which rsync', capture=True)
         rsync = os.path.basename(rsync_bin)
 

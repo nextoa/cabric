@@ -80,7 +80,7 @@ def put(local_path, remote_path):
             raise IOError("rsync not exist.please install it.")
 
         tpl = str('%(bin)s -e ssh%(port_str)s%(recursive_str)s '
-                  '-v %(local_path)s %(host)s:%(remote_path)s')
+                  '%(local_path)s %(host)s:%(remote_path)s')
         port = int(env.host_string[
                    env.host_string.find(':') + 1:]) if env.host_string.find(
             ':') > -1 else 22

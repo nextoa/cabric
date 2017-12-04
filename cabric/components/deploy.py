@@ -283,13 +283,13 @@ class DeployComponent(Component):
 
         with cd(project_path):
             run(
-                '(test -f %s/manage.py) && '
-                'python %s/manage.py migrate --settings=%s'
-                ' || echo "skip migrate database"' % (
-                    project_path,
-                    project_path,
-                    django_settings
-                ),
+                'test -f %(project_path)s/manage.py && '
+                'python %(project_path)s/manage.py migrate '
+                '--settings=%(settings)s'
+                ' || echo "skip migrate database"' % {
+                    'project_path': project_path,
+                    'settings': 'web.online'
+                },
                 user=user
             )
             pass

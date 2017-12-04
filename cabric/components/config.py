@@ -394,6 +394,8 @@ class ConfigComponent(Component):
                                                                'env.json'))
             pass
 
+        command_list = []
+
         if not options.skip_upload:
             [command_list.append(v) for v in
              self.upload_config_file(config_root,

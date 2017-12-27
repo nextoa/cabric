@@ -6,8 +6,10 @@ import os
 from cliez.component import Component
 
 from cabric.dns.dnspod import DNSPod
-from cabric.utils import get_roots, mirror_put, run, bind_hosts, execute, \
-    get_platform, put, fabric_settings, env, get_home, current_machine
+from cabric.utils import (get_roots, run, bind_hosts, execute,
+                          get_platform, put, fabric_settings, env, get_home,
+                          current_machine,
+                          mirror_put)
 
 try:
     from shlex import quote as shell_quote
@@ -56,6 +58,31 @@ class ConfigComponent(Component):
                 self.warn(
                     "restart progress actived,but no restart service found.")
         pass
+
+    def upload_config_file(self, config_root, working_env, stages=[]):
+        """
+        support upload other config or project cabric files
+        :param config_root:
+        :param working_env:
+        :param stages:
+        :return:
+        """
+
+        stages.append(working_env)
+
+        upload_roots = map(
+            lambda x: os.path.join(os.path.expanduser(
+                x.get('root')),
+                'config',
+                'stages',
+                x.get('name',
+                      'default')) if isinstance(x,
+                                                dict) else os.path.join(
+                config_root, x),
+            stages)
+
+        return [lambda: mirror_put(local_root, '/') for local_root in
+                upload_roots]
 
     def upload_crontab(self, config, env_option, crontab_root):
         user = config.get('user')
@@ -353,23 +380,27 @@ class ConfigComponent(Component):
         """
 
         package_root, config_root, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env, options.parallel)
+
+        bind_hosts(fabric_root, options.env, options.parallel,
+                   options.hosts_file)
 
         # try upload repo config if it can recognize
         using_config = os.path.join(package_root, options.env)
-        stage_config = os.path.join(config_root, options.env)
-
-        command_list = []
-
-        if not options.skip_upload:
-            command_list.append(lambda: mirror_put(stage_config, '/'))
-
         try:
             env_config = json.load(
                 open(os.path.join(using_config, 'env.json'), 'r'))
         except ValueError:
             self.error("Invalid json syntax:%s" % os.path.join(using_config,
                                                                'env.json'))
+            pass
+
+        command_list = []
+
+        if not options.skip_upload:
+            [command_list.append(v) for v in
+             self.upload_config_file(config_root,
+                                     options.env,
+                                     env_config.get('stages', []))]
             pass
 
         if not options.skip_hostname:

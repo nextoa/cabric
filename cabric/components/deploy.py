@@ -340,7 +340,8 @@ class DeployComponent(Component):
         django_manage = os.path.join(working_root, 'manage.py')
 
         if not os.path.exists(django_manage):
-            self.warn("not django project,skip upload resources")
+            self.warn(
+                "local root is not a django project,skip upload resources")
             return
 
         with settings(warn_only=True):
@@ -516,7 +517,8 @@ class DeployComponent(Component):
             options.debug = True
 
         package_root, _, fabric_root = get_roots(options.dir)
-        bind_hosts(fabric_root, options.env, options.parallel)
+        bind_hosts(fabric_root, options.env, options.parallel,
+                   options.hosts_file)
 
         using_config = os.path.join(package_root, options.env)
         project_root = os.path.dirname(package_root)

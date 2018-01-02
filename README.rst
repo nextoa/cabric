@@ -8,6 +8,18 @@ Cabric,a deploy tool for CentOS,based on Fabric.
 |build-status| |license| |pyimp|
 
 
+.. note::
+
+    Cabric was stoped development at 2017-12-31.
+
+    We focus on docker and fabric can only works on python2.x
+    and we don't plan support python2. anymore.
+
+    We release a new project `tara <https://github.com/wangwenpei/tara/>`_
+    to play with Docker,K8s and make your development more easier.
+
+
+
 Quick Start
 --------------------------
 

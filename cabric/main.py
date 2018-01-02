@@ -29,7 +29,7 @@ def main():
     for v in conf.GENERAL_ARGUMENTS:
         parser.add_argument(*v[0], **v[1])
 
-    parser.add_argument('--version', action='version',
+    parser.add_argument('--version','-V', action='version',
                         version='%(prog)s v{}'.format(version))
 
     # do nothing when no argument applied

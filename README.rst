@@ -88,7 +88,7 @@ FAQ
 ---------------------------
 
 Q: When I use `cabric`, I got this error:
-.. code-bloc:: bash
+.. code-block:: bash
 
     rsync: connection unexpectedly closed (0 bytes received so far) [sender]
     rsync error: error in rsync protocol data stream (code 12) at /BuildRoot/Library/Caches/com.apple.xbs/Sources/rsync/rsync-51/rsync/io.c(453) [sender=2.6.9]

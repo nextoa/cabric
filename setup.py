@@ -15,7 +15,7 @@ setup(
     license='http://opensource.org/licenses/MIT',
     install_requires=[
         'fabric',
-        'cliez',
+        'cliez==2.0.12',
     ],
     author='WANG WENPEI',
     author_email='wangwenpei@nextoa.com',

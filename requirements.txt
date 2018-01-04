@@ -1,6 +1,6 @@
 requests
 fabric
-cliez==2.0         # cliez don't support python2 anymore!
+cliez==2.0.12         # cliez don't support python2 anymore!
 pycrypto
 gitpython
 mock

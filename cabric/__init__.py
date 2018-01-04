@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
 
-version = '0.9.12'
-version_info = (0, 9, 12)
+version = '1.0.0'
+version_info = (1, 0, 0)

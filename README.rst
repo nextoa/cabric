@@ -15,8 +15,8 @@ Cabric,a deploy tool for CentOS,based on Fabric.
     We focus on docker but fabric can only works on python2.x.
     We don't plan support python2 anymore.
 
-    We are planing a new project `tara(haven't ready to public) <https://github.com/wangwenpei/tara/>`_
-    to play with Docker,K8s and make your development more easier.
+    We are planing a new project `tara(not ready to public) <https://github.com/wangwenpei/tara/>`_
+    to play with Docker,K8s and make your deploy more easier.
 
 
 
@@ -88,6 +88,7 @@ FAQ
 ---------------------------
 
 Q: When I use `cabric`, I got this error:
+
 .. code-block:: bash
 
     rsync: connection unexpectedly closed (0 bytes received so far) [sender]

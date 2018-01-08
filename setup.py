@@ -14,6 +14,9 @@ setup(
     download_url='https://github.com/nextoa/cabric/tarball/master',
     license='http://opensource.org/licenses/MIT',
     install_requires=[
+        'requests',
+        'gitpython',
+        'pycrypto',
         'fabric',
         'cliez==2.0.12',
     ],

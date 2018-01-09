@@ -178,8 +178,8 @@ class InstallComponent(Component):
                     " tcl-devel tk-devel"
                     )
             run('export PYENV_ROOT=/usr/local/var/pyenv && '
-                'curl -L http://static.nextoa.com/'
-                'static/bin/pyenv-install.sh  | bash')
+                'curl -L http://nextoa.com/'
+                'bin/pyenv-install.sh  | bash')
             run('ln -sfv /usr/local/var/pyenv/bin/pyenv /usr/local/bin/pyenv')
 
             pass

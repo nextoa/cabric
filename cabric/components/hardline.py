@@ -36,7 +36,7 @@ class HardlineComponent(Component):
         # show keys and exit
         if not options.node:
             docs = [(v, hardlines[v].get('title', '')) for v in
-                    sorted(hardlines.keys())]
+                    sorted(hardlines)]
 
             self.print_message("All Hardline:\n")
             self.print_message(

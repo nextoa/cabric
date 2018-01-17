@@ -237,7 +237,7 @@ class DeployComponent(Component):
         """
 
         project_path = self.get_remote_project_path(user, project_name)
-        python_version = self.get_project_python(user, project_name)
+        python_version = self.get_project_python(user, project_name) or 'shims'
 
         requirement_files = [
             os.path.join(project_path, 'requirements.txt'),

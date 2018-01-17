@@ -10,7 +10,7 @@ Cabric,a deploy tool for CentOS,based on Fabric.
 
 .. note::
 
-    Cabric was stoped development at 2017-12-31.
+    Cabric was stopped add new feature at 2017-12-31.
 
     We focus on docker but fabric can only works on python2.x.
     We don't plan support python2 anymore.

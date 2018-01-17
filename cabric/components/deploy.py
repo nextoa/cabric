@@ -237,7 +237,24 @@ class DeployComponent(Component):
         """
 
         project_path = self.get_remote_project_path(user, project_name)
-        python_version = self.get_project_python(user, project_name) or 'shims'
+        python_version = self.get_project_python(user, project_name)
+
+        bin_home = '/usr/local/var/pyenv/'
+
+        if python_version:
+            bin_dir = bin_home + 'versions/%s/bin' % python_version
+        else:
+            python_version = run('test -e ~%(user)s/.python-version && '
+                                 'cat ~%(user)s/.python-version '
+                                 '|| echo ""' % {
+                                     'user': user
+                                 })
+
+            bin_dir = bin_home + 'versions/%s/bin' % python_version
+
+            if not python_version:
+                bin_dir = bin_home + 'shims'
+            pass
 
         requirement_files = [
             os.path.join(project_path, 'requirements.txt'),
@@ -245,14 +262,23 @@ class DeployComponent(Component):
             os.path.join(project_path, 'requirements', 'private.txt'),
         ]
 
+        python_v = run('%s/python -V' % bin_dir, capture=True)
+
+        if python_v.split(' ')[1][0] == '3':
+            pip_tool = 'pip3'
+        else:
+            pip_tool = 'pip'
+            pass
+
         for f in requirement_files:
             # 有版本bug
             # " install -U  --upgrade-strategy only-if-needed -r {0} || "
 
-            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip"
+            run("test -f {0} && {1}/{2}"
                 " install -U  -r {0} || "
                 "echo '{0} not exist,skip install...'".format(f,
-                                                              python_version))
+                                                              bin_dir,
+                                                              pip_tool))
             pass
 
         requirement_files = [
@@ -263,10 +289,11 @@ class DeployComponent(Component):
         ]
 
         for f in requirement_files:
-            run("test -f {0} && /usr/local/var/pyenv/versions/{1}/bin/pip"
+            run("test -f {0} && {1}/{2}"
                 " install -r {0} || "
                 "echo '{0} not exist,skip install...'".format(f,
-                                                              python_version))
+                                                              bin_dir,
+                                                              pip_tool))
             pass
 
         pass
@@ -559,7 +586,7 @@ class DeployComponent(Component):
 
         if options.with_deploy_key:
             if options.force_renew or (
-                    not os.path.exists(private_key) and github):
+                not os.path.exists(private_key) and github):
                 self.create_github_key(private_key, github, user)
 
             command_list.append(

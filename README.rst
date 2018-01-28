@@ -78,6 +78,8 @@ Features
     cab update                   # [plan-feature] upgrade target server.
     cab package                  # a short way for python package.
     cab hardline                 # batch way to execute fabric & cabric command
+    cab compose                  # work with remote docker
+
 
 
 

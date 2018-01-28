@@ -104,7 +104,7 @@ A: your remote server may not install `rsync`. please install first. if you stil
 
 
 
-For more document. please visit `Cabric cookbook <https://www.nextoa.com/cabric/>`_
+For more document. please visit `Cabric cookbook <https://nextoa.com/cabric/>`_
 
 
 .. |build-status| image:: https://secure.travis-ci.org/wangwenpei/cabric.png?branch=master

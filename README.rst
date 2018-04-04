@@ -12,8 +12,12 @@ Cabric,a deploy tool for CentOS,based on Fabric.
 
     Cabric was stopped add new feature at 2017-12-31.
 
-    We focus on docker but fabric can only works on python2.x.
-    We don't plan support python2 anymore.
+    We focus on docker and kubernetes now.
+    If you use Cabric,we suggest you use python2.7+,
+    because Fabric only works on python2.
+
+    Although we use `Fabric3 <https://github.com/mathiasertl/fabric/>`_
+    when system detect python3.but we haven't test it.
 
     We are planing a new project `tara(not ready to public) <https://github.com/wangwenpei/tara/>`_
     to play with Docker,K8s and make your deploy more easier.

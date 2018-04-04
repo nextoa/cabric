@@ -1,5 +1,5 @@
 requests
-fabric
+fabric3               # you must use python3
 cliez==2.0.12         # cliez don't support python2 anymore!
 pycrypto
 gitpython

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 
 from distutils.core import setup
 
@@ -17,7 +18,7 @@ setup(
         'requests',
         'gitpython',
         'pycrypto',
-        'fabric',
+        'fabric' if sys.version_info[0] < 3 else 'fabric3',
         'cliez==2.0.12',
     ],
     author='WANG WENPEI',

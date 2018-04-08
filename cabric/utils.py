@@ -16,6 +16,12 @@ from fabric.tasks import execute as fab_execute
 
 from cabric.bridge import parse_options, update_output_levels, load_settings
 
+try:
+    _ = basestring
+except NameError:
+    basestring = str
+    pass
+
 
 # try:
 #     from shlex import quote as cmd_quote

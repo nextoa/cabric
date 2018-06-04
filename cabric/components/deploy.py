@@ -112,7 +112,7 @@ class DeployComponent(Component):
 
         private_key_dir = os.path.dirname(private_key)
         if not os.path.exists(private_key_dir):
-            os.makedirs(private_key_dir, 0700)
+            os.makedirs(private_key_dir, o700)
             pass
 
         with open(private_key, mode='w') as fp:
